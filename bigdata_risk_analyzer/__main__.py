@@ -1,16 +1,13 @@
-import os
 from datetime import datetime
 from importlib.metadata import version
 
-from bigdata_client import Bigdata
 from bigdata_client.models.search import DocumentType
 from bigdata_research_tools.workflows.risk_analyzer import RiskAnalyzer
-from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import HTTPException
 
-from bigdata_risk_analyzer import __version__, logger
+from bigdata_risk_analyzer.api.app import app
+from bigdata_risk_analyzer.api.models import RiskAnalysisRequest
 from bigdata_risk_analyzer.logging import logging
-from bigdata_risk_analyzer.models.request import RiskAnalysisRequest
 from bigdata_risk_analyzer.models.response import (
     ContentOutput,
     RiskAnalysisResponse,
@@ -18,43 +15,8 @@ from bigdata_risk_analyzer.models.response import (
     TaxonomyOutput,
 )
 
-# Load environment variables
-load_dotenv()
-BIGDATA_USERNAME = os.getenv("BIGDATA_USERNAME")
-BIGDATA_PASSWORD = os.getenv("BIGDATA_PASSWORD")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-if not all([BIGDATA_USERNAME, BIGDATA_PASSWORD, OPENAI_API_KEY]):
-    raise EnvironmentError("Missing credentials in .env file")
-
-# Instantiate Bigdata client
-bigdata = Bigdata(BIGDATA_USERNAME, BIGDATA_PASSWORD)
-
-
-def lifespan(app: FastAPI):
-    logger.info("Starting Risk Analyzer service")
-    logging.send_trace(
-        bigdata,
-        event_name=logging.TraceEventName.SERVICE_START,
-        trace={
-            "version": __version__,
-        },
-    )
-    yield
-
-
-app = FastAPI(
-    title="Risk Analyzer & Thematic Screener API",
-    description="API for analyzing corporate exposure to specific risk channels and thematic exposure using Bigdata.com",
-    lifespan=lifespan,
-)
-
-@app.get("/health")
-def health_check():
-    return {"status": "ok", "version": __version__}
-
-@app.post("/risk-analysis", response_model=RiskAnalysisResponse)
-def analyze_risk(req: RiskAnalysisRequest):
+def process_request(req: RiskAnalysisRequest, bigdata):
     try:
         workflow_execution_start = datetime.now()
 

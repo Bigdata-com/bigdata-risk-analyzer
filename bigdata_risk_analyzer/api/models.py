@@ -1,50 +1,25 @@
 from datetime import date, datetime, timedelta
-from enum import Enum
+from enum import StrEnum
 from typing import List, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
 
-def seven_days_ago() -> date:
-    return date.today() - timedelta(days=7)
+class DocumentTypeEnum(StrEnum):
+    NEWS = "NEWS"
+    TRANSCRIPT = "TRANSCRIPT"
+    FILING = "FILING"
+
+
+def two_months_ago() -> date:
+    return date.today() - timedelta(days=60)
 
 
 def yesterday() -> date:
     return date.today() - timedelta(days=1)
 
 
-def validate_common(values):
-    # Validate input companies
-    if not values.get("company_universe") and not values.get("watchlist_id"):
-        raise ValueError("You must provide either 'company_universe' or 'watchlist_id'")
-
-    # Validate date ranges
-    try:
-        start_date = values["start_date"]
-        end_date = values["end_date"]
-        if start_date > end_date:
-            raise ValueError("start_date must be earlier than end_date")
-    except Exception as e:
-        raise ValueError(f"Invalid date format or range: {e}")
-
-    # Validate frequency vs date range
-    freq = values.get("frequency")
-    delta_days = (
-        datetime.strptime(end_date, "%Y-%m-%d")
-        - datetime.strptime(start_date, "%Y-%m-%d")
-    ).days + 1
-    freq_min_days = {"D": 1, "W": 7, "M": 30, "3M": 90, "Y": 365}
-    freq_value = freq.value if hasattr(freq, "value") else freq
-    if freq_value not in freq_min_days:
-        raise ValueError(f"Invalid frequency: {freq_value}")
-    if delta_days < freq_min_days[freq_value]:
-        raise ValueError(
-            f"The number of days in the range between start_date={start_date} and end_date={end_date} ({delta_days} days) should be higher than the minimum required for the selected frequency '{freq_value}' ({freq_min_days[freq_value]} days)."
-        )
-    return values
-
-
-class FrequencyEnum(str, Enum):
+class FrequencyEnum(StrEnum):
     daily = "D"
     weekly = "W"
     monthly = "M"
@@ -85,11 +60,11 @@ class RiskAnalysisRequest(BaseModel):
     )
 
     start_date: str = Field(
-        default="2025-04-01",  # seven_days_ago(),
-        description="Start date of the analysis window (format: YYYY-MM-DD). Defaults to 7 days ago.",
+        default=two_months_ago().isoformat(),
+        description="Start date of the analysis window (format: YYYY-MM-DD). Defaults to 60 days ago.",
     )
     end_date: str = Field(
-        default="2025-04-30",  #  yesterday(),
+        default=yesterday().isoformat(),
         description="End date of the analysis window (format: YYYY-MM-DD). Defaults to yesterday.",
     )
 
@@ -103,13 +78,13 @@ class RiskAnalysisRequest(BaseModel):
         default="openai::gpt-4o-mini",
         description="LLM model identifier used for taxonomy creation and semantic analysis.",
     )
-    document_type: str = Field(
-        default="NEWS",
+    document_type: DocumentTypeEnum = Field(
+        default=DocumentTypeEnum.NEWS,
         description="Type of documents to analyze (e.g., NEWS, TRANSCRIPT, FILING).",
     )
     rerank_threshold: Optional[float] = Field(
         default=None,
-        description="Optional threshold (0–1) to rerank and filter search results by relevance.",
+        description="Optional threshold (0-1) to rerank and filter search results by relevance.",
     )
     frequency: FrequencyEnum = Field(
         default=FrequencyEnum.monthly,
@@ -125,5 +100,41 @@ class RiskAnalysisRequest(BaseModel):
     )
 
     @model_validator(mode="before")
-    def check_entity_source(cls, values):
-        return validate_common(values)
+    def check_company_source(cls, values):
+        if not values.get("company_universe") and not values.get("watchlist_id"):
+            raise ValueError(
+                "You must provide either 'company_universe' or 'watchlist_id'"
+            )
+        return values
+
+    @model_validator(mode="before")
+    def check_date_range(cls, values):
+        try:
+            start_date = values["start_date"]
+            end_date = values["end_date"]
+            if (
+                start_date > end_date
+            ):  # We can compare directly as they are both ISO format strings
+                raise ValueError("start_date must be earlier than end_date")
+        except Exception as e:
+            raise ValueError(f"Invalid date format or range: {e}")
+        return values
+
+    @model_validator(mode="before")
+    def check_frequency_vs_date_range(cls, values):
+        start_date = values["start_date"]
+        end_date = values["end_date"]
+        freq = values.get("frequency")
+        delta_days = (
+            datetime.fromisoformat(end_date) - datetime.fromisoformat(start_date)
+        ).days + 1  # Adjust for inclusive range
+        freq_min_days = {"D": 1, "W": 7, "M": 30, "3M": 90, "Y": 365}
+        if isinstance(freq, str):
+            freq = FrequencyEnum(freq)
+        if not isinstance(freq, FrequencyEnum):
+            raise ValueError(f"Invalid frequency: {freq}")
+        if delta_days < freq_min_days[freq.value]:
+            raise ValueError(
+                f"The number of days in the range between start_date={start_date} and end_date={end_date} ({delta_days} days) should be higher than the minimum required for the selected frequency '{freq.value}' ({freq_min_days[freq.value]} days)."
+            )
+        return values
