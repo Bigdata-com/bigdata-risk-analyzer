@@ -1,9 +1,0 @@
-fastapi
-uvicorn[standard]
-python-dotenv
-pandas
-bigdata-client
-bigdata-research-tools
-plotly
-nest_asyncio
-structlog

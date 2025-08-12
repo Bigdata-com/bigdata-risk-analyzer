@@ -12,5 +12,6 @@ structlog.configure(
     ),
 )
 
-__version__ = "0.1"
+
+__version__ = version("bigdata_risk_analyzer")
 logger = structlog.get_logger().bind(logger="risk-analyzer-api")

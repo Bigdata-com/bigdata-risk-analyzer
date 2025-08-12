@@ -9,11 +9,12 @@ class TraceEventName(StrEnum):
     RISK_ANALYZER_REPORT_GENERATED = "onPremRiskAnalyzerReportGenerated"
     THEMATIC_SCREENING_REPORT_GENERATED = "onPremThematicScreeningReportGenerated"
 
+
 def send_trace(bigdata_client, event_name: TraceEventName, trace: dict):
-        try:
-            bigdata_send_trace(
-                bigdata_client=bigdata_client,
-                trace=TraceEvent(event_name=event_name, properties=trace),
-            )
-        except Exception:
-            pass    
+    try:
+        bigdata_send_trace(
+            bigdata_client=bigdata_client,
+            trace=TraceEvent(event_name=event_name, properties=trace),
+        )
+    except Exception:
+        pass
