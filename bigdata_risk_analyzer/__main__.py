@@ -49,6 +49,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "version": __version__}
 
 @app.post("/risk-analysis", response_model=RiskAnalysisResponse)
 def analyze_risk(req: RiskAnalysisRequest):

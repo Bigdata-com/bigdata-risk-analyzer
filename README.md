@@ -2,34 +2,36 @@
 
 This API exposes the functionality of `RiskAnalyzer` to assess companies’ exposure to US-China trade risks.
 
-## Install
-For your project root:
+# Quickstart
+To quickly get started, you have two options:
+
+1. **Build and run locally:**
+You need to build the docker image first and then run it:
+
 ```bash
-uv venv .venv_ra
-source .venv_ra/bin/activate
-uv pip install -r requirements.txt
+# Clone the repository and navigate to the folder
+git clone git@github.com:Bigdata-com/bigdata-risk-analyzer.git
+cd "bigdata-risk-analyzer"
 
+# Build the docker image
+docker build -t bigdata_risk_analyzer .
 
-## 🔧 Setup
+# Run the docker image
+docker run -d \
+  --name bigdata_risk_analyzer \
+  -p 8000:8000 \
+  -e BIGDATA_API_KEY=<bigdata-api-key-here> \
+  -e OPENAI_API_KEY=<openai-api-key-here> \
+  bigdata_risk_analyzer
+```
 
-### Local (for testing)
+2. **Run directly from GitHub Container Registry:**
+
 ```bash
-uvicorn app.main:app --reload --port 8010
-
-### 🌐 Once it's running...
-You can access your API docs at:
-
-📄 Swagger UI: http://localhost:8010/docs
-📜 ReDoc: http://localhost:8010/redoc
-
-
-### Run the container
-docker build -t risk-analyzer-api .
-docker run -d --env-file app/.env -p 8000:8000 risk-analyzer-api
-
-## Now access the API at:
-http://localhost:8010/docs
-
-
-
-## 🧪 Example JSON Requests
+docker run -d \
+  --name bigdata_risk_analyzer \
+  -p 8000:8000 \
+  -e BIGDATA_API_KEY=<bigdata-api-key-here> \
+  -e OPENAI_API_KEY=<openai-api-key-here> \
+  ghcr.io/bigdata-com/bigdata-risk-analyzer:latest
+```
