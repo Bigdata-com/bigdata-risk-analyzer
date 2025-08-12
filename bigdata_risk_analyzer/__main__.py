@@ -14,10 +14,10 @@ from bigdata_research_tools.search.screener_search import search_by_companies
 from bigdata_research_tools.themes import generate_theme_tree
 from bigdata_research_tools.workflows.utils import get_scored_df
 
-from app.logging import logging
-from app import LOG_LEVEL, __version__, logger
-from app.models.request import RiskAnalysisRequest, ThematicScreenRequest
-from app.models.response import RiskAnalysisResponse, TaxonomyOutput, ContentOutput, RiskScoringOutput, ThematicScreeningResponse
+from bigdata_risk_analyzer.logging import logging
+from bigdata_risk_analyzer import LOG_LEVEL, __version__, logger
+from bigdata_risk_analyzer.models.request import RiskAnalysisRequest
+from bigdata_risk_analyzer.models.response import RiskAnalysisResponse, TaxonomyOutput, ContentOutput, RiskScoringOutput, ThematicScreeningResponse
 
 
 
@@ -143,3 +143,7 @@ def analyze_risk(req: RiskAnalysisRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
