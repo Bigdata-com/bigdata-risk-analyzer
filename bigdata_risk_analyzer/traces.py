@@ -5,9 +5,8 @@ from bigdata_client.tracking_services import send_trace as bigdata_send_trace
 
 
 class TraceEventName(StrEnum):
-    SERVICE_START = "onPremRiskAnalyzerThematicScreenerServiceStart"
+    SERVICE_START = "onPremRiskAnalyzerServiceStart"
     RISK_ANALYZER_REPORT_GENERATED = "onPremRiskAnalyzerReportGenerated"
-    THEMATIC_SCREENING_REPORT_GENERATED = "onPremThematicScreeningReportGenerated"
 
 
 def send_trace(bigdata_client, event_name: TraceEventName, trace: dict):

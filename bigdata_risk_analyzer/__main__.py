@@ -7,13 +7,13 @@ from fastapi import HTTPException
 
 from bigdata_risk_analyzer.api.app import app
 from bigdata_risk_analyzer.api.models import RiskAnalysisRequest
-from bigdata_risk_analyzer.logging import logging
-from bigdata_risk_analyzer.models.response import (
+from bigdata_risk_analyzer.models import (
     ContentOutput,
     RiskAnalysisResponse,
     RiskScoringOutput,
     TaxonomyOutput,
 )
+from bigdata_risk_analyzer.traces import TraceEventName, send_trace
 
 
 def process_request(req: RiskAnalysisRequest, bigdata):
@@ -70,9 +70,9 @@ def process_request(req: RiskAnalysisRequest, bigdata):
         workflow_execution_end = datetime.now()
 
         # Send log
-        logging.send_trace(
+        send_trace(
             bigdata,
-            event_name=logging.TraceEventName.RISK_ANALYZER_REPORT_GENERATED,
+            event_name=TraceEventName.RISK_ANALYZER_REPORT_GENERATED,
             trace={
                 "bigdataClientVersion": version("bigdata-client"),
                 "workflowStartDate": workflow_execution_start.isoformat(

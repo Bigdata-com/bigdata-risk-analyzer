@@ -5,9 +5,9 @@ from fastapi import FastAPI, Query
 
 from bigdata_risk_analyzer import __version__, logger
 from bigdata_risk_analyzer.api.models import RiskAnalysisRequest
-from bigdata_risk_analyzer.logging import logging
-from bigdata_risk_analyzer.models.response import RiskAnalysisResponse
+from bigdata_risk_analyzer.models import RiskAnalysisResponse
 from bigdata_risk_analyzer.settings import settings
+from bigdata_risk_analyzer.traces import TraceEventName, send_trace
 
 BIGDATA: Bigdata | None = None
 
@@ -19,9 +19,9 @@ def lifespan(app: FastAPI):
     # Instantiate Bigdata client
     BIGDATA = Bigdata(api_key=settings.BIGDATA_API_KEY)
 
-    logging.send_trace(
+    send_trace(
         BIGDATA,
-        event_name=logging.TraceEventName.SERVICE_START,
+        event_name=TraceEventName.SERVICE_START,
         trace={
             "version": __version__,
         },
@@ -30,8 +30,9 @@ def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Risk Analyzer & Thematic Screener API",
-    description="API for analyzing corporate exposure to specific risk channels and thematic exposure using Bigdata.com",
+    title="Risk Analyzer API",
+    description="API for analyzing corporate exposure to specific risk channels  using Bigdata.com",
+    version=__version__,
     lifespan=lifespan,
 )
 

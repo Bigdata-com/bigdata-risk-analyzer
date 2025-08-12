@@ -25,11 +25,3 @@ class RiskAnalysisResponse(BaseModel):
     taxonomy: TaxonomyOutput
     content: ContentOutput
     risk_scoring: RiskScoringOutput
-
-
-class ThematicScreeningResponse(BaseModel):
-    theme_tree: Dict[str, Any]
-    node_summaries: Any
-    df_sentences: List[Dict[str, Any]]
-    df_company: List[Dict[str, Any]]
-    df_industry: List[Dict[str, Any]]
