@@ -1,11 +1,14 @@
-import pytest
 from unittest.mock import Mock
-from bigdata_risk_analyzer.traces import send_trace, TraceEventName
+
+import pytest
+
+from bigdata_risk_analyzer.traces import TraceEventName, send_trace
+
 
 def test_send_trace_with_mock_client():
     mock_client = Mock()
     for event_name in TraceEventName.__members__.values():
-        trace_data = {'key': 'value'}
+        trace_data = {"key": "value"}
 
         # The function should not raise when using a mock client
         try:
