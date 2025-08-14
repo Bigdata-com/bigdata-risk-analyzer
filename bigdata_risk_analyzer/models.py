@@ -1,27 +1,54 @@
-from typing import Any, Dict, List
-
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
 
 
-class TaxonomyOutput(BaseModel):
-    risk_tree: Dict[str, Any]
-    risk_summaries: Any
-    terminal_labels: Any
+class RiskTaxonomy(BaseModel):
+    label: str
+    node: int
+    summary: str | None
+    children: list["RiskTaxonomy"] = []
+    keywords: list[str] | None = None
 
 
-class ContentOutput(BaseModel):
-    df_sentences: List[Dict[str, Any]]
-    df: List[Dict[str, Any]]
-    df_labeled: List[Dict[str, Any]]
+class LabeledChunk(BaseModel):
+    time_period: str
+    date: str
+    company: str
+    sector: str
+    industry: str
+    country: str
+    ticker: str
+    document_id: str
+    headline: str
+    quote: str
+    motivation: str
+    sub_scenario: str
+    risk_channel: str
+    risk_factor: str
+    highlights: list[str]
 
 
-class RiskScoringOutput(BaseModel):
-    df_company: List[Dict[str, Any]]
-    df_industry: List[Dict[str, Any]]
-    df_motivation: List[Dict[str, Any]]
+class LabeledContent(RootModel):
+    root: list[LabeledChunk] = []
+
+
+class RiskScore(RootModel):
+    root: dict[str, int]
+
+
+class CompanyScoring(BaseModel):
+    ticker: str
+    sector: str
+    industry: str
+    composite_score: int
+    motivation: str | None
+    risks: RiskScore
+
+
+class RiskScoring(RootModel):
+    root: dict[str, CompanyScoring]
 
 
 class RiskAnalysisResponse(BaseModel):
-    taxonomy: TaxonomyOutput
-    content: ContentOutput
-    risk_scoring: RiskScoringOutput
+    risk_taxonomy: RiskTaxonomy
+    risk_scoring: RiskScoring
+    content: LabeledContent | None = None

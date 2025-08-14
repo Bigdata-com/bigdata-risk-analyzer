@@ -8,10 +8,13 @@ from fastapi import HTTPException
 from bigdata_risk_analyzer.api.app import app
 from bigdata_risk_analyzer.api.models import RiskAnalysisRequest
 from bigdata_risk_analyzer.models import (
-    ContentOutput,
+    CompanyScoring,
+    LabeledChunk,
+    LabeledContent,
     RiskAnalysisResponse,
-    RiskScoringOutput,
-    TaxonomyOutput,
+    RiskScore,
+    RiskScoring,
+    RiskTaxonomy,
 )
 from bigdata_risk_analyzer.traces import TraceEventName, send_trace
 
@@ -57,7 +60,7 @@ def process_request(req: RiskAnalysisRequest, bigdata):
         )
 
         # 3) Semantic Labeling: Uses AI to categorize content into appropriate sub-scenarios
-        df, df_labeled = analyzer.label_search_results(
+        _, df_labeled = analyzer.label_search_results(
             df_sentences=df_sentences,
             terminal_labels=terminal_labels,
             risk_tree=risk_tree,
@@ -65,7 +68,7 @@ def process_request(req: RiskAnalysisRequest, bigdata):
         )
 
         # 4) Risk Scoring: Calculates company and industry-level exposure scores
-        df_company, df_industry, df_motivation = analyzer.generate_results(df_labeled)
+        df_company, _, df_motivation = analyzer.generate_results(df_labeled)
 
         workflow_execution_end = datetime.now()
 
@@ -83,24 +86,50 @@ def process_request(req: RiskAnalysisRequest, bigdata):
             },
         )
 
+        risk_scoring = {}
+        for record in df_company.to_dict(orient="records"):
+            company = record.pop("Company")
+            ticker = record.pop("Ticker")
+            sector = record.pop("Sector")
+            industry = record.pop("Industry")
+            motivation = df_motivation.loc[df_motivation["Company"] == company][
+                "Motivation"
+            ].values[0]
+            composite_score = record.pop("Composite Score")
+            risk_scoring[company] = CompanyScoring(
+                ticker=ticker,
+                sector=sector,
+                industry=industry,
+                motivation=motivation,
+                composite_score=composite_score,
+                risks=RiskScore(root=record),
+            )
+
         # Return results
         return RiskAnalysisResponse(
-            taxonomy=TaxonomyOutput(
-                risk_tree=vars(risk_tree)
-                if hasattr(risk_tree, "__dict__")
-                else str(risk_tree),
-                risk_summaries=risk_summaries,
-                terminal_labels=terminal_labels,
-            ),
-            content=ContentOutput(
-                df_sentences=df_sentences.to_dict(orient="records"),
-                df=df.to_dict(orient="records"),
-                df_labeled=df_labeled.to_dict(orient="records"),
-            ),
-            risk_scoring=RiskScoringOutput(
-                df_company=df_company.to_dict(orient="records"),
-                df_industry=df_industry.to_dict(orient="records"),
-                df_motivation=df_motivation.to_dict(orient="records"),
+            risk_taxonomy=RiskTaxonomy(**risk_tree._to_dict()),  # ty: ignore[missing-argument]
+            risk_scoring=RiskScoring(root=risk_scoring),
+            content=LabeledContent(
+                [
+                    LabeledChunk(
+                        time_period=record["Time Period"],
+                        date=record["Date"],
+                        company=record["Company"],
+                        sector=record["Sector"],
+                        industry=record["Industry"],
+                        country=record["Country"],
+                        ticker=record["Ticker"],
+                        document_id=record["Document ID"],
+                        headline=record["Headline"],
+                        quote=record["Quote"],
+                        motivation=record["Motivation"],
+                        sub_scenario=record["Sub-Scenario"],
+                        risk_channel=record["Risk Channel"],
+                        risk_factor=record["Risk Factor"],
+                        highlights=record["Highlights"],
+                    )
+                    for record in df_labeled.to_dict(orient="records")
+                ]
             ),
         )
 
