@@ -6,9 +6,11 @@ from pydantic import BaseModel, Field, model_validator
 
 
 class DocumentTypeEnum(StrEnum):
-    NEWS = "NEWS"
-    TRANSCRIPT = "TRANSCRIPT"
-    FILING = "FILING"
+    ALL = "all"
+    FILINGS = "filings"
+    TRANSCRIPTS = "transcripts"
+    NEWS = "news"
+    FILES = "files"
 
 
 def two_months_ago() -> date:
@@ -53,7 +55,7 @@ class RiskAnalysisRequest(BaseModel):
         example="44118802-9104-4265-b97a-2e6d88d74893",
     )
 
-    control_entities: Optional[dict] = Field(
+    control_entities: Optional[dict[str, list[str]]] = Field(
         default={"place": ["China"]},
         description="Dictionary specifying the countries, people, or organizations that characterize the risk scenario.",
         example={"place": ["China"]},
