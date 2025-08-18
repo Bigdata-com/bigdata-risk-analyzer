@@ -43,7 +43,7 @@ docker run -d \
   ghcr.io/bigdata-com/bigdata-risk-analyzer:latest
 ```
 
-This will start the brief service locally on port 8000. You can then access the service @ `http://localhost:8000/` and the documentation for the API @ `http://localhost:8000/docs`.
+This will start the risk analyzer service locally on port 8000. You can then access the service @ `http://localhost:8000/` and the documentation for the API @ `http://localhost:8000/docs`.
 
 For a custom enterprise-ready solution, please contact us at [support@bigdata.com](mailto:support@bigdata.com)
 
@@ -53,15 +53,15 @@ For a custom enterprise-ready solution, please contact us at [support@bigdata.co
 We perform a pre-release security scan on our container images to detect vulnerabilities in all components.
 
 
-## How to use? Generate a brief for your Bigdata.com watchlist
+## How to analyse a set of companies?
 
-A brief is an executive summary of financially relevant information about a set of companies that form your watchlist.
+A risk analysis report provides an executive summary of financially relevant information about a set of companies that form your watchlist. You can generate a report either using the UI or programmatically, allowing you to build custom workflows on top of this service.
 
 ### Using the UI
 There is a very simple UI available @ `http://localhost:8000/` where you can set your parameters and receive an easy-to-read summary of the analysis.
 
 ### Programmatically
-You can generate a brief by sending a POST request to the `/risk-analysis` endpoint with the required
+You can generate report for a universe of companies by sending a POST request to the `/risk-analysis` endpoint with the required
 parameters. For example, using `curl`:
 ```bash
 curl -X 'GET' \
@@ -83,7 +83,7 @@ export BIGDATA_API_KEY=<bigdata-api-key-here>
 export OPENAI_API_KEY=<openai-api-key-here>
 ```
 
-Then, the following command will start the brief service locally on port 8000.
+Then, the following command will start the risk analyzer service locally on port 8000.
 ```bash
 uv run -m bigdata_risk_analyzer
 ```
