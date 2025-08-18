@@ -49,6 +49,6 @@ class RiskScoring(RootModel):
 
 
 class RiskAnalysisResponse(BaseModel):
-    risk_taxonomy: RiskTaxonomy
     risk_scoring: RiskScoring
+    risk_taxonomy: RiskTaxonomy
     content: LabeledContent | None = None
