@@ -15,6 +15,4 @@ def test_send_trace_with_mock_client():
             send_trace(mock_client, event_name, trace_data)
         except Exception as e:
             pytest.fail(f"send_trace raised an exception: {e}")
-        assert mock_client._api.send_tracking_event.called_with(
-            event_name=event_name, trace_data=trace_data
-        )
+        assert mock_client._api.send_tracking_event.called
