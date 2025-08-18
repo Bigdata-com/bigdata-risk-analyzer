@@ -1,3 +1,4 @@
+import math
 from datetime import datetime
 from importlib.metadata import version
 
@@ -77,7 +78,9 @@ def build_response(
             industry=industry,
             motivation=motivation,
             composite_score=composite_score,
-            risks=RiskScore(root=record),
+            risks=RiskScore(
+                root={k: v for k, v in record.items() if not math.isnan(v)}
+            ),
         )
 
     # Return results
@@ -85,7 +88,7 @@ def build_response(
         risk_taxonomy=RiskTaxonomy(**risk_tree._to_dict()),  # ty: ignore[missing-argument]
         risk_scoring=RiskScoring(root=risk_scoring),
         content=LabeledContent(
-            [
+            root=[
                 LabeledChunk(
                     time_period=record["Time Period"],
                     date=record["Date"],
