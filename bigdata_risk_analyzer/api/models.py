@@ -6,11 +6,11 @@ from pydantic import BaseModel, Field, model_validator
 
 
 class DocumentTypeEnum(StrEnum):
-    ALL = "all"
-    FILINGS = "filings"
-    TRANSCRIPTS = "transcripts"
-    NEWS = "news"
-    FILES = "files"
+    ALL = "ALL"
+    FILINGS = "FILINGS"
+    TRANSCRIPTS = "TRANSCRIPTS"
+    NEWS = "NEWS"
+    FILES = "FILES"
 
 
 def two_months_ago() -> date:
