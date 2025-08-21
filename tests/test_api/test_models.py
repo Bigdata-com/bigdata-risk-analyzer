@@ -8,7 +8,7 @@ from bigdata_risk_analyzer.api.models import (
 
 
 @pytest.mark.parametrize(
-    "main_theme,focus,company_universe,watchlist_id,control_entities,start_date,end_date,keywords,llm_model,document_type,rerank_threshold,frequency,document_limit,batch_size",
+    "main_theme,focus,company_universe,watchlist_id,control_entities,start_date,end_date,keywords,llm_model,document_type,rerank_threshold,frequency,document_limit,batch_size,fiscal_year",
     [
         # Minimal valid input with company_universe
         (
@@ -26,6 +26,7 @@ from bigdata_risk_analyzer.api.models import (
             FrequencyEnum.monthly,
             100,
             10,
+            2024,
         ),
         # Minimal valid input with watchlist_id
         (
@@ -43,6 +44,7 @@ from bigdata_risk_analyzer.api.models import (
             FrequencyEnum.weekly,
             50,
             5,
+            2025,
         ),
         # Different frequency and document type
         (
@@ -60,6 +62,7 @@ from bigdata_risk_analyzer.api.models import (
             FrequencyEnum.yearly,
             200,
             20,
+            2023,
         ),
         # Control entities with multiple places
         (
@@ -77,6 +80,7 @@ from bigdata_risk_analyzer.api.models import (
             FrequencyEnum.daily,
             10,
             1,
+            2022,
         ),
     ],
 )
@@ -95,6 +99,7 @@ def test_risk_analysis_request_model(
     frequency,
     document_limit,
     batch_size,
+    fiscal_year,
 ):
     req = RiskAnalysisRequest(
         main_theme=main_theme,
@@ -111,6 +116,7 @@ def test_risk_analysis_request_model(
         frequency=frequency,
         document_limit=document_limit,
         batch_size=batch_size,
+        fiscal_year=fiscal_year,
     )
     assert req.main_theme == main_theme
     assert req.focus == focus
@@ -131,3 +137,5 @@ def test_risk_analysis_request_model(
         assert req.keywords == keywords
     if rerank_threshold is not None:
         assert req.rerank_threshold == rerank_threshold
+    if fiscal_year:
+        assert req.fiscal_year == fiscal_year
