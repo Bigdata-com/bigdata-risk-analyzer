@@ -71,6 +71,7 @@ def analyze_risk(request: Annotated[RiskAnalysisRequest, Body()]):
         rerank_threshold=request.rerank_threshold,
         focus=request.focus,
         frequency=request.frequency,
+        fiscal_year=request.fiscal_year,
         document_limit=request.document_limit,
         batch_size=request.batch_size,
         bigdata=BIGDATA,

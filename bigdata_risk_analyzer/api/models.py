@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime
 from enum import StrEnum
 from typing import List, Optional
 
@@ -11,14 +11,6 @@ class DocumentTypeEnum(StrEnum):
     TRANSCRIPTS = "TRANSCRIPTS"
     NEWS = "NEWS"
     FILES = "FILES"
-
-
-def two_months_ago() -> date:
-    return date.today() - timedelta(days=60)
-
-
-def yesterday() -> date:
-    return date.today() - timedelta(days=1)
 
 
 class FrequencyEnum(StrEnum):
@@ -62,11 +54,11 @@ class RiskAnalysisRequest(BaseModel):
     )
 
     start_date: str = Field(
-        default=two_months_ago().isoformat(),
+        default="2024-01-01",
         description="Start date of the analysis window (format: YYYY-MM-DD). Defaults to 60 days ago.",
     )
     end_date: str = Field(
-        default=yesterday().isoformat(),
+        default="2024-12-31",
         description="End date of the analysis window (format: YYYY-MM-DD). Defaults to yesterday.",
     )
 
@@ -81,8 +73,12 @@ class RiskAnalysisRequest(BaseModel):
         description="LLM model identifier used for taxonomy creation and semantic analysis.",
     )
     document_type: DocumentTypeEnum = Field(
-        default=DocumentTypeEnum.NEWS,
+        default=DocumentTypeEnum.TRANSCRIPTS,
         description="Type of documents to analyze (e.g., NEWS, TRANSCRIPT, FILING).",
+    )
+    fiscal_year: Optional[int] = Field(
+        description="Fiscal year to filter documents (format: YYYY).",
+        example=2024,
     )
     rerank_threshold: Optional[float] = Field(
         default=None,

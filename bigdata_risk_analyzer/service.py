@@ -127,6 +127,7 @@ def process_request(
     frequency: str,
     document_limit: int,
     batch_size: int,
+    fiscal_year: int | None,
     bigdata: Bigdata | None,
 ):
     if not bigdata:
@@ -144,6 +145,7 @@ def process_request(
             end_date=end_date,
             keywords=keywords,
             document_type=document_type,
+            fiscal_year=fiscal_year,
             control_entities=control_entities,
             rerank_threshold=rerank_threshold,
             focus=focus,

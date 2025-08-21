@@ -64,9 +64,19 @@ There is a very simple UI available @ `http://localhost:8000/` where you can set
 You can generate report for a universe of companies by sending a POST request to the `/risk-analysis` endpoint with the required
 parameters. For example, using `curl`:
 ```bash
-curl -X 'GET' \
-  'http://localhost:8000/risk-analysis?main_theme=US-China%20trade%20relations&focus=intellectual%20property%20risks&watchlist_id=44118802-9104-4265-b97a-2e6d88d74893' \
-  -H 'accept: application/json'
+curl -X 'POST' \
+  'http://localhost:8000/risk-analysis' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "main_theme": "US-China trade relations",
+    "focus": "intellectual property risks",
+    "watchlist_id": "44118802-9104-4265-b97a-2e6d88d74893",
+    "start_date": "2024-06-01",
+    "end_date": "2024-08-01",
+    "frequency": "W",
+    "document_type": "TRANSCRIPTS"
+  }'
 ```
 
 For more details on the parameters, refer to the API documentation @ `http://localhost:8000/docs`.
