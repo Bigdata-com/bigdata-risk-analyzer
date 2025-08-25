@@ -26,7 +26,7 @@ from bigdata_risk_analyzer.api.models import (
             FrequencyEnum.monthly,
             100,
             10,
-            2024,
+            None,
         ),
         # Minimal valid input with watchlist_id
         (

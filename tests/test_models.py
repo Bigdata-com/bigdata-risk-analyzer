@@ -27,7 +27,7 @@ from bigdata_risk_analyzer.api.models import (
             FrequencyEnum.monthly,
             100,
             10,
-            2025,
+            None,
             "You must provide either 'company_universe' or 'watchlist_id'",
         ),
         # start_date after end_date
@@ -46,7 +46,7 @@ from bigdata_risk_analyzer.api.models import (
             FrequencyEnum.monthly,
             100,
             10,
-            2025,
+            None,
             "The number of days in the range between start_date",
         ),
         # Frequency interval too large for date range
@@ -60,7 +60,7 @@ from bigdata_risk_analyzer.api.models import (
             "2025-08-10",
             ["Tariffs"],
             "openai::gpt-4o-mini",
-            DocumentTypeEnum.NEWS,
+            DocumentTypeEnum.FILINGS,
             None,
             FrequencyEnum.monthly,
             100,
@@ -79,7 +79,7 @@ from bigdata_risk_analyzer.api.models import (
             "2025-08-01",
             ["Tariffs"],
             "openai::gpt-4o-mini",
-            DocumentTypeEnum.NEWS,
+            DocumentTypeEnum.TRANSCRIPTS,
             None,
             "invalid_freq",
             100,
@@ -147,7 +147,7 @@ def test_risk_analysis_request_model_invalid(
             FrequencyEnum.monthly,
             100,
             10,
-            2025,
+            None,
         ),
         # Minimal valid input with watchlist_id
         (
@@ -185,7 +185,6 @@ def test_risk_analysis_request_model_invalid(
             20,
             2025,
         ),
-        # Control entities with multiple places
         (
             "Intellectual property risks",
             "IP risk taxonomy",
@@ -202,6 +201,23 @@ def test_risk_analysis_request_model_invalid(
             10,
             1,
             2025,
+        ),
+        (
+            "Intellectual property risks",
+            "IP risk taxonomy",
+            ["B67890"],
+            None,
+            {"place": ["China", "USA"]},
+            "2025-07-01",
+            "2025-08-01",
+            ["IP", "Patent"],
+            "openai::gpt-5",
+            DocumentTypeEnum.NEWS,
+            None,
+            FrequencyEnum.daily,
+            10,
+            1,
+            None,
         ),
     ],
 )

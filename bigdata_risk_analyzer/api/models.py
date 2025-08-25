@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import StrEnum
-from typing import List, Optional
+from typing import List, Optional, Self
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -96,6 +96,18 @@ class RiskAnalysisRequest(BaseModel):
         default=10,
         description="Number of entities to include in each batch for parallel querying.",
     )
+
+    @model_validator(mode="after")
+    def fiscal_year_only_when_transcrips_or_filings(self) -> Self:
+        if self.fiscal_year is not None and self.document_type not in {
+            DocumentTypeEnum.FILINGS,
+            DocumentTypeEnum.TRANSCRIPTS,
+            DocumentTypeEnum.ALL,
+        }:
+            raise ValueError(
+                "fiscal_year can only be set when document_type is FILINGS or TRANSCRIPTS"
+            )
+        return self
 
     @model_validator(mode="before")
     def check_company_source(cls, values):

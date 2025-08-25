@@ -284,6 +284,12 @@
       const batch_size = document.getElementById('batch_size').value;
       const fiscal_year = document.getElementById('fiscal_year').value.trim();
 
+      // Show error if fiscal_year is provided and document_type is not FILINGS, TRANSCRIPTS, or ALL
+      if (fiscal_year && !["FILINGS", "TRANSCRIPTS", "ALL"].includes(document_type)) {
+        output.innerHTML = '<span class="error">❌ Fiscal year is only allowed for Filings, Transcripts, or All document types.</span>';
+        output.classList.add('error');
+        return;
+      }
       // Build request payload
       let payload = {
         main_theme,
