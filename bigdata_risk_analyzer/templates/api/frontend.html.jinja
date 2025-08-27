@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Risk Analyzer</title>
+  <link rel="icon" href="https://app.bigdata.com/favicon.ico"/>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -96,11 +97,8 @@
     <label for="focus">Focus:</label>
     <textarea id="focus" class="input-field" rows="3" placeholder="{{ focus }}" required>{{ focus }}</textarea>
 
-    <label for="company_universe">Company Universe (comma separated RavenPack IDs):</label>
-    <input type="text" id="company_universe" class="input-field" placeholder="{{ company_universe|join(',') if company_universe is defined and company_universe else '' }}" />
-
-    <label for="watchlist_id">Watchlist ID:</label>
-    <input type="text" id="watchlist_id" class="input-field" placeholder="{{ watchlist_id }}" value="{{ watchlist_id }}" />
+    <label for="companies">Company Universe (either a comma separated RavenPack IDs or a watchlist ID):</label>
+    <input type="text" id="companies" class="input-field" placeholder="{{ companies }}" value="{{ companies }}" />
 
     <label for="control_entities">Control Entities (JSON):</label>
     <input type="text" id="control_entities" class="input-field" placeholder="{{ control_entities }}" value="{{ control_entities }}" />
@@ -117,8 +115,9 @@
     <label for="llm_model">LLM Model:</label>
     <input type="text" id="llm_model" class="input-field" placeholder="{{ llm_model }}" value="{{ llm_model }}" />
 
-    <label for="document_type">Document Type:</label>
-    <select id="document_type" class="input-field">
+    <!-- Document Type hidden for now until we improve the UX -->
+    <label for="document_type" style="display:none;">Document Type:</label>
+    <select id="document_type" class="input-field" style="display:none;">
       <option value="ALL" {% if document_type == 'ALL' %}selected{% endif %}>ALL</option>
       <option value="FILINGS" {% if document_type == 'FILINGS' %}selected{% endif %}>FILINGS</option>
       <option value="TRANSCRIPTS" {% if document_type == 'TRANSCRIPTS' %}selected{% endif %}>TRANSCRIPTS</option>
@@ -270,8 +269,7 @@
       // Gather form data
       const main_theme = document.getElementById('main_theme').value.trim();
       const focus = document.getElementById('focus').value.trim();
-      const company_universe = document.getElementById('company_universe').value.trim();
-      const watchlist_id = document.getElementById('watchlist_id').value.trim();
+      const companies = document.getElementById('companies').value.trim();
       const control_entities = document.getElementById('control_entities').value.trim();
       const start_date = document.getElementById('start_date').value;
       const end_date = document.getElementById('end_date').value;
@@ -301,11 +299,15 @@
         batch_size: batch_size ? parseInt(batch_size) : undefined,
         fiscal_year: fiscal_year ? fiscal_year : undefined
       };
-      if (company_universe) {
-        payload.company_universe = company_universe.split(',').map(s => s.trim()).filter(Boolean);
-      }
-      if (watchlist_id) {
-        payload.watchlist_id = watchlist_id;
+      // A list of companies
+      if (companies.includes(',')) {
+        payload.companies = companies.split(',').map(s => s.trim()).filter(Boolean);
+      // A single RP Entity ID
+      } else if (companies.length === 6) {
+        payload.companies = [companies];
+      // A watchlist ID
+      } else if (companies.length > 6) {
+        payload.companies = companies;
       }
       if (control_entities) {
         var clean_control_entities = control_entities.replaceAll(`'`, `"`);

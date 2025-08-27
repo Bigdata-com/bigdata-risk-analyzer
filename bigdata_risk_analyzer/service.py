@@ -23,20 +23,21 @@ from bigdata_risk_analyzer.traces import TraceEventName, send_trace
 
 
 def prepare_companies(
-    company_universe: list[str] | None,
-    watchlist_id: str | None,
+    companies: list[str] | str,
     bigdata: Bigdata,
 ) -> list[Company]:
     """Prepare the list of companies for analysis. Ensure at least one of the forms of providing
     the companies is present and ensures all elements are companies."""
-    if company_universe:
-        entities = bigdata.knowledge_graph.get_entities(company_universe)
-    elif watchlist_id:
+    if isinstance(companies, list):
+        entities = bigdata.knowledge_graph.get_entities(companies)
+    elif isinstance(companies, str):
         entities = bigdata.knowledge_graph.get_entities(
-            bigdata.watchlists.get(watchlist_id).items
+            bigdata.watchlists.get(companies).items
         )
     else:
-        raise ValueError("Either company_universe or watchlist_id must be provided.")
+        raise ValueError(
+            "Companies must be either a list of RP entity IDs or a string representing a watchlist ID."
+        )
 
     # Ensure there is entities, there is no duplicates and all entities are companies
     if len(entities) == 0:
@@ -113,8 +114,7 @@ def build_response(
 
 
 def process_request(
-    company_universe: list[str] | None,
-    watchlist_id: str | None,
+    companies: list[str] | str,
     llm_model: str,
     main_theme: str,
     start_date: str,
@@ -135,12 +135,12 @@ def process_request(
     try:
         workflow_execution_start = datetime.now()
 
-        companies = prepare_companies(company_universe, watchlist_id, bigdata)
+        resolved_companies = prepare_companies(companies, bigdata)
 
         analyzer = RiskAnalyzer(
             llm_model=llm_model,
             main_theme=main_theme,
-            companies=companies,
+            companies=resolved_companies,
             start_date=start_date,
             end_date=end_date,
             keywords=keywords,
@@ -186,7 +186,7 @@ def process_request(
                     timespec="seconds"
                 ),
                 "workflowEndDate": workflow_execution_end.isoformat(timespec="seconds"),
-                "watchlistLength": len(companies),
+                "watchlistLength": len(resolved_companies),
             },
         )
 

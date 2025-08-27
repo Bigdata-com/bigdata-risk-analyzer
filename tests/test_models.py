@@ -9,44 +9,42 @@ from bigdata_risk_analyzer.api.models import (
 
 
 @pytest.mark.parametrize(
-    "main_theme,focus,company_universe,watchlist_id,control_entities,start_date,end_date,keywords,llm_model,document_type,rerank_threshold,frequency,document_limit,batch_size,fiscal_year,expected_error",
+    "main_theme,focus,companies,control_entities,start_date,end_date,keywords,llm_model,document_type,rerank_threshold,frequency,document_limit,batch_size,fiscal_year,expected_error",
     [
-        # Missing both company_universe and watchlist_id
+        # Missing both companies
         (
             "US Import Tariffs against China",
             "Taxonomy of risks for US companies",
-            None,
             None,
             {"place": ["China"]},
             "2025-06-01",
             "2025-08-01",
             ["Tariffs"],
             "openai::gpt-4o-mini",
-            DocumentTypeEnum.NEWS,
+            DocumentTypeEnum.TRANSCRIPTS,
             None,
             FrequencyEnum.monthly,
             100,
             10,
-            None,
-            "You must provide either 'company_universe' or 'watchlist_id'",
+            2025,
+            "Input should be a valid",
         ),
         # start_date after end_date
         (
             "US Import Tariffs against China",
             "Taxonomy of risks for US companies",
             ["4A6F00"],
-            None,
             {"place": ["China"]},
             "2025-08-01",
             "2025-06-01",
             ["Tariffs"],
             "openai::gpt-4o-mini",
-            DocumentTypeEnum.NEWS,
+            DocumentTypeEnum.TRANSCRIPTS,
             None,
             FrequencyEnum.monthly,
             100,
             10,
-            None,
+            2025,
             "The number of days in the range between start_date",
         ),
         # Frequency interval too large for date range
@@ -54,13 +52,12 @@ from bigdata_risk_analyzer.api.models import (
             "US Import Tariffs against China",
             "Taxonomy of risks for US companies",
             ["4A6F00"],
-            None,
             {"place": ["China"]},
             "2025-08-01",
             "2025-08-10",
             ["Tariffs"],
             "openai::gpt-4o-mini",
-            DocumentTypeEnum.FILINGS,
+            DocumentTypeEnum.TRANSCRIPTS,
             None,
             FrequencyEnum.monthly,
             100,
@@ -73,7 +70,6 @@ from bigdata_risk_analyzer.api.models import (
             "US Import Tariffs against China",
             "Taxonomy of risks for US companies",
             ["4A6F00"],
-            None,
             {"place": ["China"]},
             "2025-06-01",
             "2025-08-01",
@@ -92,8 +88,7 @@ from bigdata_risk_analyzer.api.models import (
 def test_risk_analysis_request_model_invalid(
     main_theme,
     focus,
-    company_universe,
-    watchlist_id,
+    companies,
     control_entities,
     start_date,
     end_date,
@@ -111,8 +106,7 @@ def test_risk_analysis_request_model_invalid(
         RiskAnalysisRequest(
             main_theme=main_theme,
             focus=focus,
-            company_universe=company_universe,
-            watchlist_id=watchlist_id,
+            companies=companies,
             control_entities=control_entities,
             start_date=start_date,
             end_date=end_date,
@@ -129,38 +123,36 @@ def test_risk_analysis_request_model_invalid(
 
 
 @pytest.mark.parametrize(
-    "main_theme,focus,company_universe,watchlist_id,control_entities,start_date,end_date,keywords,llm_model,document_type,rerank_threshold,frequency,document_limit,batch_size,fiscal_year",
+    "main_theme,focus,companies,control_entities,start_date,end_date,keywords,llm_model,document_type,rerank_threshold,frequency,document_limit,batch_size,fiscal_year",
     [
-        # Minimal valid input with company_universe
+        # Minimal valid input with companies
         (
             "US Import Tariffs against China",
             "Taxonomy of risks for US companies",
             ["4A6F00", "D8442A"],
-            None,
             {"place": ["China"]},
             "2025-06-01",
             "2025-08-01",
             ["Tariffs"],
             "openai::gpt-4o-mini",
-            DocumentTypeEnum.NEWS,
+            DocumentTypeEnum.TRANSCRIPTS,
             None,
             FrequencyEnum.monthly,
             100,
             10,
-            None,
+            2025,
         ),
         # Minimal valid input with watchlist_id
         (
             "US Import Tariffs against China",
             "Taxonomy of risks for US companies",
-            None,
             "44118802-9104-4265-b97a-2e6d88d74893",
             {"place": ["China"]},
             "2025-06-01",
             "2025-08-01",
             ["Tariffs"],
             "openai::gpt-4o-mini",
-            DocumentTypeEnum.FILINGS,
+            DocumentTypeEnum.TRANSCRIPTS,
             0.8,
             FrequencyEnum.weekly,
             50,
@@ -172,7 +164,6 @@ def test_risk_analysis_request_model_invalid(
             "Risk of supply chain disruption",
             "Impact on global logistics",
             ["A12345"],
-            None,
             {"place": ["USA"]},
             "2025-01-01",
             "2025-12-31",
@@ -189,13 +180,12 @@ def test_risk_analysis_request_model_invalid(
             "Intellectual property risks",
             "IP risk taxonomy",
             ["B67890"],
-            None,
             {"place": ["China", "USA"]},
             "2025-07-01",
             "2025-08-01",
             ["IP", "Patent"],
             "openai::gpt-4o-mini",
-            DocumentTypeEnum.ALL,
+            DocumentTypeEnum.TRANSCRIPTS,
             None,
             FrequencyEnum.daily,
             10,
@@ -206,26 +196,24 @@ def test_risk_analysis_request_model_invalid(
             "Intellectual property risks",
             "IP risk taxonomy",
             ["B67890"],
-            None,
             {"place": ["China", "USA"]},
             "2025-07-01",
             "2025-08-01",
             ["IP", "Patent"],
             "openai::gpt-5",
-            DocumentTypeEnum.NEWS,
+            DocumentTypeEnum.TRANSCRIPTS,
             None,
             FrequencyEnum.daily,
             10,
             1,
-            None,
+            2025,
         ),
     ],
 )
 def test_risk_analysis_request_model(
     main_theme,
     focus,
-    company_universe,
-    watchlist_id,
+    companies,
     control_entities,
     start_date,
     end_date,
@@ -241,8 +229,7 @@ def test_risk_analysis_request_model(
     req = RiskAnalysisRequest(
         main_theme=main_theme,
         focus=focus,
-        company_universe=company_universe,
-        watchlist_id=watchlist_id,
+        companies=companies,
         control_entities=control_entities,
         start_date=start_date,
         end_date=end_date,
@@ -264,10 +251,7 @@ def test_risk_analysis_request_model(
     assert req.frequency == frequency
     assert req.document_limit == document_limit
     assert req.batch_size == batch_size
-    if company_universe:
-        assert req.company_universe == company_universe
-    if watchlist_id:
-        assert req.watchlist_id == watchlist_id
+    assert req.companies == companies
     if control_entities:
         assert req.control_entities == control_entities
     if keywords:

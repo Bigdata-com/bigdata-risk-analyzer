@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import StrEnum
-from typing import List, Optional, Self
+from typing import List, Literal, Optional, Self
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -36,14 +36,9 @@ class RiskAnalysisRequest(BaseModel):
         description="The analyst focus that provides an expert perspective on the scenario and helps break it down into risks.",
     )
 
-    company_universe: Optional[List[str]] = Field(
-        default=None,
-        description="List of RavenPack entity IDs representing the companies to screen. Required if 'watchlist_id' is not provided.",
-        example=["4A6F00", "D8442A"],
-    )
-    watchlist_id: Optional[str] = Field(
-        default=None,
-        description="ID of a watchlist containing companies to analyze. Required if 'company_universe' is not provided.",
+    companies: list[str] | str = Field(
+        ...,
+        description="List of RavenPack entity IDs  or a watchlist ID representing the companies to screen.",
         example="44118802-9104-4265-b97a-2e6d88d74893",
     )
 
@@ -72,9 +67,9 @@ class RiskAnalysisRequest(BaseModel):
         default="openai::gpt-4o-mini",
         description="LLM model identifier used for taxonomy creation and semantic analysis.",
     )
-    document_type: DocumentTypeEnum = Field(
+    document_type: Literal[DocumentTypeEnum.TRANSCRIPTS] = Field(
         default=DocumentTypeEnum.TRANSCRIPTS,
-        description="Type of documents to analyze (e.g., NEWS, TRANSCRIPT, FILING).",
+        description="Type of documents to analyze (only transcript supported for now).",
     )
     fiscal_year: Optional[int] = Field(
         description="Fiscal year to filter documents (format: YYYY).",
@@ -108,14 +103,6 @@ class RiskAnalysisRequest(BaseModel):
                 "fiscal_year can only be set when document_type is FILINGS or TRANSCRIPTS"
             )
         return self
-
-    @model_validator(mode="before")
-    def check_company_source(cls, values):
-        if not values.get("company_universe") and not values.get("watchlist_id"):
-            raise ValueError(
-                "You must provide either 'company_universe' or 'watchlist_id'"
-            )
-        return values
 
     @model_validator(mode="before")
     def check_date_range(cls, values):

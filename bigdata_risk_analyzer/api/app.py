@@ -58,15 +58,18 @@ async def sample_frontend():
 
 @app.post("/risk-analysis", response_model=RiskAnalysisResponse)
 def analyze_risk(request: Annotated[RiskAnalysisRequest, Body()]):
+    # While we improve the UX of working with several document types with different sets of parameters
+    # we will limit the document type to transcripts
+    DOCUMENT_TYPE = DocumentType.TRANSCRIPTS
+
     return process_request(
-        company_universe=request.company_universe,
-        watchlist_id=request.watchlist_id,
+        companies=request.companies,
         llm_model=request.llm_model,
         main_theme=request.main_theme,
         start_date=request.start_date,
         end_date=request.end_date,
         keywords=request.keywords,
-        document_type=DocumentType[request.document_type],
+        document_type=DOCUMENT_TYPE,
         control_entities=request.control_entities,
         rerank_threshold=request.rerank_threshold,
         focus=request.focus,
