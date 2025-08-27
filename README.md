@@ -69,14 +69,23 @@ curl -X 'POST' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
-    "main_theme": "US-China trade relations",
-    "focus": "intellectual property risks",
-    "watchlist_id": "44118802-9104-4265-b97a-2e6d88d74893",
-    "start_date": "2024-06-01",
-    "end_date": "2024-08-01",
-    "frequency": "W",
-    "document_type": "TRANSCRIPTS"
-  }'
+  "main_theme": "US Import Tariffs against China",
+  "focus": "Provide a detailed taxonomy of risks describing how new American import tariffs against China will impact US companies, their operations and strategy. Cover trade-relations risks, foreign market access risks, supply chain risks, US market sales and revenue risks (including price impacts), and intellectual property risks, provide at least 4 sub-scenarios for each risk factor.",
+  "companies": "44118802-9104-4265-b97a-2e6d88d74893",
+  "control_entities": {
+    "place": [
+      "China"
+    ]
+  },
+  "start_date": "2024-01-01",
+  "end_date": "2024-12-31",
+  "keywords": [
+    "Tariffs"
+  ],
+  "document_type": "TRANSCRIPTS",
+  "fiscal_year": 2024,
+  "frequency": "M"
+}'
 ```
 
 For more details on the parameters, refer to the API documentation @ `http://localhost:8000/docs`.
