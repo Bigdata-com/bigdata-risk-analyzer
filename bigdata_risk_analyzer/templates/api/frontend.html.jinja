@@ -261,10 +261,15 @@
       const output = document.getElementById('output');
       const spinner = document.getElementById('spinner');
       const showJsonBtn = document.getElementById('showJsonBtn');
+      const submitBtn = document.querySelector('button[type="submit"]');
       output.innerHTML = '';
       output.classList.remove('error');
       showJsonBtn.style.display = 'none';
       lastJson = null;
+
+      // Disable the submit button
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Waiting for response...';
 
       // Gather form data
       const main_theme = document.getElementById('main_theme').value.trim();
@@ -286,6 +291,8 @@
       if (fiscal_year && !["FILINGS", "TRANSCRIPTS", "ALL"].includes(document_type)) {
         output.innerHTML = '<span class="error">❌ Fiscal year is only allowed for Filings, Transcripts, or All document types.</span>';
         output.classList.add('error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Analyze Risk';
         return;
       }
       // Build request payload
@@ -316,6 +323,8 @@
         } catch (e) {
           output.innerHTML = '<span class="error">❌ Invalid JSON for control entities.</span>';
           output.classList.add('error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Analyze Risk';
           return;
         }
       }
@@ -343,6 +352,8 @@
         output.classList.add('error');
       } finally {
         spinner.style.display = 'none';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Analyze Risk';
       }
     };
 
