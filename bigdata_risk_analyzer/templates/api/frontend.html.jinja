@@ -139,7 +139,7 @@
     <input type="text" id="keywords" class="input-field" placeholder="{{ keywords|join(',') if keywords is defined and keywords else '' }}" value="{{ keywords|join(',') if keywords is defined and keywords else '' }}" />
 
     <label for="llm_model">
-      LLM Model: <button type="button" class="info-btn" onclick="showInfoModal('rerank_threshold')" title="Info about Rerank Threshold">i</button>
+      LLM Model: <button type="button" class="info-btn" onclick="showInfoModal('llm_model')" title="Info about LLM Model">i</button>
     </label>
     <input type="text" id="llm_model" class="input-field" placeholder="{{ llm_model }}" value="{{ llm_model }}" />
 
