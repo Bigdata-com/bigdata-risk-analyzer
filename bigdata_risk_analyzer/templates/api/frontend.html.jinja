@@ -138,7 +138,9 @@
     </label>
     <input type="text" id="keywords" class="input-field" placeholder="{{ keywords|join(',') if keywords is defined and keywords else '' }}" value="{{ keywords|join(',') if keywords is defined and keywords else '' }}" />
 
-    <label for="llm_model">LLM Model:</label>
+    <label for="llm_model">
+      LLM Model: <button type="button" class="info-btn" onclick="showInfoModal('rerank_threshold')" title="Info about Rerank Threshold">i</button>
+    </label>
     <input type="text" id="llm_model" class="input-field" placeholder="{{ llm_model }}" value="{{ llm_model }}" />
 
     <!-- Document Type hidden for now until we improve the UX -->
@@ -174,10 +176,14 @@
       <option value="Y" {% if frequency == 'Y' %}selected{% endif %}>Yearly</option>
     </select>
 
-    <label for="document_limit">Document Limit:</label>
+    <label for="document_limit">
+      Document Limit: <button type="button" class="info-btn" onclick="showInfoModal('document_limit')" title="Info about Document Limit">i</button>
+    </label>
     <input type="number" id="document_limit" class="input-field" placeholder="{{ document_limit }}" value="{{ document_limit }}" min="1" />
 
-    <label for="batch_size">Batch Size:</label>
+    <label for="batch_size">
+      Batch Size: <button type="button" class="info-btn" onclick="showInfoModal('batch_size')" title="Info about Batch Size">i</button>
+    </label>
     <script>
       // Info modal content for each label
       const infoContents = {
@@ -190,7 +196,10 @@
         document_type: `<b>Document Type</b>:<br>The type of documents to search over. Use this to analyze text data from news, corporate transcripts, or filings. Currently, only "TRANSCRIPTS" is supported.`,
         fiscal_year: `<b>Fiscal Year</b>:<br>For Transcripts and Filings, filter documents by their reporting details. <b>fiscal_year</b> represents the annual reporting period and can be combined with <b>start_date</b> and <b>end_date</b> for time-sensitive queries. Not applicable to News.`,
         rerank_threshold: `<b>Rerank Threshold</b>:<br>Optional, used with sentence search only. Ensures close cosine similarity between sentence embeddings and retrieved chunks. By default, not applied. For most use cases, one-step retrieval is sufficient. <a href='https://docs.bigdata.com/how-to-guides/rerank_search' target='_blank'>Learn more</a>.`,
-        frequency: `<b>Frequency</b>:<br>Break down your sample range into higher frequency intervals (<code>D</code>, <code>Y</code>, <code>M</code>, <code>3M</code>, <code>Y</code>). Useful for large samples to control document retrieval over time.`
+        frequency: `<b>Frequency</b>:<br>Break down your sample range into higher frequency intervals (<code>D</code>, <code>Y</code>, <code>M</code>, <code>3M</code>, <code>Y</code>). Useful for large samples to control document retrieval over time.`,
+        llm_model: `<b>LLM Model</b>:<br>The LLM model to be used for mindmap generation and text analysis. It has to be specified as a string containing both provider name and model name separated by two colons: <provider::model>.`,
+        document_limit: `<b>Document Limit</b>:<br>The maximum number of documents to be retrieved by each query. This is a single value that applies to any combination of query statement & date range.`,
+        batch_size: `<b>Batch Size</b>:<br>Set this parameter when screening a large portfolio of companies (i.e. 50 or more). It allows to break down the portfolio into smaller batches of fixed size, and instructs the search service to run parallel queries for each and every batch. This allows for improving the sampling across your portfolio, given the document limit constraint that has to be applied per query.`
       };
 
       function showInfoModal(label) {
