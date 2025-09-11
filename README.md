@@ -90,6 +90,46 @@ curl -X 'POST' \
 
 For more details on the parameters, refer to the API documentation @ `http://localhost:8000/docs`.
 
+## Enable access token protection
+You can optionally protect the API endpoints using an access token. To enable this feature, set the `ACCESS_TOKEN` environment variable when running the Docker container. For example:
+
+```bash
+docker run -d \
+  --name bigdata_risk_analyzer \
+  -p 8000:8000 \
+  -e BIGDATA_API_KEY=<bigdata-api-key-here> \
+  -e OPENAI_API_KEY=<openai-apikey-here> \
+  -e ACCESS_TOKEN=<access-token-here> \
+  ghcr.io/bigdata-com/bigdata_risk_analyzer:latest
+```
+
+Then all API requests must include a `token` query parameter with the correct value to be authorized. For example:
+
+```bash
+curl -X 'POST' \
+  'http://localhost:8000/thematic-screener?token=<access-token-here>' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "main_theme": "US Import Tariffs against China",
+  "focus": "Provide a detailed taxonomy of risks describing how new American import tariffs against China will impact US companies, their operations and strategy. Cover trade-relations risks, foreign market access risks, supply chain risks, US market sales and revenue risks (including price impacts), and intellectual property risks, provide at least 4 sub-scenarios for each risk factor.",
+  "companies": "44118802-9104-4265-b97a-2e6d88d74893",
+  "control_entities": {
+    "place": [
+      "China"
+    ]
+  },
+  "start_date": "2024-01-01",
+  "end_date": "2024-12-31",
+  "keywords": [
+    "Tariffs"
+  ],
+  "document_type": "TRANSCRIPTS",
+  "fiscal_year": 2024,
+  "frequency": "M"
+}'
+```
+
 # Install and for development locally
 ```bash
 uv sync --dev
