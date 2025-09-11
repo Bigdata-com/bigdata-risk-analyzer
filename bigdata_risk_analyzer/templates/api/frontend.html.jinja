@@ -325,6 +325,13 @@
       return html;
     }
 
+    // Helper to get URL param
+    function getUrlParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+
     document.getElementById('riskForm').onsubmit = async function(e) {
       e.preventDefault();
       const output = document.getElementById('output');
@@ -402,9 +409,17 @@
       if (keywords) payload.keywords = keywords.split(',').map(s => s.trim()).filter(Boolean);
       if (rerank_threshold) payload.rerank_threshold = parseFloat(rerank_threshold);
 
+      // Add token from URL param if present
+      const params = new URLSearchParams();
+      const token = getUrlParam('token');
+      if (token) {
+        params.append("token", token);
+      }
+
+
       spinner.style.display = 'block';
       try {
-        const response = await fetch('/risk-analysis', {
+        const response = await fetch(`/risk-analysis?${params}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)

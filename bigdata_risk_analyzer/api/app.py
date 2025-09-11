@@ -1,11 +1,12 @@
 from typing import Annotated
 
 from bigdata_client import Bigdata
-from fastapi import Body, FastAPI
+from fastapi import Body, FastAPI, Security
 from fastapi.responses import HTMLResponse
 
 from bigdata_risk_analyzer import __version__, logger
 from bigdata_risk_analyzer.api.models import RiskAnalysisRequest
+from bigdata_risk_analyzer.api.secure import query_scheme
 from bigdata_risk_analyzer.api.utils import get_example_values_from_schema
 from bigdata_risk_analyzer.models import RiskAnalysisResponse
 from bigdata_risk_analyzer.service import DocumentType, process_request
@@ -47,7 +48,7 @@ def health_check():
 
 
 @app.get("/")
-async def sample_frontend():
+async def sample_frontend(_: str = Security(query_scheme)):
     # Get example values from the schema for all fields
     example_values = get_example_values_from_schema(RiskAnalysisRequest)
 
@@ -57,7 +58,9 @@ async def sample_frontend():
 
 
 @app.post("/risk-analysis", response_model=RiskAnalysisResponse)
-def analyze_risk(request: Annotated[RiskAnalysisRequest, Body()]):
+def analyze_risk(
+    request: Annotated[RiskAnalysisRequest, Body()], _: str = Security(query_scheme)
+):
     # While we improve the UX of working with several document types with different sets of parameters
     # we will limit the document type to transcripts
     DOCUMENT_TYPE = DocumentType.TRANSCRIPTS
