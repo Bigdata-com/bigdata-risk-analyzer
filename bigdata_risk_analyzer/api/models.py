@@ -2,15 +2,8 @@ from datetime import datetime
 from enum import StrEnum
 from typing import List, Literal, Optional, Self
 
+from bigdata_client.models.search import DocumentType
 from pydantic import BaseModel, Field, model_validator
-
-
-class DocumentTypeEnum(StrEnum):
-    ALL = "ALL"
-    FILINGS = "FILINGS"
-    TRANSCRIPTS = "TRANSCRIPTS"
-    NEWS = "NEWS"
-    FILES = "FILES"
 
 
 class FrequencyEnum(StrEnum):
@@ -67,8 +60,8 @@ class RiskAnalysisRequest(BaseModel):
         default="openai::gpt-4o-mini",
         description="LLM model identifier used for taxonomy creation and semantic analysis.",
     )
-    document_type: Literal[DocumentTypeEnum.TRANSCRIPTS] = Field(
-        default=DocumentTypeEnum.TRANSCRIPTS,
+    document_type: Literal[DocumentType.TRANSCRIPTS] = Field(
+        default=DocumentType.TRANSCRIPTS,
         description="Type of documents to analyze (only transcript supported for now).",
     )
     fiscal_year: Optional[int] = Field(
@@ -95,9 +88,9 @@ class RiskAnalysisRequest(BaseModel):
     @model_validator(mode="after")
     def fiscal_year_only_when_transcrips_or_filings(self) -> Self:
         if self.fiscal_year is not None and self.document_type not in {
-            DocumentTypeEnum.FILINGS,
-            DocumentTypeEnum.TRANSCRIPTS,
-            DocumentTypeEnum.ALL,
+            DocumentType.FILINGS,
+            DocumentType.TRANSCRIPTS,
+            DocumentType.ALL,
         }:
             raise ValueError(
                 "fiscal_year can only be set when document_type is FILINGS or TRANSCRIPTS"

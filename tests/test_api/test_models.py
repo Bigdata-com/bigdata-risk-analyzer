@@ -1,7 +1,7 @@
 import pytest
 
 from bigdata_risk_analyzer.api.models import (
-    DocumentTypeEnum,
+    DocumentType,
     FrequencyEnum,
     RiskAnalysisRequest,
 )
@@ -20,7 +20,7 @@ from bigdata_risk_analyzer.api.models import (
             "2025-08-01",
             ["Tariffs"],
             "openai::gpt-4o-mini",
-            DocumentTypeEnum.TRANSCRIPTS,
+            DocumentType.TRANSCRIPTS,
             None,
             FrequencyEnum.monthly,
             100,
@@ -37,7 +37,7 @@ from bigdata_risk_analyzer.api.models import (
             "2025-08-01",
             ["Tariffs"],
             "openai::gpt-4o-mini",
-            DocumentTypeEnum.TRANSCRIPTS,
+            DocumentType.TRANSCRIPTS,
             0.8,
             FrequencyEnum.weekly,
             50,
@@ -54,7 +54,7 @@ from bigdata_risk_analyzer.api.models import (
             "2025-12-31",
             ["Disruption", "Logistics"],
             "openai::gpt-4o-mini",
-            DocumentTypeEnum.TRANSCRIPTS,
+            DocumentType.TRANSCRIPTS,
             None,
             FrequencyEnum.yearly,
             200,
@@ -71,7 +71,7 @@ from bigdata_risk_analyzer.api.models import (
             "2025-08-01",
             ["IP", "Patent"],
             "openai::gpt-4o-mini",
-            DocumentTypeEnum.TRANSCRIPTS,
+            DocumentType.TRANSCRIPTS,
             None,
             FrequencyEnum.daily,
             10,
