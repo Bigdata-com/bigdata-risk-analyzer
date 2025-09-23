@@ -61,8 +61,11 @@ A risk analysis report provides an executive summary of financially relevant inf
 There is a very simple UI available @ `http://localhost:8000/` where you can set your parameters and receive an easy-to-read summary of the analysis.
 
 ### Programmatically
-You can generate report for a universe of companies by sending a POST request to the `/risk-analysis` endpoint with the required
-parameters. For example, using `curl`:
+The risk analysis API works asynchronously. You first submit a request to start the analysis, then check the status periodically until completion.
+
+#### Step 1: Submit Risk Analysis Request
+Send a POST request to the `/risk-analysis` endpoint with the required parameters. This will return a `request_id` and queue the analysis for processing:
+
 ```bash
 curl -X 'POST' \
   'http://localhost:8000/risk-analysis' \
@@ -88,6 +91,28 @@ curl -X 'POST' \
 }'
 ```
 
+This will return a response like:
+```json
+{
+  "request_id": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "queued"
+}
+```
+
+#### Step 2: Check Analysis Status
+Use the `request_id` to periodically check the status of your analysis:
+
+```bash
+curl -X 'GET' \
+  'http://localhost:8000/status/550e8400-e29b-41d4-a716-446655440000' \
+  -H 'accept: application/json'
+```
+
+The status response includes:
+- `status`: Current state (`queued`, `in_progress`, `completed`, or `failed`)
+- `logs`: Processing logs and progress updates
+- `report`: Complete analysis results (only available when `status` is `completed`)
+
 For more details on the parameters, refer to the API documentation @ `http://localhost:8000/docs`.
 
 ## Enable access token protection
@@ -106,8 +131,9 @@ docker run -d \
 Then all API requests must include a `token` query parameter with the correct value to be authorized. For example:
 
 ```bash
+# Submit analysis request
 curl -X 'POST' \
-  'http://localhost:8000/risk-analyzer?token=<access-token-here>' \
+  'http://localhost:8000/risk-analysis?token=<access-token-here>' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -128,6 +154,11 @@ curl -X 'POST' \
   "fiscal_year": 2024,
   "frequency": "M"
 }'
+
+# Check status using the returned request_id
+curl -X 'GET' \
+  'http://localhost:8000/status/<request-id>?token=<access-token-here>' \
+  -H 'accept: application/json'
 ```
 
 # Install and for development locally
