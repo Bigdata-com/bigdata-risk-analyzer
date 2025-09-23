@@ -1,6 +1,6 @@
-import uuid
 from datetime import datetime
 from threading import Lock
+from uuid import UUID
 
 from sqlmodel import Session, select
 
@@ -21,28 +21,24 @@ class StorageManager:
         self.db_session = db_session
         self.lock = Lock()
 
-    def _get_workflow_status(self, request_id: str) -> SQLWorkflowStatus | None:
+    def _get_workflow_status(self, request_id: UUID) -> SQLWorkflowStatus | None:
         return self.db_session.exec(
-            select(SQLWorkflowStatus).where(
-                SQLWorkflowStatus.id == uuid.UUID(request_id)
-            )
+            select(SQLWorkflowStatus).where(SQLWorkflowStatus.id == request_id)
         ).first()
 
-    def _get_workflow_report(self, request_id: str) -> SQLRiskAnalyzerReport | None:
+    def _get_workflow_report(self, request_id: UUID) -> SQLRiskAnalyzerReport | None:
         return self.db_session.exec(
-            select(SQLRiskAnalyzerReport).where(
-                SQLRiskAnalyzerReport.id == uuid.UUID(request_id)
-            )
+            select(SQLRiskAnalyzerReport).where(SQLRiskAnalyzerReport.id == request_id)
         ).first()
 
     def _create_workflow_status(
-        self, request_id: str, status: WorkflowStatus
+        self, request_id: UUID, status: WorkflowStatus
     ) -> SQLWorkflowStatus:
         return SQLWorkflowStatus(
-            id=uuid.UUID(request_id), status=status, last_updated=datetime.now()
+            id=request_id, status=status, last_updated=datetime.now()
         )
 
-    def update_status(self, request_id: str, status: WorkflowStatus):
+    def update_status(self, request_id: UUID, status: WorkflowStatus):
         with self.lock:
             workflow_status = self._get_workflow_status(request_id)
 
@@ -56,14 +52,14 @@ class StorageManager:
             self.db_session.commit()
             self.db_session.refresh(workflow_status)
 
-    def get_status(self, request_id: str) -> WorkflowStatus | None:
+    def get_status(self, request_id: UUID) -> WorkflowStatus | None:
         with self.lock:
             workflow_status = self._get_workflow_status(request_id)
             if workflow_status is None:
                 return None
             return workflow_status.status
 
-    def log_message(self, request_id: str, message: str):
+    def log_message(self, request_id: UUID, message: str):
         with self.lock:
             workflow_status = self._get_workflow_status(request_id)
             if workflow_status is None:
@@ -76,7 +72,7 @@ class StorageManager:
             self.db_session.commit()
             self.db_session.refresh(workflow_status)
 
-    def get_logs(self, request_id: str) -> list[str] | None:
+    def get_logs(self, request_id: UUID) -> list[str] | None:
         with self.lock:
             workflow_status = self._get_workflow_status(request_id)
             if workflow_status is None:
@@ -85,7 +81,7 @@ class StorageManager:
 
     def mark_workflow_as_completed(
         self,
-        request_id: str,
+        request_id: UUID,
         request: RiskAnalysisRequest,
         report: RiskAnalysisResponse,
     ):
@@ -106,7 +102,7 @@ class StorageManager:
             self.db_session.refresh(workflow_status)
             self.db_session.refresh(sql_report)
 
-    def get_report(self, request_id: str) -> RiskAnalyzerStatusResponse | None:
+    def get_report(self, request_id: UUID) -> RiskAnalyzerStatusResponse | None:
         with self.lock:
             workflow_status = self._get_workflow_status(request_id)
             if workflow_status is None:
@@ -114,7 +110,7 @@ class StorageManager:
             sql_report = self._get_workflow_report(request_id)
             if sql_report is None:
                 return RiskAnalyzerStatusResponse(
-                    request_id=request_id,
+                    request_id=str(request_id),
                     last_updated=workflow_status.last_updated,
                     status=workflow_status.status,
                     logs=workflow_status.logs,
@@ -122,7 +118,7 @@ class StorageManager:
                 )
 
             return RiskAnalyzerStatusResponse(
-                request_id=request_id,
+                request_id=str(request_id),
                 last_updated=workflow_status.last_updated,
                 status=workflow_status.status,
                 logs=workflow_status.logs,

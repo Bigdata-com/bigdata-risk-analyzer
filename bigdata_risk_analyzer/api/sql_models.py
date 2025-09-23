@@ -1,5 +1,5 @@
-import uuid
 from datetime import datetime
+from uuid import UUID
 
 from sqlalchemy.ext.mutable import MutableList
 from sqlmodel import JSON, Column, Field, SQLModel
@@ -9,7 +9,7 @@ from bigdata_risk_analyzer.models import RiskAnalysisResponse
 
 
 class SQLWorkflowStatus(SQLModel, table=True):
-    id: uuid.UUID = Field(primary_key=True)
+    id: UUID = Field(primary_key=True)
     last_updated: datetime
     status: str
     logs: list[str] = Field(
@@ -18,7 +18,7 @@ class SQLWorkflowStatus(SQLModel, table=True):
 
 
 class SQLRiskAnalyzerReport(SQLModel, table=True):
-    id: uuid.UUID = Field(primary_key=True)
+    id: UUID = Field(primary_key=True)
     created_at: datetime = Field(default_factory=datetime.now)
     companies: str | list[str] = Field(sa_column=Column(JSON))
     llm_model: str
@@ -36,12 +36,12 @@ class SQLRiskAnalyzerReport(SQLModel, table=True):
 
     @staticmethod
     def from_risk_analyzer_response(
-        request_id: str,
+        request_id: UUID,
         request: RiskAnalysisRequest,
         response: RiskAnalysisResponse,
     ) -> "SQLRiskAnalyzerReport":
         return SQLRiskAnalyzerReport(
-            id=uuid.UUID(request_id),
+            id=request_id,
             companies=request.companies,
             llm_model=request.llm_model,
             theme=request.main_theme,

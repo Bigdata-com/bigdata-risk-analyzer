@@ -1,6 +1,7 @@
 import math
 from datetime import datetime
 from importlib.metadata import version
+from uuid import UUID
 
 import pandas as pd
 from bigdata_client import Bigdata
@@ -24,7 +25,7 @@ from bigdata_risk_analyzer.traces import TraceEventName, send_trace
 
 
 class WorkflowObserver(Observer):
-    def __init__(self, request_id: str, storage_manager: StorageManager):
+    def __init__(self, request_id: UUID, storage_manager: StorageManager):
         self.request_id = request_id
         self.storage_manager = storage_manager
 
@@ -129,7 +130,7 @@ def build_response(
 def process_request(
     request: RiskAnalysisRequest,
     bigdata: Bigdata | None,
-    request_id: str,
+    request_id: UUID,
     storage_manager: StorageManager,
 ):
     storage_manager.update_status(request_id, WorkflowStatus.IN_PROGRESS)

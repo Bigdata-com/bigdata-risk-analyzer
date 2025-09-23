@@ -1,6 +1,6 @@
 from functools import partial
 from typing import Annotated
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from bigdata_client import Bigdata
 from bigdata_client.models.search import DocumentType
@@ -107,7 +107,7 @@ def analyze_risk(
     # we will limit the document type to transcripts
     DOCUMENT_TYPE = DocumentType.TRANSCRIPTS
     request.document_type = DOCUMENT_TYPE
-    request_id = str(uuid4())
+    request_id = uuid4()
 
     storage_manager.update_status(request_id, WorkflowStatus.QUEUED)
 
@@ -123,7 +123,7 @@ def analyze_risk(
     return JSONResponse(
         status_code=202,
         content=RiskAnalyzerAcceptedResponse(
-            request_id=request_id, status=WorkflowStatus.QUEUED
+            request_id=str(request_id), status=WorkflowStatus.QUEUED
         ).model_dump(),
     )
 
@@ -133,7 +133,7 @@ def analyze_risk(
     summary="Get the status of a risk analyzer report",
 )
 def get_status(
-    request_id: str,
+    request_id: UUID,
     storage_manager: StorageManager = Depends(get_storage_manager),
     _: str = Security(query_scheme),
 ) -> RiskAnalyzerStatusResponse:
