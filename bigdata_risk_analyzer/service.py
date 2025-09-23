@@ -158,28 +158,17 @@ def process_request(
     analyzer.register_observer(
         WorkflowObserver(request_id=request_id, storage_manager=storage_manager)
     )
-    # Run workflow
-    # 1) Taxonomy creation
-    risk_tree, risk_summaries, terminal_labels = analyzer.create_taxonomy()
 
-    # 2) Content Retrieval: Searches news for relevant discussions
-    df_sentences = analyzer.retrieve_results(
-        sentences=risk_summaries,
-        freq=request.frequency,
+    results = analyzer.screen_companies(
         document_limit=request.document_limit,
         batch_size=request.batch_size,
+        frequency=request.frequency,
     )
 
-    # 3) Semantic Labeling: Uses AI to categorize content into appropriate sub-scenarios
-    _, df_labeled = analyzer.label_search_results(
-        df_sentences=df_sentences,
-        terminal_labels=terminal_labels,
-        risk_tree=risk_tree,
-        additional_prompt_fields=["entity_sector", "entity_industry", "headline"],
-    )
-
-    # 4) Risk Scoring: Calculates company and industry-level exposure scores
-    df_company, _, df_motivation = analyzer.generate_results(df_labeled)
+    df_labeled = results["df_labeled"]
+    df_company = results["df_company"]
+    df_motivation = results["df_motivation"]
+    risk_tree = results["risk_tree"]
 
     workflow_execution_end = datetime.now()
 
