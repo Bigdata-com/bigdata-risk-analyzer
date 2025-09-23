@@ -5,11 +5,12 @@ from importlib.metadata import version
 import pandas as pd
 from bigdata_client import Bigdata
 from bigdata_client.models.entities import Company
-from bigdata_client.models.search import DocumentType
 from bigdata_research_tools.themes import ThemeTree
+from bigdata_research_tools.utils.observer import OberserverNotification, Observer
 from bigdata_research_tools.workflows.risk_analyzer import RiskAnalyzer
-from fastapi import HTTPException
 
+from bigdata_risk_analyzer.api.models import RiskAnalysisRequest, WorkflowStatus
+from bigdata_risk_analyzer.api.storage import StorageManager
 from bigdata_risk_analyzer.models import (
     CompanyScoring,
     LabeledChunk,
@@ -20,6 +21,18 @@ from bigdata_risk_analyzer.models import (
     RiskTaxonomy,
 )
 from bigdata_risk_analyzer.traces import TraceEventName, send_trace
+
+
+class WorkflowObserver(Observer):
+    def __init__(self, request_id: str, storage_manager: StorageManager):
+        self.request_id = request_id
+        self.storage_manager = storage_manager
+
+    def update(self, message: OberserverNotification):
+        self.storage_manager.log_message(
+            request_id=self.request_id,
+            message=message.message,
+        )
 
 
 def prepare_companies(
@@ -114,88 +127,80 @@ def build_response(
 
 
 def process_request(
-    companies: list[str] | str,
-    llm_model: str,
-    main_theme: str,
-    start_date: str,
-    end_date: str,
-    keywords: list[str],
-    document_type: DocumentType,
-    control_entities: dict[str, list[str]] | None,
-    rerank_threshold: float | None,
-    focus: str,
-    frequency: str,
-    document_limit: int,
-    batch_size: int,
-    fiscal_year: int | None,
+    request: RiskAnalysisRequest,
     bigdata: Bigdata | None,
+    request_id: str,
+    storage_manager: StorageManager,
 ):
+    storage_manager.update_status(request_id, WorkflowStatus.IN_PROGRESS)
     if not bigdata:
+        storage_manager.update_status(request_id, WorkflowStatus.FAILED)
         raise ValueError("Bigdata client is not initialized.")
-    try:
-        workflow_execution_start = datetime.now()
 
-        resolved_companies = prepare_companies(companies, bigdata)
+    workflow_execution_start = datetime.now()
 
-        analyzer = RiskAnalyzer(
-            llm_model=llm_model,
-            main_theme=main_theme,
-            companies=resolved_companies,
-            start_date=start_date,
-            end_date=end_date,
-            keywords=keywords,
-            document_type=document_type,
-            fiscal_year=fiscal_year,
-            control_entities=control_entities,
-            rerank_threshold=rerank_threshold,
-            focus=focus,
-        )
+    resolved_companies = prepare_companies(request.companies, bigdata)
 
-        # Run workflow
-        # 1) Taxonomy creation
-        risk_tree, risk_summaries, terminal_labels = analyzer.create_taxonomy()
+    analyzer = RiskAnalyzer(
+        llm_model=request.llm_model,
+        main_theme=request.main_theme,
+        companies=resolved_companies,
+        start_date=request.start_date,
+        end_date=request.end_date,
+        keywords=request.keywords,
+        document_type=request.document_type,
+        fiscal_year=request.fiscal_year,
+        control_entities=request.control_entities,
+        rerank_threshold=request.rerank_threshold,
+        focus=request.focus,
+    )
 
-        # 2) Content Retrieval: Searches news for relevant discussions
-        df_sentences = analyzer.retrieve_results(
-            sentences=risk_summaries,
-            freq=frequency,
-            document_limit=document_limit,
-            batch_size=batch_size,
-        )
+    analyzer.register_observer(
+        WorkflowObserver(request_id=request_id, storage_manager=storage_manager)
+    )
+    # Run workflow
+    # 1) Taxonomy creation
+    risk_tree, risk_summaries, terminal_labels = analyzer.create_taxonomy()
 
-        # 3) Semantic Labeling: Uses AI to categorize content into appropriate sub-scenarios
-        _, df_labeled = analyzer.label_search_results(
-            df_sentences=df_sentences,
-            terminal_labels=terminal_labels,
-            risk_tree=risk_tree,
-            additional_prompt_fields=["entity_sector", "entity_industry", "headline"],
-        )
+    # 2) Content Retrieval: Searches news for relevant discussions
+    df_sentences = analyzer.retrieve_results(
+        sentences=risk_summaries,
+        freq=request.frequency,
+        document_limit=request.document_limit,
+        batch_size=request.batch_size,
+    )
 
-        # 4) Risk Scoring: Calculates company and industry-level exposure scores
-        df_company, _, df_motivation = analyzer.generate_results(df_labeled)
+    # 3) Semantic Labeling: Uses AI to categorize content into appropriate sub-scenarios
+    _, df_labeled = analyzer.label_search_results(
+        df_sentences=df_sentences,
+        terminal_labels=terminal_labels,
+        risk_tree=risk_tree,
+        additional_prompt_fields=["entity_sector", "entity_industry", "headline"],
+    )
 
-        workflow_execution_end = datetime.now()
+    # 4) Risk Scoring: Calculates company and industry-level exposure scores
+    df_company, _, df_motivation = analyzer.generate_results(df_labeled)
 
-        # Send log
-        send_trace(
-            bigdata,
-            event_name=TraceEventName.RISK_ANALYZER_REPORT_GENERATED,
-            trace={
-                "bigdataClientVersion": version("bigdata-client"),
-                "workflowStartDate": workflow_execution_start.isoformat(
-                    timespec="seconds"
-                ),
-                "workflowEndDate": workflow_execution_end.isoformat(timespec="seconds"),
-                "watchlistLength": len(resolved_companies),
-            },
-        )
+    workflow_execution_end = datetime.now()
 
-        return build_response(
-            df_company=df_company,
-            df_motivation=df_motivation,
-            df_labeled=df_labeled,
-            risk_tree=risk_tree,
-        )
+    # Send log
+    send_trace(
+        bigdata,
+        event_name=TraceEventName.RISK_ANALYZER_REPORT_GENERATED,
+        trace={
+            "bigdataClientVersion": version("bigdata-client"),
+            "workflowStartDate": workflow_execution_start.isoformat(timespec="seconds"),
+            "workflowEndDate": workflow_execution_end.isoformat(timespec="seconds"),
+            "watchlistLength": len(resolved_companies),
+        },
+    )
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    response = build_response(
+        df_company=df_company,
+        df_motivation=df_motivation,
+        df_labeled=df_labeled,
+        risk_tree=risk_tree,
+    )
+
+    storage_manager.mark_workflow_as_completed(request_id, request, response)
+    return response

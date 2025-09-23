@@ -107,7 +107,7 @@ Then all API requests must include a `token` query parameter with the correct va
 
 ```bash
 curl -X 'POST' \
-  'http://localhost:8000/thematic-screener?token=<access-token-here>' \
+  'http://localhost:8000/risk-analyzer?token=<access-token-here>' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{

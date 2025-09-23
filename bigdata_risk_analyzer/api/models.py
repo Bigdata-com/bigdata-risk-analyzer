@@ -5,6 +5,8 @@ from typing import List, Literal, Optional, Self
 from bigdata_client.models.search import DocumentType
 from pydantic import BaseModel, Field, model_validator
 
+from bigdata_risk_analyzer.models import RiskAnalysisResponse
+
 
 class FrequencyEnum(StrEnum):
     daily = "D"
@@ -12,6 +14,13 @@ class FrequencyEnum(StrEnum):
     monthly = "M"
     quarterly = "3M"
     yearly = "Y"
+
+
+class WorkflowStatus(StrEnum):
+    QUEUED = "queued"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
 
 class RiskAnalysisRequest(BaseModel):
@@ -128,3 +137,16 @@ class RiskAnalysisRequest(BaseModel):
                 f"The number of days in the range between start_date={start_date} and end_date={end_date} ({delta_days} days) should be higher than the minimum required for the selected frequency '{freq.value}' ({freq_min_days[freq.value]} days)."
             )
         return values
+
+
+class RiskAnalyzerAcceptedResponse(BaseModel):
+    request_id: str
+    status: WorkflowStatus
+
+
+class RiskAnalyzerStatusResponse(BaseModel):
+    request_id: str
+    last_updated: datetime
+    status: WorkflowStatus
+    logs: list[str] = Field(default_factory=list)
+    report: RiskAnalysisResponse | None = None
