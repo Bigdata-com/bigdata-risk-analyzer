@@ -136,7 +136,6 @@ def process_request(
     try:
         storage_manager.update_status(request_id, WorkflowStatus.IN_PROGRESS)
         if not bigdata:
-            storage_manager.update_status(request_id, WorkflowStatus.FAILED)
             raise ValueError("Bigdata client is not initialized.")
 
         workflow_execution_start = datetime.now()
