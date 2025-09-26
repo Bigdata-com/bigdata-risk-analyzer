@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN: str | None = None
     TEMPLATES_DIR: str = str(PROJECT_DIRECTORY / "bigdata_risk_analyzer" / "templates")
 
+    # Static dir configuration
+    STATIC_DIR: str = str(PROJECT_DIRECTORY / "bigdata_risk_analyzer" / "static")
+
     # Data storage configuration
     DB_STRING: str = "sqlite:///risk_analyzer.db"
 

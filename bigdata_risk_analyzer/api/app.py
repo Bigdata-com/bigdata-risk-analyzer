@@ -6,6 +6,7 @@ from bigdata_client import Bigdata
 from bigdata_client.models.search import DocumentType
 from fastapi import BackgroundTasks, Body, Depends, FastAPI, HTTPException, Security
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session, SQLModel, create_engine
 
 from bigdata_risk_analyzer import LOG_LEVEL, __version__, logger
@@ -67,6 +68,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.mount("/static", StaticFiles(directory=settings.STATIC_DIR), name="static")
+
 
 @app.get(
     "/health",
@@ -86,7 +89,7 @@ async def sample_frontend(_: str = Security(query_scheme)) -> HTMLResponse:
     example_values = get_example_values_from_schema(RiskAnalysisRequest)
 
     return HTMLResponse(
-        content=loader.get_template("api/frontend.html.jinja").render(**example_values),
+        content=loader.get_template("api/index.html.jinja").render(**example_values),
         media_type="text/html",
     )
 

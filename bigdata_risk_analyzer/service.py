@@ -133,64 +133,73 @@ def process_request(
     request_id: UUID,
     storage_manager: StorageManager,
 ):
-    storage_manager.update_status(request_id, WorkflowStatus.IN_PROGRESS)
-    if not bigdata:
+    try:
+        storage_manager.update_status(request_id, WorkflowStatus.IN_PROGRESS)
+        if not bigdata:
+            storage_manager.update_status(request_id, WorkflowStatus.FAILED)
+            raise ValueError("Bigdata client is not initialized.")
+
+        workflow_execution_start = datetime.now()
+
+        resolved_companies = prepare_companies(request.companies, bigdata)
+
+        analyzer = RiskAnalyzer(
+            llm_model=request.llm_model,
+            main_theme=request.main_theme,
+            companies=resolved_companies,
+            start_date=request.start_date,
+            end_date=request.end_date,
+            keywords=request.keywords,
+            document_type=request.document_type,
+            fiscal_year=request.fiscal_year,
+            control_entities=request.control_entities,
+            rerank_threshold=request.rerank_threshold,
+            focus=request.focus,
+        )
+
+        analyzer.register_observer(
+            WorkflowObserver(request_id=request_id, storage_manager=storage_manager)
+        )
+
+        results = analyzer.screen_companies(
+            document_limit=request.document_limit,
+            batch_size=request.batch_size,
+            frequency=request.frequency,
+        )
+
+        df_labeled = results["df_labeled"]
+        df_company = results["df_company"]
+        df_motivation = results["df_motivation"]
+        risk_tree = results["risk_tree"]
+
+        workflow_execution_end = datetime.now()
+
+        # Send log
+        send_trace(
+            bigdata,
+            event_name=TraceEventName.RISK_ANALYZER_REPORT_GENERATED,
+            trace={
+                "bigdataClientVersion": version("bigdata-client"),
+                "workflowStartDate": workflow_execution_start.isoformat(timespec="seconds"),
+                "workflowEndDate": workflow_execution_end.isoformat(timespec="seconds"),
+                "watchlistLength": len(resolved_companies),
+            },
+        )
+
+        response = build_response(
+            df_company=df_company,
+            df_motivation=df_motivation,
+            df_labeled=df_labeled,
+            risk_tree=risk_tree,
+        )
+
+        storage_manager.mark_workflow_as_completed(request_id, request, response)
+        return response
+    
+    except Exception as e:
+        storage_manager.log_message(
+            request_id=request_id,
+            message=f"Workflow failed with error: {str(e)}",
+        )
         storage_manager.update_status(request_id, WorkflowStatus.FAILED)
-        raise ValueError("Bigdata client is not initialized.")
-
-    workflow_execution_start = datetime.now()
-
-    resolved_companies = prepare_companies(request.companies, bigdata)
-
-    analyzer = RiskAnalyzer(
-        llm_model=request.llm_model,
-        main_theme=request.main_theme,
-        companies=resolved_companies,
-        start_date=request.start_date,
-        end_date=request.end_date,
-        keywords=request.keywords,
-        document_type=request.document_type,
-        fiscal_year=request.fiscal_year,
-        control_entities=request.control_entities,
-        rerank_threshold=request.rerank_threshold,
-        focus=request.focus,
-    )
-
-    analyzer.register_observer(
-        WorkflowObserver(request_id=request_id, storage_manager=storage_manager)
-    )
-
-    results = analyzer.screen_companies(
-        document_limit=request.document_limit,
-        batch_size=request.batch_size,
-        frequency=request.frequency,
-    )
-
-    df_labeled = results["df_labeled"]
-    df_company = results["df_company"]
-    df_motivation = results["df_motivation"]
-    risk_tree = results["risk_tree"]
-
-    workflow_execution_end = datetime.now()
-
-    # Send log
-    send_trace(
-        bigdata,
-        event_name=TraceEventName.RISK_ANALYZER_REPORT_GENERATED,
-        trace={
-            "bigdataClientVersion": version("bigdata-client"),
-            "workflowStartDate": workflow_execution_start.isoformat(timespec="seconds"),
-            "workflowEndDate": workflow_execution_end.isoformat(timespec="seconds"),
-            "watchlistLength": len(resolved_companies),
-        },
-    )
-
-    response = build_response(
-        df_company=df_company,
-        df_motivation=df_motivation,
-        df_labeled=df_labeled,
-        risk_tree=risk_tree,
-    )
-
-    storage_manager.mark_workflow_as_completed(request_id, request, response)
-    return response
+        raise e        
