@@ -148,11 +148,11 @@
     Document Type: <button type="button" class="info-btn" style="display:none;" onclick="showInfoModal('document_type')" title="Info about Document Type">i</button>
     </label>
     <select id="document_type" class="input-field" style="display:none;">
-      <option value="ALL" {% if document_type == 'ALL' %}selected{% endif %}>ALL</option>
-      <option value="FILINGS" {% if document_type == 'FILINGS' %}selected{% endif %}>FILINGS</option>
-      <option value="TRANSCRIPTS" {% if document_type == 'TRANSCRIPTS' %}selected{% endif %}>TRANSCRIPTS</option>
-      <option value="NEWS" {% if document_type == 'NEWS' %}selected{% endif %}>NEWS</option>
-      <option value="FILES" {% if document_type == 'FILES' %}selected{% endif %}>FILES</option>
+      <option value="all" {% if document_type == 'all' %}selected{% endif %}>ALL</option>
+      <option value="filings" {% if document_type == 'filings' %}selected{% endif %}>FILINGS</option>
+      <option value="transcripts" {% if document_type == 'transcripts' %}selected{% endif %}>TRANSCRIPTS</option>
+      <option value="news" {% if document_type == 'news' %}selected{% endif %}>NEWS</option>
+      <option value="files" {% if document_type == 'files' %}selected{% endif %}>FILES</option>
     </select>
 
     <label for="fiscal_year">
@@ -363,8 +363,8 @@
       const batch_size = document.getElementById('batch_size').value;
       const fiscal_year = document.getElementById('fiscal_year').value.trim();
 
-      // Show error if fiscal_year is provided and document_type is not FILINGS, TRANSCRIPTS, or ALL
-      if (fiscal_year && !["FILINGS", "TRANSCRIPTS", "ALL"].includes(document_type)) {
+      // Show error if fiscal_year is provided and document_type is not filings, transcripts, or all
+      if (fiscal_year && !["filings", "transcripts", "all"].includes(document_type)) {
         output.innerHTML = '<span class="error">❌ Fiscal year is only allowed for Filings, Transcripts, or All document types.</span>';
         output.classList.add('error');
         submitBtn.disabled = false;
