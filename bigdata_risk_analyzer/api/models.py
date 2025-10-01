@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, date
+from datetime import date, datetime, timedelta
 from enum import Enum, StrEnum
 from typing import List, Literal, Optional, Self
 
@@ -21,6 +21,7 @@ class WorkflowStatus(StrEnum):
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     FAILED = "failed"
+
 
 class WatchlistExample(BaseModel):
     id: str = Field(..., description="The unique identifier for the watchlist.")
@@ -54,7 +55,7 @@ class ExampleWatchlists(Enum):
         {'POINT_72': {'id': '9ab396cf-a2bb-4c91-b9bf-ed737905803e', 'name': 'Point 72 Holdings'}, ...}
         """
         yield self.name
-        yield self.value.model_dump()    
+        yield self.value.model_dump()
 
 
 class RiskAnalysisRequest(BaseModel):
@@ -93,7 +94,6 @@ class RiskAnalysisRequest(BaseModel):
         default="2024-12-31",
         description="End date of the analysis window (format: YYYY-MM-DD). Defaults to yesterday.",
         example=date.today().isoformat(),
-
     )
 
     keywords: List[str] | None = Field(
@@ -105,6 +105,7 @@ class RiskAnalysisRequest(BaseModel):
     llm_model: str = Field(
         default="openai::gpt-4o-mini",
         description="LLM model identifier used for taxonomy creation and semantic analysis.",
+        example="openai::gpt-4o-mini",
     )
     document_type: Literal[DocumentType.NEWS] = Field(
         default=DocumentType.NEWS,

@@ -11,8 +11,8 @@ from sqlmodel import Session, SQLModel, create_engine
 
 from bigdata_risk_analyzer import LOG_LEVEL, __version__, logger
 from bigdata_risk_analyzer.api.models import (
-    RiskAnalysisRequest,
     ExampleWatchlists,
+    RiskAnalysisRequest,
     RiskAnalyzerAcceptedResponse,
     RiskAnalyzerStatusResponse,
     WorkflowStatus,
@@ -88,7 +88,7 @@ def health_check():
 async def sample_frontend(_: str = Security(query_scheme)) -> HTMLResponse:
     # Get example values from the schema for all fields
     example_values = get_example_values_from_schema(RiskAnalysisRequest)
-    example_values['example_watchlists'] = list(dict(ExampleWatchlists).values())
+    example_values["example_watchlists"] = list(dict(ExampleWatchlists).values())
 
     return HTMLResponse(
         content=loader.get_template("api/index.html.jinja").render(**example_values),

@@ -179,7 +179,9 @@ def process_request(
             event_name=TraceEventName.RISK_ANALYZER_REPORT_GENERATED,
             trace={
                 "bigdataClientVersion": version("bigdata-client"),
-                "workflowStartDate": workflow_execution_start.isoformat(timespec="seconds"),
+                "workflowStartDate": workflow_execution_start.isoformat(
+                    timespec="seconds"
+                ),
                 "workflowEndDate": workflow_execution_end.isoformat(timespec="seconds"),
                 "watchlistLength": len(resolved_companies),
             },
@@ -194,11 +196,11 @@ def process_request(
 
         storage_manager.mark_workflow_as_completed(request_id, request, response)
         return response
-    
+
     except Exception as e:
         storage_manager.log_message(
             request_id=request_id,
             message=f"Workflow failed with error: {str(e)}",
         )
         storage_manager.update_status(request_id, WorkflowStatus.FAILED)
-        raise e        
+        raise e
