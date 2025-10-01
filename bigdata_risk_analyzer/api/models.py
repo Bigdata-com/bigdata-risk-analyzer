@@ -1,5 +1,5 @@
-from datetime import datetime
-from enum import StrEnum
+from datetime import date, datetime, timedelta
+from enum import Enum, StrEnum
 from typing import List, Literal, Optional, Self
 
 from bigdata_client.models.search import DocumentType
@@ -23,6 +23,41 @@ class WorkflowStatus(StrEnum):
     FAILED = "failed"
 
 
+class WatchlistExample(BaseModel):
+    id: str = Field(..., description="The unique identifier for the watchlist.")
+    name: str = Field(..., description="The name of the watchlist.")
+
+
+class ExampleWatchlists(Enum):
+    POINT_72 = WatchlistExample(
+        id="9ab396cf-a2bb-4c91-b9bf-ed737905803e", name="Point 72 Holdings"
+    )
+    MILITARIZATION = WatchlistExample(
+        id="beda15f2-b3ba-44dd-80c6-79d8a1bba764", name="Militarization"
+    )
+    US_LARGE_CAP_100 = WatchlistExample(
+        id="44118802-9104-4265-b97a-2e6d88d74893", name="US Large Cap 100"
+    )
+    HIGH_FINANCE = WatchlistExample(
+        id="f7801965-ed54-4ff1-b524-b4ecee3bc858", name="High Finance"
+    )
+    THIRD_POINT_HOLDINGS = WatchlistExample(
+        id="ec300f6f-64f0-4897-9f63-82e8d60a7e5a", name="Third Point Holdings"
+    )
+    THE_STREET_INDEX = WatchlistExample(
+        id="ccfe5dc2-0c92-42d7-861c-1d8ee74a9e02", name="The Street Index"
+    )
+    AI_SZN = WatchlistExample(id="db8478c9-34db-4975-8e44-b1ff764098ac", name="AI Szn")
+
+    def __iter__(self):
+        """Allows to create a dict from the enum
+        >>> dict(ExampleWatchlists)
+        {'POINT_72': {'id': '9ab396cf-a2bb-4c91-b9bf-ed737905803e', 'name': 'Point 72 Holdings'}, ...}
+        """
+        yield self.name
+        yield self.value.model_dump()
+
+
 class RiskAnalysisRequest(BaseModel):
     main_theme: str = Field(
         ...,
@@ -40,8 +75,8 @@ class RiskAnalysisRequest(BaseModel):
 
     companies: list[str] | str = Field(
         ...,
-        description="List of RavenPack entity IDs  or a watchlist ID representing the companies to screen.",
-        example="44118802-9104-4265-b97a-2e6d88d74893",
+        description="List of RavenPack entity IDs  or a watchlist ID representing the companies to track in the generated brief.",
+        example=ExampleWatchlists.POINT_72.value.id,
     )
 
     control_entities: Optional[dict[str, list[str]]] = Field(
@@ -52,14 +87,16 @@ class RiskAnalysisRequest(BaseModel):
 
     start_date: str = Field(
         default="2024-01-01",
-        description="Start date of the analysis window (format: YYYY-MM-DD). Defaults to 60 days ago.",
+        description="Start date of the analysis window (format: YYYY-MM-DD). Defaults to 6 months ago.",
+        example=(date.today() - timedelta(days=180)).isoformat(),
     )
     end_date: str = Field(
         default="2024-12-31",
         description="End date of the analysis window (format: YYYY-MM-DD). Defaults to yesterday.",
+        example=date.today().isoformat(),
     )
 
-    keywords: List[str] = Field(
+    keywords: List[str] | None = Field(
         default=None,
         description="Key risk-related terms to drive content retrieval (e.g., 'tariffs').",
         example=["Tariffs"],
@@ -68,30 +105,37 @@ class RiskAnalysisRequest(BaseModel):
     llm_model: str = Field(
         default="openai::gpt-4o-mini",
         description="LLM model identifier used for taxonomy creation and semantic analysis.",
+        example="openai::gpt-4o-mini",
     )
-    document_type: Literal[DocumentType.TRANSCRIPTS] = Field(
-        default=DocumentType.TRANSCRIPTS,
+    document_type: Literal[DocumentType.NEWS] = Field(
+        default=DocumentType.NEWS,
         description="Type of documents to analyze (only transcript supported for now).",
+        example=DocumentType.NEWS,
     )
     fiscal_year: Optional[int] = Field(
+        default=None,
         description="Fiscal year to filter documents (format: YYYY).",
-        example=2024,
+        example=None,
     )
     rerank_threshold: Optional[float] = Field(
         default=None,
         description="Optional threshold (0-1) to rerank and filter search results by relevance.",
+        example=None,
     )
     frequency: FrequencyEnum = Field(
-        default=FrequencyEnum.monthly,
+        default=FrequencyEnum.quarterly,
         description="Search frequency interval. Supported values: D (daily), W (weekly), M (monthly), Y (yearly).",
+        example=FrequencyEnum.quarterly,
     )
     document_limit: int = Field(
         default=100,
         description="Maximum number of documents to retrieve per query to Bigdata API.",
+        example=100,
     )
     batch_size: int = Field(
         default=10,
         description="Number of entities to include in each batch for parallel querying.",
+        example=10,
     )
 
     @model_validator(mode="after")

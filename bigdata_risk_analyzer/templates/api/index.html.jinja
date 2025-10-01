@@ -4,7 +4,7 @@
 <div id="infoModalsContainer"></div>
 <div class="flex flex-row w-full min-h-[500px]">
   <!-- Left: Form -->
-  <div class="w-1/6 min-w-[250px] pr-6 bg-zinc-800 pl-2 rounded-l-lg pt-2 pb-2 text-sm">
+  <div id="sidebar" class="min-w-[150px] max-w-[600px] w-[300px] pr-6 bg-zinc-800 pl-2 rounded-l-lg pt-2 pb-2 text-sm transition-all duration-100 ease-in-out">
     <div class="overflow-y-auto">
       <form id="riskForm" autocomplete="off" class="sticky top-0 z-10">
         <div class="mb-5">
@@ -96,11 +96,11 @@
             </label>
             <select id="frequency"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5">
-              <option value="D">Daily</option>
-              <option value="W">Weekly</option>
-              <option value="M">Monthly</option>
-              <option value="3M" selected>Quarterly</option>
-              <option value="Y">Yearly</option>
+              <option value="D" {% if frequency=='D' %}selected{% endif %}>Daily</option>
+              <option value="W" {% if frequency=='W' %}selected{% endif %}>Weekly</option>
+              <option value="M" {% if frequency=='M' %}selected{% endif %}>Monthly</option>
+              <option value="3M" {% if frequency=='3M' %}selected{% endif %}>Quarterly</option>
+              <option value="Y" {% if frequency=='Y' %}selected{% endif %}>Yearly</option>
             </select>
           </div>
 
@@ -116,7 +116,7 @@
               value="{{ keywords|join(',') if keywords is defined and keywords else '' }}" />
           </div>
 
-          <div class="mb-5">
+          <div class="hidden mb-5">
             <label for="fiscal_year" class="block mb-2 font-bold text-md text-white">
               <span>Fiscal Year:</span>
               <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('fiscal_year')"
@@ -199,7 +199,9 @@
 
   </div>
   <!-- Right: Output -->
-  <div class="w-5/6 min-w-[300px] bg-zinc-900 p-8 rounded-r-lg">
+     <!-- Drag bar -->
+  <div id="dragbar" class="w-2 cursor-ew-resize bg-zinc-700 hover:bg-blue-500 transition-colors duration-100 ease-in-out z-20" style="position: relative;"></div>
+  <div id="outputarea" class="flex-1 min-w-[300px] bg-zinc-900 p-8 rounded-r-lg transition-all duration-100 ease-in-out">
     <button id="showJsonBtn"
       class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center mb-4"
       style="display:none;">Show raw JSON</button>
@@ -222,7 +224,7 @@
 
         <h2 class="text-2xl font-bold text-white mb-4">CURRENT LIMITATIONS:</h2>
         <ul class="list-disc mb-4 pl-6">
-          <li>Demo version retrieves <strong>TRANSCRIPT</strong> documents only, restricted to 4 temporal buckets (e.g.,
+          <li>Demo version retrieves <strong>NEWS</strong> documents only, restricted to 4 temporal buckets (e.g.,
             4 quarters)</li>
           <li>Processing may take a few minutes for complex queries</li>
           <li>This is an experimental tool – results should be validated independently before making investment
@@ -280,29 +282,7 @@
     headline_comment: `<b>Headline</b>:<br>Click on each headline to retrieve the DOCUMENT ID. The DOCUMENT ID identifies the document that contains that  headline.`,
   };
 
-  const watchlists = [
-    { "watchlist_id": "9ab396cf-a2bb-4c91-b9bf-ed737905803e", "name": "Point 72 Holdings" },
-    { "watchlist_id": "beda15f2-b3ba-44dd-80c6-79d8a1bba764", "name": "Militarization" },
-    { "watchlist_id": "44118802-9104-4265-b97a-2e6d88d74893", "name": "US Large Cap 100" },
-    { "watchlist_id": "f7801965-ed54-4ff1-b524-b4ecee3bc858", "name": "High Finance" },
-    { "watchlist_id": "ec300f6f-64f0-4897-9f63-82e8d60a7e5a", "name": "Third Point Holdings" },
-    { "watchlist_id": "ccfe5dc2-0c92-42d7-861c-1d8ee74a9e02", "name": "The Street Index" },
-    { "watchlist_id": "db8478c9-34db-4975-8e44-b1ff764098ac", "name": "AI Szn" }
-  ];
-
-  // Calculate dates for start_date and end_date
-  const today = new Date();
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-  sixMonthsAgo.setDate(1);
-
-  // Format a date as YYYY-MM-DD
-  function formatDate(date) {
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    const dd = String(date.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
-  }
+  const watchlists = {{ example_watchlists | tojson }};
 
   // Calculate maximum number of days based on frequency (maximum 4 times the frequency)
   function calculateMaxDays(frequency) {
@@ -318,6 +298,33 @@
     const baseDays = frequencyToDays[frequency] || 90; // Default to quarterly if unknown
     return baseDays
   }
+
+  document.addEventListener('DOMContentLoaded', function() {
+  const dragbar = document.getElementById('dragbar');
+  const sidebar = document.getElementById('sidebar');
+  const outputarea = document.getElementById('outputarea');
+  let dragging = false;
+  dragbar.addEventListener('mousedown', function(e) {
+    dragging = true;
+    document.body.classList.add('cursor-ew-resize');
+    document.body.style.userSelect = 'none';
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (!dragging) return;
+    const minSidebar = 250;
+    const maxSidebar = 600;
+    let newWidth = Math.min(Math.max(e.clientX - sidebar.getBoundingClientRect().left, minSidebar), maxSidebar);
+    sidebar.style.width = newWidth + 'px';
+    // outputarea will flex to fill remaining space
+  });
+  document.addEventListener('mouseup', function(e) {
+    if (dragging) {
+      dragging = false;
+      document.body.classList.remove('cursor-ew-resize');
+      document.body.style.userSelect = '';
+    }
+  });
+});
 
   // Validate date range based on frequency
   function validateDateRange(startDate, endDate, frequency) {
@@ -343,22 +350,11 @@
 
       return {
         isValid: false,
-        message: `Date range exceeds maximum allowed for ${frequencyName} frequency. <br>Maximum: ${maxDays} days.<br>Current range: ${diffDays} days.`
+        message: `Date range exceeds maximum allowed for ${frequencyName} frequency. <br>Maximum: ${maxDays} days.<br>Current range: ${diffDays} days.<br>Use the endpoint directly for full control`
       };
     }
 
     return { isValid: true, message: '' };
-  }
-
-  // Set dates
-  document.getElementById('start_date').value = formatDate(sixMonthsAgo);
-  document.getElementById('end_date').value = formatDate(today);
-
-  // Set fiscal year to current fiscal year if the current month is June or later, otherwise last fiscal year
-  if (today.getMonth() >= 6) {
-    document.getElementById('fiscal_year').value = String(today.getFullYear());
-  } else {
-    document.getElementById('fiscal_year').value = String(today.getFullYear() - 1);
   }
 
   // Add event listeners for date range validation
@@ -399,11 +395,11 @@
   const comp_select = document.getElementById('companies');
   const comp_text = document.getElementById('companies_text');
   watchlists.forEach((watchlist, index) => {
-    if (index === 0) {
+    if (watchlist.id === "{{ companies }}") {
       comp_text.value = watchlist.name;
     }
     const option = document.createElement('option');
-    option.value = watchlist.watchlist_id;
+    option.value = watchlist.id;
     option.textContent = watchlist.name;
     comp_select.appendChild(option);
   });
@@ -500,7 +496,7 @@
     let companies = document.getElementById('companies_text').value.trim();
     const foundWatchlist = watchlists.find(w => w.name === companies);
     if (foundWatchlist) {
-      companies = foundWatchlist.watchlist_id;
+      companies = foundWatchlist.id;
     }
     else if (!companies) {
       output.innerHTML = `<span class="error">❌ Error: Company Universe is required.</span>`;

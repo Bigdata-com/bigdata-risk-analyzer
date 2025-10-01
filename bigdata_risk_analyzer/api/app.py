@@ -11,6 +11,7 @@ from sqlmodel import Session, SQLModel, create_engine
 
 from bigdata_risk_analyzer import LOG_LEVEL, __version__, logger
 from bigdata_risk_analyzer.api.models import (
+    ExampleWatchlists,
     RiskAnalysisRequest,
     RiskAnalyzerAcceptedResponse,
     RiskAnalyzerStatusResponse,
@@ -87,6 +88,7 @@ def health_check():
 async def sample_frontend(_: str = Security(query_scheme)) -> HTMLResponse:
     # Get example values from the schema for all fields
     example_values = get_example_values_from_schema(RiskAnalysisRequest)
+    example_values["example_watchlists"] = list(dict(ExampleWatchlists).values())
 
     return HTMLResponse(
         content=loader.get_template("api/index.html.jinja").render(**example_values),
@@ -104,11 +106,11 @@ def analyze_risk(
     """This endpoints starts the generation of therisk analyzer workflow on the background
     and will return a request_id that can be used to check the status of the request in the
     `/status/{request_id}` endpoint.
-    Note: for now, it only supports transcripts as document type.
+    Note: for now, it only supports news as document type.
     """
     # While we improve the UX of working with several document types with different sets of parameters
-    # we will limit the document type to transcripts
-    DOCUMENT_TYPE = DocumentType.TRANSCRIPTS
+    # we will limit the document type to news
+    DOCUMENT_TYPE = DocumentType.NEWS
     request.document_type = DOCUMENT_TYPE
     request_id = uuid4()
 
