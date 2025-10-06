@@ -1,6 +1,6 @@
 [project]
 name = "bigdata_risk_analyzer"
-version = "2.1.0"
+version = "2.2.0"
 description = "Identify corportate exposure to uncertain scenarios and risk channels, grounded on thousands of sources provided by Bigdata.com"
 authors = [{name = "jaldana", email = "jaldana@ravenpack.com"}]
 readme = "README.md"
