@@ -27,7 +27,7 @@ class SQLRiskAnalyzerReport(SQLModel, table=True):
     start_date: datetime
     end_date: datetime
     document_type: str
-    fiscal_year: int | None = None
+    fiscal_year: list[int] | None = Field(default=None, sa_column=Column(JSON))
     rerank_threshold: float | None = None
     frequency: str
     document_limit: int
@@ -49,7 +49,9 @@ class SQLRiskAnalyzerReport(SQLModel, table=True):
             start_date=datetime.fromisoformat(request.start_date),
             end_date=datetime.fromisoformat(request.end_date),
             document_type=request.document_type.value,
-            fiscal_year=request.fiscal_year,
+            fiscal_year=request.fiscal_year
+            if isinstance(request.fiscal_year, list | None)
+            else [request.fiscal_year],
             rerank_threshold=request.rerank_threshold,
             frequency=request.frequency.value,
             document_limit=request.document_limit,

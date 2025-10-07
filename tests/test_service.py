@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+from bigdata_research_tools.tree import SemanticTree
 
 from bigdata_risk_analyzer.models import (
     LabeledContent,
@@ -7,7 +8,7 @@ from bigdata_risk_analyzer.models import (
     RiskScoring,
     RiskTaxonomy,
 )
-from bigdata_risk_analyzer.service import ThemeTree, build_response
+from bigdata_risk_analyzer.service import build_response
 
 
 @pytest.fixture
@@ -92,13 +93,13 @@ def df_labeled():
 
 @pytest.fixture
 def risk_tree():
-    return ThemeTree(
+    return SemanticTree(
         label="Root",
         node=1,
         summary="Root node",
         children=[
-            ThemeTree(label="Risk1", node=2, summary="Risk1 for company"),
-            ThemeTree(
+            SemanticTree(label="Risk1", node=2, summary="Risk1 for company"),
+            SemanticTree(
                 label="Risk 2 with long name", node=3, summary="Risk 2 for company"
             ),
         ],
