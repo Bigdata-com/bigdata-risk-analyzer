@@ -64,7 +64,7 @@
             </label>
             <input id="control_entities"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
-              placeholder="{{ control_entities }}" required value="{{ control_entities }}" />
+              value="{{ control_entities if control_entities is defined and control_entities else '' }}" />
           </div>
 
           <div class="mb-5">

@@ -77,9 +77,9 @@ class RiskAnalysisRequest(BaseModel):
     )
 
     control_entities: Optional[dict[str, list[str]]] = Field(
-        default={"place": ["China"]},
+        default=None,
         description="Dictionary specifying the countries, people, or organizations that characterize the risk scenario.",
-        example={"place": ["China"]},
+        example=None,
     )
 
     start_date: str = Field(
@@ -96,7 +96,7 @@ class RiskAnalysisRequest(BaseModel):
     keywords: List[str] | None = Field(
         default=None,
         description="Key risk-related terms to drive content retrieval (e.g., 'tariffs').",
-        example=["Tariffs"],
+        example=None,
     )
 
     llm_model: str = Field(

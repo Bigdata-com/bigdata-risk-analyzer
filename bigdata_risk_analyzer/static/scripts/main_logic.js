@@ -120,6 +120,8 @@ document.getElementById('riskForm').onsubmit = async function (e) {
             body: JSON.stringify(payload)
         });
         if (!response.ok) {
+            const errorData = await response.json();
+            // Iterate over errorData.detail if it's an array
             throw new Error(`HTTP error ${response.status}`);
         }
         const data = await response.json();
