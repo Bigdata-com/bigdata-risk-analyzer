@@ -3,7 +3,7 @@ from enum import Enum, StrEnum
 from typing import List, Literal, Optional, Self
 
 from bigdata_client.models.search import DocumentType
-from pydantic import BaseModel, Field, model_validator, ValidationInfo
+from pydantic import BaseModel, Field, model_validator
 from pydantic_core import ValidationError
 
 from bigdata_risk_analyzer.models import RiskAnalysisResponse
