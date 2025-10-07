@@ -794,11 +794,11 @@
     if (textDiv.classList.contains('max-h-[2em]')) {
       textDiv.classList.remove('max-h-[2em]', 'overflow-hidden');
       textDiv.classList.add('max-h-full');
-      clickText.textContent = 'Click to collapse...';
+      clickText.textContent = 'Click to collapse';
     } else {
       textDiv.classList.remove('max-h-full');
       textDiv.classList.add('max-h-[2em]', 'overflow-hidden');
-      clickText.textContent = 'Click to expand...';
+      clickText.textContent = 'Click to expand';
     }
   }
   window.toggleMotivation = toggleMotivation;

@@ -85,7 +85,7 @@ class RiskAnalysisRequest(BaseModel):
     start_date: str = Field(
         default="2024-01-01",
         description="Start date of the analysis window (format: YYYY-MM-DD). Defaults to 6 months ago.",
-        example=(date.today() - timedelta(days=180)).isoformat(),
+        example=(date.today() - timedelta(days=30)).isoformat(),
     )
     end_date: str = Field(
         default="2024-12-31",
@@ -120,9 +120,9 @@ class RiskAnalysisRequest(BaseModel):
         example=None,
     )
     frequency: FrequencyEnum = Field(
-        default=FrequencyEnum.quarterly,
+        default=FrequencyEnum.monthly,
         description="Search frequency interval. Supported values: D (daily), W (weekly), M (monthly), Y (yearly).",
-        example=FrequencyEnum.quarterly,
+        example=FrequencyEnum.monthly,
     )
     document_limit: int = Field(
         default=100,
