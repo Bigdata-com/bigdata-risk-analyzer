@@ -121,7 +121,17 @@ document.getElementById('riskForm').onsubmit = async function (e) {
         });
         if (!response.ok) {
             const errorData = await response.json();
-            // Iterate over errorData.detail if it's an array
+            // Iterate over errorData.detail if it's an array show the loc and msg fields
+            if (errorData.detail && Array.isArray(errorData.detail)) {
+                const messages = errorData.detail.map(err => {
+                    if (err.loc && err.loc.length > 1) {
+                        return `${err.loc.join(', ')}: ${err.msg}`;
+                    } else {
+                        return err.msg;
+                    }
+                }).join('<br>');
+                throw new Error('Form submission error:<br>' + messages);
+            }
             throw new Error(`HTTP error ${response.status}`);
         }
         const data = await response.json();

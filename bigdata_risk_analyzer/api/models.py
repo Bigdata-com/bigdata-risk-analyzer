@@ -3,7 +3,8 @@ from enum import Enum, StrEnum
 from typing import List, Literal, Optional, Self
 
 from bigdata_client.models.search import DocumentType
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, ValidationInfo
+from pydantic_core import ValidationError
 
 from bigdata_risk_analyzer.models import RiskAnalysisResponse
 
@@ -157,7 +158,20 @@ class RiskAnalysisRequest(BaseModel):
             ):  # We can compare directly as they are both ISO format strings
                 raise ValueError("start_date must be earlier than end_date")
         except Exception as e:
-            raise ValueError(f"Invalid date format or range: {e}")
+            raise ValidationError.from_exception_data(
+                title=cls.__name__,
+                line_errors=[
+                    {
+                        "type": "value_error",
+                        "loc": ("start_date", "end_date"),
+                        "ctx": {"error": f"Invalid date format or range: {e}"},
+                        "input": {
+                            "start_date": values["start_date"],
+                            "end_date": values["end_date"],
+                        },
+                    }
+                ],
+            )
         return values
 
     @model_validator(mode="before")
@@ -172,10 +186,33 @@ class RiskAnalysisRequest(BaseModel):
         if isinstance(freq, str):
             freq = FrequencyEnum(freq)
         if not isinstance(freq, FrequencyEnum):
-            raise ValueError(f"Invalid frequency: {freq}")
+            raise ValidationError.from_exception_data(
+                title=cls.__name__,
+                line_errors=[
+                    {
+                        "type": "value_error",
+                        "loc": ("frequency",),
+                        "ctx": {"error": f"Invalid frequency: {freq}"},
+                        "input": {"frequency": freq},
+                    }
+                ],
+            )
         if delta_days < freq_min_days[freq.value]:
-            raise ValueError(
-                f"The number of days in the range between start_date={start_date} and end_date={end_date} ({delta_days} days) should be higher than the minimum required for the selected frequency '{freq.value}' ({freq_min_days[freq.value]} days)."
+            raise ValidationError.from_exception_data(
+                title=cls.__name__,
+                line_errors=[
+                    {
+                        "type": "value_error",
+                        "loc": ("start_date", "end_date"),
+                        "ctx": {
+                            "error": f"The number of days in the range between start_date={start_date} and end_date={end_date} ({delta_days} days) should be higher than the minimum required for the selected frequency '{freq.value}' ({freq_min_days[freq.value]} days)."
+                        },
+                        "input": {
+                            "start_date": values["start_date"],
+                            "end_date": values["end_date"],
+                        },
+                    }
+                ],
             )
         return values
 
