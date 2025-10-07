@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fiscal year now accepts list of years as input (e.g. 2024,2025,2026)
 
 ### Changed
-- Changed default values for Fiscal Year to be current year +/- 1. (This is aligned with the default time window)
+- Default time window changed to [today-1 month, today]
 - Bigdata Research Tools updated to v1.0.0 beta. 
 
 ## [2.1.0] - 01-10-2025
