@@ -6,7 +6,7 @@ from uuid import UUID
 import pandas as pd
 from bigdata_client import Bigdata
 from bigdata_client.models.entities import Company
-from bigdata_research_tools.themes import ThemeTree
+from bigdata_research_tools.tree import SemanticTree
 from bigdata_research_tools.utils.observer import OberserverNotification, Observer
 from bigdata_research_tools.workflows.risk_analyzer import RiskAnalyzer
 
@@ -72,7 +72,7 @@ def build_response(
     df_company: pd.DataFrame,
     df_motivation: pd.DataFrame,
     df_labeled: pd.DataFrame,
-    risk_tree: ThemeTree,
+    risk_tree: SemanticTree,
 ) -> RiskAnalysisResponse:
     """
     Build the response for the output of the risk analysis workflow.

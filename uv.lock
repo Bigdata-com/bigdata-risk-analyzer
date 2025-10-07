@@ -157,23 +157,24 @@ wheels = [
 
 [[package]]
 name = "bigdata-research-tools"
-version = "0.20.1"
-source = { registry = "https://pypi.org/simple" }
+version = "1.0.0b0"
+source = { git = "https://github.com/Bigdata-com/bigdata-research-tools?rev=preparation_for_v1#cd40f6da92e11af230fe247a383b0137fcd4d342" }
 dependencies = [
     { name = "bigdata-client" },
     { name = "graphviz" },
     { name = "ipython" },
     { name = "json-repair" },
-    { name = "openai" },
     { name = "openpyxl" },
     { name = "pandas" },
     { name = "pillow" },
+    { name = "plotly" },
     { name = "tabulate" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f6/91/e479663e430e04126f1326bc2d352e49d0f7d6b4aeaedf4f3f95c44db776/bigdata_research_tools-0.20.1.tar.gz", hash = "sha256:32aa89045b9e60da218f0785fc00ccf54c32d5b0db71cbfe14c8237ddc1a783a", size = 125531, upload-time = "2025-09-16T10:36:23.818Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/08/c1/fea75729fccdcacc4590db37d4a572c88c48bfb49106a999174723d023d9/bigdata_research_tools-0.20.1-py3-none-any.whl", hash = "sha256:78b627a5c6fb294976bbad7d4061ccc2cb06851990aaecfabcac8d66a8e791d9", size = 125298, upload-time = "2025-09-16T10:36:22.699Z" },
+
+[package.optional-dependencies]
+openai = [
+    { name = "openai" },
 ]
 
 [[package]]
@@ -182,7 +183,7 @@ version = "2.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "bigdata-client" },
-    { name = "bigdata-research-tools" },
+    { name = "bigdata-research-tools", extra = ["openai"] },
     { name = "fastapi" },
     { name = "jinja2" },
     { name = "pydantic" },
@@ -201,7 +202,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "bigdata-client", specifier = "==2.19.0" },
-    { name = "bigdata-research-tools", specifier = "==0.20.1" },
+    { name = "bigdata-research-tools", extras = ["openai"], git = "https://github.com/Bigdata-com/bigdata-research-tools?rev=preparation_for_v1" },
     { name = "fastapi", specifier = ">=0.116.1" },
     { name = "jinja2", specifier = "==3.1.6" },
     { name = "pydantic", specifier = ">=2.10.6" },
@@ -869,6 +870,15 @@ wheels = [
 ]
 
 [[package]]
+name = "narwhals"
+version = "2.7.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/87/76/9ca8f4d03f02b8289807d0c91eeb01fa6b7fdd6273769d5bd1f94773b40b/narwhals-2.7.0.tar.gz", hash = "sha256:e3fff7f1610fd3318ede78c969bc5954ce710d585eefdb689586fb69da3da43c", size = 569315, upload-time = "2025-10-06T09:39:37.69Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/74/0d/bc630dfd34ad2150d40f9392e94d3803980e71a47e10a709ce9bfcd40ffe/narwhals-2.7.0-py3-none-any.whl", hash = "sha256:010791aa0cee86d90bf2b658264aaec3eeea34fb4ddf2e83746ea4940bcffae3", size = 412767, upload-time = "2025-10-06T09:39:35.564Z" },
+]
+
+[[package]]
 name = "nest-asyncio"
 version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1142,6 +1152,19 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/31/5e/03966aedfbfcbb4d5f8aa042452d3361f325b963ebbadddac05b122e47dd/pillow-11.3.0-pp311-pypy311_pp73-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:5418b53c0d59b3824d05e029669efa023bbef0f3e92e75ec8428f3799487f361", size = 4957170, upload-time = "2025-07-01T09:16:23.762Z" },
     { url = "https://files.pythonhosted.org/packages/cc/2d/e082982aacc927fc2cab48e1e731bdb1643a1406acace8bed0900a61464e/pillow-11.3.0-pp311-pypy311_pp73-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:504b6f59505f08ae014f724b6207ff6222662aab5cc9542577fb084ed0676ac7", size = 5581505, upload-time = "2025-07-01T09:16:25.593Z" },
     { url = "https://files.pythonhosted.org/packages/34/e7/ae39f538fd6844e982063c3a5e4598b8ced43b9633baa3a85ef33af8c05c/pillow-11.3.0-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:c84d689db21a1c397d001aa08241044aa2069e7587b398c8cc63020390b1c1b8", size = 6984598, upload-time = "2025-07-01T09:16:27.732Z" },
+]
+
+[[package]]
+name = "plotly"
+version = "6.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "narwhals" },
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0c/63/961d47c9ffd592a575495891cdcf7875dc0903ebb33ac238935714213789/plotly-6.3.1.tar.gz", hash = "sha256:dd896e3d940e653a7ce0470087e82c2bd903969a55e30d1b01bb389319461bb0", size = 6956460, upload-time = "2025-10-02T16:10:34.16Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3f/93/023955c26b0ce614342d11cc0652f1e45e32393b6ab9d11a664a60e9b7b7/plotly-6.3.1-py3-none-any.whl", hash = "sha256:8b4420d1dcf2b040f5983eed433f95732ed24930e496d36eb70d211923532e64", size = 9833698, upload-time = "2025-10-02T16:10:22.584Z" },
 ]
 
 [[package]]
