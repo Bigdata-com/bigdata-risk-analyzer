@@ -193,11 +193,12 @@
         </div>
         <hr class="my-4 border-gray-600">
         <button type="submit"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center mb-3">Analyze
-          Risk</button>
+          class="text-white bg-blue-700 max-w-[140px] hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center mb-3">Run
+          Analysis
+        </button>
         <div>
           <button type="button" id="loadExampleBtn"
-            class="text-white  bg-green-600 hover:bg-green-800 font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center">Load
+            class="text-white max-w-[140px] bg-green-600 hover:bg-green-800 font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center">See
             Example</button>
           <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('load_example')"
             title="Info about Load Example">ⓘ</button>
@@ -227,9 +228,15 @@
         </p>
 
         <h2 class="text-2xl font-bold text-white mb-4">HOW TO USE:</h2>
-        <ol class="list-decimal mb-4 pl-6">
+        <h2 class="text-xl font-bold text-blue-100 mb-4 pl-4">Option 1: Quick Start</h2>
+        <ol class="list-decimal mb-4 pl-10">
+          <li>Click <strong>"See Example"</strong> to explore a pre-configured analysis with sample data</li>
+          <li>Perfect for first-time users to understand the tool's capabilities</li>
+        </ol>
+        <h2 class="text-xl font-bold text-blue-100 mb-4 pl-4">Option 2: Custom Analysis</h2>
+        <ol class="list-decimal mb-4 pl-10">
           <li>Configure your risk analyzer parameters in the sidebar</li>
-          <li>Click <strong>"Analyze Risk"</strong> to begin analysis</li>
+          <li>Click <strong>"Run Analysis"</strong> to begin analysis</li>
           <li>Monitor the logs below to see the process working in the background</li>
           <li>Results will appear below once processing is complete</li>
         </ol>
@@ -243,6 +250,9 @@
             decisions</li>
         </ul>
 
+        <p><strong>New users</strong>: We recommend starting with <strong>"See Example"</strong> to see the analyzer in action before
+          running your own analysis.<br></p>
+        
         <p class="">
           Check our repo
           <a href="https://github.com/Bigdata-com/bigdata-risk-analyzer" target="_blank"

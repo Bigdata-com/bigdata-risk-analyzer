@@ -42,7 +42,7 @@ document.getElementById('riskForm').onsubmit = async function (e) {
             output.innerHTML = `<span class="error">❌ Error: Company Universe is required.</span>`;
             output.classList.add('error');
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Analyze Risk';
+            submitBtn.textContent = 'Run Analysis';
             return;
         }
         const start_date = document.getElementById('start_date').value;
@@ -98,7 +98,7 @@ document.getElementById('riskForm').onsubmit = async function (e) {
                 output.innerHTML = '<span class="error">❌ Invalid JSON for control entities.</span>';
                 output.classList.add('error');
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Analyze Risk';
+                submitBtn.textContent = 'Run Analysis';
                 return;
             }
         }
@@ -175,7 +175,7 @@ document.getElementById('riskForm').onsubmit = async function (e) {
                         }
                         spinner.style.display = 'none';
                         submitBtn.disabled = false;
-                        submitBtn.textContent = 'Analyze Risk';
+                        submitBtn.textContent = 'Run Analysis';
                         return;
                     }
                 } catch (err) {
@@ -191,7 +191,7 @@ document.getElementById('riskForm').onsubmit = async function (e) {
         output.innerHTML = `<span class="error">❌ Error: ${err.message}</span>`;
         output.classList.add('error');
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Analyze Risk';
+        submitBtn.textContent = 'Run Analysis';
         spinner.style.display = 'none';
     }
 };
