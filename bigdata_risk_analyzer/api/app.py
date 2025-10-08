@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session, SQLModel, create_engine
 
 from bigdata_risk_analyzer import LOG_LEVEL, __version__, logger
+from bigdata_risk_analyzer.api.examples import EXAMPLE_UUID
 from bigdata_risk_analyzer.api.models import (
     ExampleWatchlists,
     RiskAnalysisRequest,
@@ -95,6 +96,7 @@ async def sample_frontend(_: str = Security(query_scheme)) -> HTMLResponse:
     # Get example values from the schema for all fields
     example_values = get_example_values_from_schema(RiskAnalysisRequest)
     example_values["example_watchlists"] = list(dict(ExampleWatchlists).values())
+    example_values["example_request_id"] = str(EXAMPLE_UUID)
 
     return HTMLResponse(
         content=loader.get_template("api/index.html.jinja").render(**example_values),
