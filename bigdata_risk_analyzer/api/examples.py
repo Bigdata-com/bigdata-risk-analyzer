@@ -7,9 +7,9 @@ from bigdata_risk_analyzer.api.sql_models import (
     SQLWorkflowStatus,
 )
 
-EXAMPLE_UUID: Final = UUID("11111111-1111-1111-1111-111111111111")
+EXAMPLE_UUID: Final[UUID] = UUID("11111111-1111-1111-1111-111111111111")
 
-EXAMPLE_STATUS: Final = SQLWorkflowStatus(
+EXAMPLE_STATUS: Final[SQLWorkflowStatus] = SQLWorkflowStatus(
     id=EXAMPLE_UUID,
     last_updated=datetime.now(),
     status="completed",
@@ -27,7 +27,7 @@ EXAMPLE_STATUS: Final = SQLWorkflowStatus(
     ],
 )
 
-EXAMPLE_REPORT: Final = SQLRiskAnalyzerReport(
+EXAMPLE_REPORT: Final[SQLRiskAnalyzerReport] = SQLRiskAnalyzerReport(
     id=EXAMPLE_UUID,
     created_at=datetime.now(),
     companies="814d0944-a2c1-44f6-8b42-a70c0795428e",
