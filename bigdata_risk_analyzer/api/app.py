@@ -59,6 +59,12 @@ def lifespan(app: FastAPI):
         },
     )
     create_db_and_tables()
+
+    # Initialize the database with example data
+    with Session(engine) as session:
+        storage_manager = StorageManager(session)
+        storage_manager.initialize_with_example_data()
+
     yield
 
 
