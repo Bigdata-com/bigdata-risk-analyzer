@@ -4,6 +4,7 @@ from typing import List, Literal, Optional, Self
 
 from bigdata_client.models.search import DocumentType
 from pydantic import BaseModel, Field, model_validator
+from pydantic_core import ValidationError
 
 from bigdata_risk_analyzer.models import RiskAnalysisResponse
 
@@ -29,23 +30,20 @@ class WatchlistExample(BaseModel):
 
 
 class ExampleWatchlists(Enum):
-    POINT_72 = WatchlistExample(
-        id="9ab396cf-a2bb-4c91-b9bf-ed737905803e", name="Point 72 Holdings"
+    MAG_7 = WatchlistExample(
+        id="814d0944-a2c1-44f6-8b42-a70c0795428e", name="Magnificent 7"
     )
     MILITARIZATION = WatchlistExample(
         id="beda15f2-b3ba-44dd-80c6-79d8a1bba764", name="Militarization"
     )
-    US_LARGE_CAP_100 = WatchlistExample(
-        id="44118802-9104-4265-b97a-2e6d88d74893", name="US Large Cap 100"
+    HEALTH_AND_WELLNESS = WatchlistExample(
+        id="eea133f7-ddc6-44bd-bd66-72f1e31dd7db", name="Health and Wellness Stocks"
     )
     HIGH_FINANCE = WatchlistExample(
-        id="f7801965-ed54-4ff1-b524-b4ecee3bc858", name="High Finance"
+        id="f7801965-ed54-4ff1-b524-b4ecee3bc858", name="High Finance Stocks"
     )
-    THIRD_POINT_HOLDINGS = WatchlistExample(
-        id="ec300f6f-64f0-4897-9f63-82e8d60a7e5a", name="Third Point Holdings"
-    )
-    THE_STREET_INDEX = WatchlistExample(
-        id="ccfe5dc2-0c92-42d7-861c-1d8ee74a9e02", name="The Street Index"
+    FIN_INNOV = WatchlistExample(
+        id="74cff065-9b00-4f6c-8690-5dff8cbbf3e8", name="FinTech Innovators"
     )
     AI_SZN = WatchlistExample(id="db8478c9-34db-4975-8e44-b1ff764098ac", name="AI Szn")
 
@@ -76,19 +74,19 @@ class RiskAnalysisRequest(BaseModel):
     companies: list[str] | str = Field(
         ...,
         description="List of RavenPack entity IDs  or a watchlist ID representing the companies to track in the generated brief.",
-        example=ExampleWatchlists.POINT_72.value.id,
+        example=ExampleWatchlists.MAG_7.value.id,
     )
 
     control_entities: Optional[dict[str, list[str]]] = Field(
-        default={"place": ["China"]},
+        default=None,
         description="Dictionary specifying the countries, people, or organizations that characterize the risk scenario.",
-        example={"place": ["China"]},
+        example=None,
     )
 
     start_date: str = Field(
         default="2024-01-01",
         description="Start date of the analysis window (format: YYYY-MM-DD). Defaults to 6 months ago.",
-        example=(date.today() - timedelta(days=180)).isoformat(),
+        example=(date.today() - timedelta(days=30)).isoformat(),
     )
     end_date: str = Field(
         default="2024-12-31",
@@ -99,7 +97,7 @@ class RiskAnalysisRequest(BaseModel):
     keywords: List[str] | None = Field(
         default=None,
         description="Key risk-related terms to drive content retrieval (e.g., 'tariffs').",
-        example=["Tariffs"],
+        example=None,
     )
 
     llm_model: str = Field(
@@ -112,7 +110,7 @@ class RiskAnalysisRequest(BaseModel):
         description="Type of documents to analyze (only transcript supported for now).",
         example=DocumentType.NEWS,
     )
-    fiscal_year: Optional[int] = Field(
+    fiscal_year: int | list[int] | None = Field(
         default=None,
         description="Fiscal year to filter documents (format: YYYY).",
         example=None,
@@ -123,9 +121,9 @@ class RiskAnalysisRequest(BaseModel):
         example=None,
     )
     frequency: FrequencyEnum = Field(
-        default=FrequencyEnum.quarterly,
+        default=FrequencyEnum.monthly,
         description="Search frequency interval. Supported values: D (daily), W (weekly), M (monthly), Y (yearly).",
-        example=FrequencyEnum.quarterly,
+        example=FrequencyEnum.monthly,
     )
     document_limit: int = Field(
         default=100,
@@ -160,7 +158,20 @@ class RiskAnalysisRequest(BaseModel):
             ):  # We can compare directly as they are both ISO format strings
                 raise ValueError("start_date must be earlier than end_date")
         except Exception as e:
-            raise ValueError(f"Invalid date format or range: {e}")
+            raise ValidationError.from_exception_data(
+                title=cls.__name__,
+                line_errors=[
+                    {
+                        "type": "value_error",
+                        "loc": ("start_date", "end_date"),
+                        "ctx": {"error": f"Invalid date format or range: {e}"},
+                        "input": {
+                            "start_date": values["start_date"],
+                            "end_date": values["end_date"],
+                        },
+                    }
+                ],
+            )
         return values
 
     @model_validator(mode="before")
@@ -175,10 +186,33 @@ class RiskAnalysisRequest(BaseModel):
         if isinstance(freq, str):
             freq = FrequencyEnum(freq)
         if not isinstance(freq, FrequencyEnum):
-            raise ValueError(f"Invalid frequency: {freq}")
+            raise ValidationError.from_exception_data(
+                title=cls.__name__,
+                line_errors=[
+                    {
+                        "type": "value_error",
+                        "loc": ("frequency",),
+                        "ctx": {"error": f"Invalid frequency: {freq}"},
+                        "input": {"frequency": freq},
+                    }
+                ],
+            )
         if delta_days < freq_min_days[freq.value]:
-            raise ValueError(
-                f"The number of days in the range between start_date={start_date} and end_date={end_date} ({delta_days} days) should be higher than the minimum required for the selected frequency '{freq.value}' ({freq_min_days[freq.value]} days)."
+            raise ValidationError.from_exception_data(
+                title=cls.__name__,
+                line_errors=[
+                    {
+                        "type": "value_error",
+                        "loc": ("start_date", "end_date"),
+                        "ctx": {
+                            "error": f"The number of days in the range between start_date={start_date} and end_date={end_date} ({delta_days} days) should be higher than the minimum required for the selected frequency '{freq.value}' ({freq_min_days[freq.value]} days)."
+                        },
+                        "input": {
+                            "start_date": values["start_date"],
+                            "end_date": values["end_date"],
+                        },
+                    }
+                ],
             )
         return values
 

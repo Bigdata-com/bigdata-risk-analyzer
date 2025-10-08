@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 07-10-2025
+
+### Added
+- Fiscal year now accepts list of years as input (e.g. 2024,2025,2026)
+- Example result initialized on db creation. This example can be directly retrieved from the FE.
+
+### Changed
+- Default time window changed to [today-1 month, today]
+- Bigdata Research Tools updated to v1.0.0 beta
+- JS scripts moved to static/scripts folder to clean the jinja template
+- Model validator now uses custom ValidationError to properly expose validation errors in the frontend
 
 ## [2.1.0] - 01-10-2025
 

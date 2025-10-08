@@ -1,6 +1,6 @@
 [project]
 name = "bigdata_risk_analyzer"
-version = "2.1.0"
+version = "2.2.0"
 description = "Identify corportate exposure to uncertain scenarios and risk channels, grounded on thousands of sources provided by Bigdata.com"
 authors = [{name = "jaldana", email = "jaldana@ravenpack.com"}]
 readme = "README.md"
@@ -15,7 +15,7 @@ dependencies = [
     "fastapi>=0.116.1",
     "uvicorn>=0.35.0",
     "bigdata-client==2.19.0",
-    "bigdata-research-tools==0.20.1",
+    "bigdata-research-tools[openai] @ git+https://github.com/Bigdata-com/bigdata-research-tools@preparation_for_v1",
     "sqlmodel>=0.0.24",
 ]
 
@@ -27,6 +27,9 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["bigdata_risk_analyzer"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [build-system]
 requires = ["hatchling"]
