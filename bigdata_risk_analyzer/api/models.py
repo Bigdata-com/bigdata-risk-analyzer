@@ -34,7 +34,7 @@ class ExampleWatchlists(Enum):
         id="814d0944-a2c1-44f6-8b42-a70c0795428e", name="Magnificent 7"
     )
     MILITARIZATION = WatchlistExample(
-        id="beda15f2-b3ba-44dd-80c6-79d8a1bba764", name="Militarization"
+        id="beda15f2-b3ba-44dd-80c6-79d8a1bba764", name="Defense Stocks"
     )
     HEALTH_AND_WELLNESS = WatchlistExample(
         id="eea133f7-ddc6-44bd-bd66-72f1e31dd7db", name="Health and Wellness Stocks"
@@ -45,7 +45,9 @@ class ExampleWatchlists(Enum):
     FIN_INNOV = WatchlistExample(
         id="74cff065-9b00-4f6c-8690-5dff8cbbf3e8", name="FinTech Innovators"
     )
-    AI_SZN = WatchlistExample(id="db8478c9-34db-4975-8e44-b1ff764098ac", name="AI Szn")
+    AI_SZN = WatchlistExample(
+        id="db8478c9-34db-4975-8e44-b1ff764098ac", name="AI Scene Stocks"
+    )
 
     def __iter__(self):
         """Allows to create a dict from the enum
