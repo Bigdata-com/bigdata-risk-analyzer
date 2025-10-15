@@ -48,6 +48,7 @@ function adaptRiskDataToThemeFormat(riskData) {
     }
     
     // Convert risk_scoring to theme_scoring
+    // Note: We keep risk_taxonomy as-is (hierarchical) for mindmap compatibility
     const adapted = {
         theme_scoring: {},
         theme_taxonomy: riskData.risk_taxonomy || {},
@@ -69,20 +70,20 @@ function adaptRiskDataToThemeFormat(riskData) {
 
 function loadQuickStartTemplate(type) {
     const jsonFiles = {
-        'supply-chain': {
-            file: '/static/data/supply-chain-risk-example.json',
+        'import-tariffs': {
+            file: '/static/data/import_tariffs.json', 
             theme: 'US Import Tariffs Against China',
-            universe: 'Magnificent 7'
+            universe: 'Top 100 US'
         },
-        'regulatory-risk': {
-            file: '/static/data/regulatory-risk-example.json',
-            theme: 'Regulatory Risk',
-            universe: 'FinTech Innovators'
+        'energy-cost': {
+            file: '/static/data/energy-cost.json',
+            theme: 'Energy Cost Increase Risk',
+            universe: 'Top 100 US'
         },
-        'market-risk': {
-            file: '/static/data/market-risk-example.json',
-            theme: 'Market Volatility Risk',
-            universe: 'Defense Stocks'
+        'operational-technology': {
+            file: '/static/data/operational_technology.json',
+            theme: 'Operational & Technology Risk',
+            universe: 'Top 100 US'
         }
     };
     

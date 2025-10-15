@@ -6,6 +6,7 @@ function adaptRiskDataToThemeFormat(riskData) {
     }
     
     // Convert risk_scoring to theme_scoring
+    // Note: We keep risk_taxonomy as-is (hierarchical) for mindmap compatibility
     const adapted = {
         theme_scoring: {},
         theme_taxonomy: riskData.risk_taxonomy || {},
