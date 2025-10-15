@@ -14,9 +14,9 @@ function renderEvidenceTable(content) {
     allEvidenceData = content;
     filteredEvidenceData = [...content];
 
-    // Extract unique companies and themes for filters
+    // Extract unique companies and risk factors for filters
     const companies = [...new Set(content.map(item => item.company))].sort();
-    const themes = [...new Set(content.map(item => item.theme))].sort();
+    const themes = [...new Set(content.map(item => item.risk_factor || item.theme))].filter(Boolean).sort();
 
     let html = `
         <div class="mb-6">
@@ -60,10 +60,10 @@ function renderEvidenceTable(content) {
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-zinc-300 mb-2">Filter by Theme</label>
+                        <label class="block text-sm font-medium text-zinc-300 mb-2">Filter by Risk Factor</label>
                         <select id="filterTheme" onchange="applyEvidenceFilters()" 
                             class="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 rounded-lg text-zinc-200 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer">
-                            <option value="">All Themes (${themes.length})</option>
+                            <option value="">All Risk Factors (${themes.length})</option>
                             ${themes.map(theme => `<option value="${escapeHtml(theme)}">${escapeHtml(theme)}</option>`).join('')}
                         </select>
                     </div>
@@ -97,7 +97,7 @@ function renderEvidenceTable(content) {
                         <th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Headline</th>
                         <th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Quote</th>
                         <th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Motivation</th>
-                        <th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Theme</th>
+                        <th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Risk Factor</th>
                     </tr>
                 </thead>
                 <tbody id="evidenceTableBody" class="divide-y divide-zinc-700 bg-zinc-900">
@@ -150,7 +150,7 @@ function renderEvidenceTableRows(page = 1) {
                 <td class="px-4 py-3 text-sm text-blue-400 cursor-pointer hover:text-blue-300 hover:underline" onclick="showDocumentModal('${chunk.document_id}')">${escapeHtml(chunk.headline)}</td>
                 <td class="px-4 py-3 text-sm text-zinc-300 italic max-w-md">${escapeHtml(chunk.quote)}</td>
                 <td class="px-4 py-3 text-sm text-zinc-300 max-w-md">${escapeHtml(chunk.motivation)}</td>
-                <td class="px-4 py-3 text-sm font-medium text-emerald-400">${escapeHtml(chunk.theme)}</td>
+                <td class="px-4 py-3 text-sm font-medium text-orange-400">${escapeHtml(chunk.risk_factor || chunk.theme || 'N/A')}</td>
             </tr>
         `;
     });
@@ -187,7 +187,8 @@ function applyEvidenceFilters() {
 
     filteredEvidenceData = allEvidenceData.filter(item => {
         const matchesCompany = !companyFilter || item.company.toLowerCase() === companyFilter;
-        const matchesTheme = !themeFilter || item.theme.toLowerCase() === themeFilter;
+        const riskFactor = (item.risk_factor || item.theme || '').toLowerCase();
+        const matchesTheme = !themeFilter || riskFactor === themeFilter;
         const matchesSearch = !searchTerm || 
             item.quote.toLowerCase().includes(searchTerm) ||
             item.headline.toLowerCase().includes(searchTerm) ||
