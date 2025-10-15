@@ -30,23 +30,27 @@ class WatchlistExample(BaseModel):
 
 
 class ExampleWatchlists(Enum):
+    TOP_100_UK = WatchlistExample(
+        id="33d6f577-9256-4a53-944f-09127e42fdc2", name="Top 100 UK"
+    )
+    TOP_50_EU = WatchlistExample(
+        id="9baef470-8cf5-46fa-b30a-352bcb35cd94", name="Top 50 Europe"
+    )
+    US_LARGE_CAP_100 = WatchlistExample(
+        id="44118802-9104-4265-b97a-2e6d88d74893", name="Top 100 US"
+    )
+    TOP_40_DE = WatchlistExample(
+        id="8453c26f-47c5-4e78-b5c8-acf245caccad", name="Top 40 Germany"
+    )
+    TOP_40_FR = WatchlistExample(
+        id="9fb6ac2d-a552-4dbb-b62f-8657ef18bf29", name="Top 40 France"
+    )
+    DOW_30 = WatchlistExample(id="5b78837c-343d-4559-8f06-98668b09d1df", name="Dow 30")
+    NASDAQ_100 = WatchlistExample(
+        id="402acbcd-f1d8-4a55-997a-598819be0bbf", name="Nasdaq 100"
+    )
     MAG_7 = WatchlistExample(
         id="814d0944-a2c1-44f6-8b42-a70c0795428e", name="Magnificent 7"
-    )
-    MILITARIZATION = WatchlistExample(
-        id="beda15f2-b3ba-44dd-80c6-79d8a1bba764", name="Defense Stocks"
-    )
-    HEALTH_AND_WELLNESS = WatchlistExample(
-        id="eea133f7-ddc6-44bd-bd66-72f1e31dd7db", name="Health and Wellness Stocks"
-    )
-    HIGH_FINANCE = WatchlistExample(
-        id="f7801965-ed54-4ff1-b524-b4ecee3bc858", name="High Finance Stocks"
-    )
-    FIN_INNOV = WatchlistExample(
-        id="74cff065-9b00-4f6c-8690-5dff8cbbf3e8", name="FinTech Innovators"
-    )
-    AI_SZN = WatchlistExample(
-        id="db8478c9-34db-4975-8e44-b1ff764098ac", name="AI Scene Stocks"
     )
 
     def __iter__(self):
@@ -76,7 +80,7 @@ class RiskAnalysisRequest(BaseModel):
     companies: list[str] | str = Field(
         ...,
         description="List of RavenPack entity IDs  or a watchlist ID representing the companies to track in the generated brief.",
-        example=ExampleWatchlists.MAG_7.value.id,
+        example=ExampleWatchlists.US_LARGE_CAP_100.value.id,
     )
 
     control_entities: Optional[dict[str, list[str]]] = Field(

@@ -1,16 +1,44 @@
 document.getElementById('riskForm').onsubmit = async function (e) {
     e.preventDefault();
-    const output = document.getElementById('output');
     const spinner = document.getElementById('spinner');
     const showJsonBtn = document.getElementById('showJsonBtn');
     const submitBtn = document.querySelector('button[type="submit"]');
-    output.innerHTML = '';
-    output.classList.remove('error');
+    
+    // Close config panel
+    if (window.closeConfigPanel) {
+        closeConfigPanel();
+    }
+    
     showJsonBtn.style.display = 'none';
     lastReport = null;
+    
+    // Reset frontend: hide results, show empty state, clear dashboard
+    const emptyState = document.getElementById('emptyState');
+    const dashboardSection = document.getElementById('dashboardSection');
+    const dashboardCards = document.getElementById('dashboardCards');
+    
+    if (emptyState) emptyState.style.display = 'none';
+    if (dashboardSection) dashboardSection.classList.add('hidden');
+    if (dashboardCards) dashboardCards.innerHTML = '';
+    
+    // Open process logs
+    const logViewerContainer = document.getElementById('logViewerContainer');
+    const logsIcon = document.getElementById('logsIcon');
+    if (logViewerContainer && logViewerContainer.classList.contains('hidden')) {
+        logViewerContainer.classList.remove('hidden');
+        if (logsIcon) logsIcon.style.transform = 'rotate(180deg)';
+    }
+    
+    // Clear logs
+    const logViewer = document.getElementById('logViewer');
+    if (logViewer) logViewer.innerHTML = '<div class="text-zinc-400">Starting analysis...</div>';
+    
+    // Reset all tabs
+    if (window.tabController) {
+        window.tabController.reset();
+    }
 
     try {
-
         // Validate date range first
         const startDateInput = document.getElementById('start_date').value;
         const endDateInput = document.getElementById('end_date').value;
@@ -18,8 +46,7 @@ document.getElementById('riskForm').onsubmit = async function (e) {
 
         const dateValidation = validateDateRange(startDateInput, endDateInput, frequencyInput);
         if (!dateValidation.isValid) {
-            output.innerHTML = `<span class="error">❌ ${dateValidation.message}</span>`;
-            output.classList.add('error');
+            alert(`❌ ${dateValidation.message}`);
             return;
         }
 
@@ -30,8 +57,8 @@ document.getElementById('riskForm').onsubmit = async function (e) {
         // Gather form data
         const main_theme = document.getElementById('main_theme').value.trim();
         const focus = document.getElementById('focus').value.trim();
-        const control_entities = document.getElementById('control_entities').value.trim();
-        const keywords = document.getElementById('keywords').value.trim();
+        const control_entities = document.getElementById('control_entities')?.value?.trim() || '';
+        const keywords = document.getElementById('keywords')?.value?.trim() || '';
         // Get companies and check if its available in the watchlists
         let companies = document.getElementById('companies_text').value.trim();
         const foundWatchlist = watchlists.find(w => w.name === companies);
@@ -39,8 +66,7 @@ document.getElementById('riskForm').onsubmit = async function (e) {
             companies = foundWatchlist.id;
         }
         else if (!companies) {
-            output.innerHTML = `<span class="error">❌ Error: Company Universe is required.</span>`;
-            output.classList.add('error');
+            alert(`❌ Error: Company Universe is required.`);
             submitBtn.disabled = false;
             submitBtn.textContent = 'Run Analysis';
             return;
@@ -95,8 +121,7 @@ document.getElementById('riskForm').onsubmit = async function (e) {
             try {
                 payload.control_entities = JSON.parse(clean_control_entities);
             } catch (e) {
-                output.innerHTML = '<span class="error">❌ Invalid JSON for control entities.</span>';
-                output.classList.add('error');
+                alert('❌ Invalid JSON for control entities.');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Run Analysis';
                 return;
@@ -169,8 +194,27 @@ document.getElementById('riskForm').onsubmit = async function (e) {
                     if (statusData.status === 'completed' || statusData.status === 'failed') {
                         polling = false;
                         if (statusData.status === 'completed') {
-                            output.innerHTML = renderRiskReport(statusData.report)
+                            // Update config badge BEFORE rendering so dashboard has access to it
+                            if (window.updateConfigBadge) {
+                                // Use exactly what the user typed for display
+                                const companiesText = document.getElementById('companies_text').value.trim();
+                                updateConfigBadge({
+                                    main_theme: main_theme,
+                                    companies: companiesText || 'Custom Universe',
+                                    isDemo: false
+                                });
+                            }
+                            
+                            // Render the report using the new interface
+                            if (window.renderRiskReport) {
+                                renderRiskReport(statusData.report);
+                            }
                             showJsonBtn.style.display = 'inline-block';
+                            
+                            // Show new analysis button
+                            const newAnalysisBtn = document.getElementById('newAnalysisBtn');
+                            if (newAnalysisBtn) newAnalysisBtn.style.display = 'inline-flex';
+                            
                             lastReport = statusData.report;
                         }
                         spinner.style.display = 'none';
@@ -188,8 +232,7 @@ document.getElementById('riskForm').onsubmit = async function (e) {
             pollStatus();
         }
     } catch (err) {
-        output.innerHTML = `<span class="error">❌ Error: ${err.message}</span>`;
-        output.classList.add('error');
+        alert(`❌ Error: ${err.message}`);
         submitBtn.disabled = false;
         submitBtn.textContent = 'Run Analysis';
         spinner.style.display = 'none';

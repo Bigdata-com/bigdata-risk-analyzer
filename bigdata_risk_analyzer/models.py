@@ -42,6 +42,12 @@ class CompanyScoring(BaseModel):
     composite_score: int
     motivation: str | None
     risks: RiskScore
+    
+    # Add compatibility property for frontend
+    @property
+    def themes(self):
+        """Alias for risks to maintain frontend compatibility"""
+        return self.risks.root if hasattr(self.risks, 'root') else self.risks
 
 
 class RiskScoring(RootModel):

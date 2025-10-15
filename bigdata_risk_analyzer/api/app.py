@@ -97,6 +97,7 @@ async def sample_frontend(_: str = Security(query_scheme)) -> HTMLResponse:
     example_values = get_example_values_from_schema(RiskAnalysisRequest)
     example_values["example_watchlists"] = list(dict(ExampleWatchlists).values())
     example_values["example_request_id"] = str(EXAMPLE_UUID)
+    example_values["demo_mode"] = settings.DEMO_MODE
 
     return HTMLResponse(
         content=loader.get_template("api/index.html.jinja").render(**example_values),

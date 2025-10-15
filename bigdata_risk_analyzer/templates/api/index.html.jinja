@@ -2,100 +2,318 @@
 {% block content %}
 
 <div id="infoModalsContainer"></div>
-<div class="flex flex-row w-full min-h-[500px]">
-  <!-- Left: Form -->
-  <div id="sidebar"
-    class="min-w-[150px] max-w-[600px] w-[300px] pr-6 bg-zinc-800 pl-2 rounded-l-lg pt-2 pb-2 text-sm transition-all duration-100 ease-in-out">
-    <div class="overflow-y-auto">
-      <form id="riskForm" autocomplete="off" class="sticky top-0 z-10">
-        <div class="mb-5">
-          <label for="main_theme" class="block mb-2 font-bold text-md text-white">
-            <span>Main Theme:</span>
-            <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('main_theme')"
-              title="Info about Main Theme">ⓘ</button>
-          </label>
-          <input type="text" id="main_theme"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
-            placeholder="{{ main_theme }}" required value="{{ main_theme }}" />
-        </div>
 
-        <div class="mb-5">
-          <label for="focus" class="block mb-2 font-bold text-md text-white">
-            <span>Focus:</span>
-            <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('focus')"
-              title="Info about Focus">ⓘ</button>
-          </label>
-          <textarea id="focus"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
-            placeholder="{{ focus }}" required>{{ focus }}</textarea>
-        </div>
+<!-- Header with Config Button -->
+<header class="flex items-center justify-between mb-8 pb-4 border-b border-zinc-700">
+  <div class="flex items-center gap-4">
+    <svg class="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.964-1.333-2.732 0L3.082 16c-.77 1.333.192 3 1.732 3z"></path>
+    </svg>
+    <div>
+      <h1 class="text-3xl font-bold text-white">Risk Analyzer</h1>
+      <p class="text-zinc-400 text-sm">AI-powered risk analysis for investment research</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <button onclick="toggleConfigPanel()" 
+      class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-lg">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+      </svg>
+      Configuration
+    </button>
+    <button id="showJsonBtn" style="display:none;"
+      class="px-6 py-2 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg font-medium transition-colors shadow-lg">
+      JSON
+    </button>
+    <button id="newAnalysisBtn" onclick="resetToStart()" style="display:none;"
+      class="flex items-center justify-center p-2 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg transition-colors shadow-lg"
+      title="Start New Analysis">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+    </button>
+  </div>
+</header>
 
-        <div class="mb-5">
-          <label for="companies" class="block mb-2 font-bold text-md text-white">
-            <span>Company Universe:</span>
-            <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('companies')"
-              title="Info about Company Universe">ⓘ</button>
-          </label>
-          <div class="relative"> <!-- dropdown -->
-            <input id="companies_text" type="text"
-              class="absolute w-[calc(100%-20px)] bg-gray-50 text-gray-900 text-md rounded-lg block p-2.5 h-[42px]" />
-            <select id="companies"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5 h-[42px] z-10"
-              onchange="this.previousElementSibling.value=this.options[this.selectedIndex].text;">
-              <!-- Options are added in a javascript-->
-            </select>
+<!-- Empty State (shown when no analysis has been run) -->
+<div id="emptyState" class="py-16 text-center">
+  <div class="mb-8">
+    <h2 class="text-3xl font-bold text-white mb-4">Ready to monitor risk exposure?</h2>
+    <p class="text-zinc-300 text-lg max-w-2xl mx-auto">
+      Uncover hidden vulnerabilities and measure risk exposure across your portfolio using AI-powered intelligence
+    </p>
+  </div>
+  
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-8">
+    <!-- Quick Start Card 1 -->
+    <div onclick="loadQuickStartTemplate('supply-chain')" 
+      class="bg-gradient-to-br from-red-900/30 to-red-800/20 rounded-xl border border-red-700/40 p-8 cursor-pointer hover:shadow-xl hover:border-red-500/60 transition-all group">
+      <div class="w-16 h-16 bg-red-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+        <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-white mb-2">Supply Chain Risk</h3>
+      <p class="text-zinc-400 text-sm">Tariffs, trade barriers, disruptions</p>
+      <p class="text-red-400 text-xs mt-3">Magnificent 7</p>
+    </div>
+    
+    <!-- Quick Start Card 2 -->
+    <div onclick="loadQuickStartTemplate('regulatory-risk')" 
+      class="bg-gradient-to-br from-orange-900/30 to-orange-800/20 rounded-xl border border-orange-700/40 p-8 cursor-pointer hover:shadow-xl hover:border-orange-500/60 transition-all group">
+      <div class="w-16 h-16 bg-orange-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+        <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-white mb-2">Regulatory Risk</h3>
+      <p class="text-zinc-400 text-sm">Compliance, policy changes, legal</p>
+      <p class="text-orange-400 text-xs mt-3">FinTech Innovators</p>
+    </div>
+    
+    <!-- Quick Start Card 3 -->
+    <div onclick="loadQuickStartTemplate('market-risk')" 
+      class="bg-gradient-to-br from-yellow-900/30 to-yellow-800/20 rounded-xl border border-yellow-700/40 p-8 cursor-pointer hover:shadow-xl hover:border-yellow-500/60 transition-all group">
+      <div class="w-16 h-16 bg-yellow-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+        <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-white mb-2">Market Volatility</h3>
+      <p class="text-zinc-400 text-sm">Price volatility, liquidity, correlations</p>
+      <p class="text-yellow-400 text-xs mt-3">Defense Stocks</p>
+    </div>
+  </div>
+  
+  <div class="flex items-center justify-center gap-4">
+    <button onclick="toggleConfigPanel()" 
+      class="flex items-center gap-2 px-6 py-3 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg font-medium transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+      </svg>
+      {% if demo_mode %}View Configuration{% else %}Custom Configuration{% endif %}
+    </button>
+  </div>
+</div>
+
+<!-- Dashboard Cards (shown after analysis) -->
+<div id="dashboardSection" class="hidden">
+  <div id="dashboardCards"></div>
+  
+  <!-- Explore Results Section (Collapsible) -->
+  <div class="mt-8">
+    <button onclick="toggleExploreSection()" 
+      class="w-full flex items-center justify-between px-6 py-4 bg-zinc-800/50 hover:bg-zinc-800 rounded-lg border border-zinc-700 transition-colors group">
+      <div class="flex items-center gap-3">
+        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <h2 class="text-2xl font-bold text-white">Explore Detailed Results</h2>
+      </div>
+      <svg id="exploreIcon" class="w-6 h-6 text-zinc-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </button>
+    
+    <div id="exploreContent" class="hidden mt-4">
+      <div id="resultsContainer">
+        <!-- Tab Navigation -->
+        <div class="bg-zinc-800/50 border-b border-zinc-700 rounded-t-lg sticky top-0 z-30">
+          <div class="flex gap-1 p-2">
+            <button data-tab="summary" 
+              class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-red-500 text-red-400 bg-red-500/10">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"></path>
+              </svg>
+              Risk Heatmap
+            </button>
+            <button data-tab="companies" 
+              class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+              Companies
+            </button>
+            <button data-tab="mindmap" 
+              class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+              </svg>
+              Taxonomy
+            </button>
+            <button data-tab="evidence" 
+              class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              Evidence
+            </button>
           </div>
         </div>
 
-        <button type="button" onclick="toggleAdvancedOptions()" id="advancedOptionsBtn"
-          class="flex items-center gap-2 text-white bg-gray-600 hover:bg-gray-700 font-medium rounded-lg text-base px-3 py-1.5 mb-2 transition-colors duration-200">
-          <span id="advancedOptionsIcon" class="text-2xl font-bold">+</span>
-          <span>Advanced Options</span>
+        <!-- Tab Contents -->
+        <div class="bg-zinc-800/30 rounded-b-lg border border-zinc-700 border-t-0">
+          <!-- Summary Tab -->
+          <div data-tab-content="summary" class="p-6">
+            <div class="loading-indicator hidden">
+              <div class="flex items-center justify-center py-20">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+                <span class="ml-3 text-zinc-400">Loading heatmap...</span>
+              </div>
+            </div>
+            <div class="tab-actual-content"></div>
+          </div>
+
+          <!-- Companies Tab -->
+          <div data-tab-content="companies" class="hidden p-6">
+            <div class="loading-indicator hidden">
+              <div class="flex items-center justify-center py-20">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+                <span class="ml-3 text-zinc-400">Loading companies...</span>
+              </div>
+            </div>
+            <div class="tab-actual-content"></div>
+          </div>
+
+          <!-- Risk Taxonomy Tab -->
+          <div data-tab-content="mindmap" class="hidden p-6">
+            <div class="loading-indicator hidden">
+              <div class="flex items-center justify-center py-20">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+                <span class="ml-3 text-zinc-400">Loading taxonomy...</span>
+              </div>
+            </div>
+            <div class="tab-actual-content"></div>
+          </div>
+
+          <!-- Evidence Tab -->
+          <div data-tab-content="evidence" class="hidden p-6">
+            <div class="loading-indicator hidden">
+              <div class="flex items-center justify-center py-20">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+                <span class="ml-3 text-zinc-400">Loading evidence...</span>
+              </div>
+            </div>
+            <div class="tab-actual-content"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Configuration Panel (Slides in from right) -->
+<div id="configBackdrop" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-40 transition-opacity duration-300"></div>
+<div id="configPanel" class="fixed top-0 right-0 h-full w-full max-w-md bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 overflow-y-auto">
+  <div class="p-6">
+    <!-- Panel Header -->
+    <div class="flex items-center justify-between mb-6 pb-4 border-b border-zinc-700">
+      <h2 class="text-2xl font-bold text-white">Configuration</h2>
+      <button onclick="closeConfigPanel()" class="text-zinc-400 hover:text-white transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Quick Start Templates -->
+    <div class="mb-8">
+      <h3 class="text-sm font-semibold text-zinc-400 mb-1 uppercase tracking-wide">Pre-computed Demos</h3>
+      <p class="text-xs text-zinc-500 mb-3">Explore example risk analyses with pre-loaded results</p>
+      <div class="space-y-2">
+        <button onclick="loadQuickStartTemplate('supply-chain')" 
+          class="w-full text-left px-4 py-3 bg-red-600/20 hover:bg-red-600/30 border border-red-600/30 rounded-lg transition-colors">
+          <div class="font-medium text-white">Supply Chain Risk</div>
+          <div class="text-xs text-zinc-400">Magnificent 7</div>
         </button>
+        <button onclick="loadQuickStartTemplate('regulatory-risk')" 
+          class="w-full text-left px-4 py-3 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-600/30 rounded-lg transition-colors">
+          <div class="font-medium text-white">Regulatory Risk</div>
+          <div class="text-xs text-zinc-400">FinTech Innovators</div>
+        </button>
+        <button onclick="loadQuickStartTemplate('market-risk')" 
+          class="w-full text-left px-4 py-3 bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-600/30 rounded-lg transition-colors">
+          <div class="font-medium text-white">Market Volatility</div>
+          <div class="text-xs text-zinc-400">Defense Stocks</div>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Custom Configuration Form -->
+    <form id="riskForm" autocomplete="off">
+      <h3 class="text-sm font-semibold text-zinc-400 mb-4 uppercase tracking-wide">Custom Configuration</h3>
+      
+      <!-- Theme -->
+      <div class="mb-4">
+        <label for="main_theme" class="block mb-2 font-medium text-sm text-white">
+          <span>Risk Scenario</span>
+          <button type="button" class="text-red-400 text-xs ml-1" onclick="showInfoModal('main_theme')" title="Info">ⓘ</button>
+        </label>
+        <input type="text" id="main_theme"
+          class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+          placeholder="{{ main_theme }}" required value="{{ main_theme }}" />
+      </div>
 
-        <div id="advanced-options" class="hidden mt-4">
+      <!-- Focus -->
+      <div class="mb-4">
+        <label for="focus" class="block mb-2 font-medium text-sm text-white">
+          <span>Focus</span>
+          <button type="button" class="text-red-400 text-xs ml-1" onclick="showInfoModal('focus')" title="Info">ⓘ</button>
+        </label>
+        <textarea id="focus"
+          class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-3 focus:ring-2 focus:ring-blue-500 focus:border-red-500 min-h-[100px] resize-none"
+          placeholder="{{ focus }}" required>{{ focus }}</textarea>
+      </div>
 
-          <div class="mb-5">
-            <label for="control_entities" class="block mb-2 font-bold text-md text-white">
-              <span>Control Entities:</span>
-              <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('control_entities')"
-                title="Info about Control Entities">ⓘ</button>
-            </label>
-            <input id="control_entities"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
-              value="{{ control_entities if control_entities is defined and control_entities else '' }}" />
-          </div>
+      <!-- Company Universe -->
+      <div class="mb-4">
+        <label for="companies" class="block mb-2 font-medium text-sm text-white">
+          <span>Company Universe</span>
+          <button type="button" class="text-red-400 text-xs ml-1" onclick="showInfoModal('companies')" title="Info">ⓘ</button>
+        </label>
+        <div class="relative">
+          <input id="companies_text" type="text"
+            class="absolute w-[calc(100%-20px)] bg-zinc-900 text-white text-sm rounded-lg block p-3 h-[46px] focus:ring-2 focus:ring-blue-500 focus:border-red-500" />
+          <select id="companies"
+            class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-3 h-[46px] z-10 focus:ring-2 focus:ring-blue-500 focus:border-red-500 cursor-pointer"
+            onchange="this.previousElementSibling.value=this.options[this.selectedIndex].text;">
+          </select>
+        </div>
+      </div>
 
-          <div class="mb-5">
-            <label for="start_date" class="block mb-2 font-bold text-md text-white">
-              <span>Start Date:</span>
-              <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('start_date')"
-                title="Info about Start Date">ⓘ</button>
-            </label>
+      <!-- Advanced Options Toggle -->
+      <button type="button" onclick="toggleAdvancedOptions()" id="advancedOptionsBtn"
+        class="w-full flex items-center justify-between px-4 py-3 bg-zinc-700 hover:bg-zinc-600 rounded-lg transition-colors mb-4">
+        <span class="text-white font-medium text-sm">Advanced Options</span>
+        <svg id="advancedOptionsIcon" class="w-4 h-4 text-white transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+
+      <!-- Advanced Options -->
+      <div id="advanced-options" class="hidden space-y-4 mb-6">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="start_date" class="block mb-2 font-medium text-xs text-zinc-400">Start Date</label>
             <input type="date" id="start_date"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
-              placeholder="{{ start_date }}" required value="{{ start_date }}" />
+              class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-2 focus:ring-2 focus:ring-orange-500"
+              value="{{ start_date }}" />
           </div>
-
-          <div class="mb-5">
-            <label for="end_date" class="block mb-2 font-bold text-md text-white">
-              <span>End Date:</span>
-              <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('end_date')"
-                title="Info about End Date">ⓘ</button>
-            </label>
+          <div>
+            <label for="end_date" class="block mb-2 font-medium text-xs text-zinc-400">End Date</label>
             <input type="date" id="end_date"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
-              placeholder="{{ end_date }}" required value="{{ end_date }}" />
+              class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-2 focus:ring-2 focus:ring-orange-500"
+              value="{{ end_date }}" />
           </div>
-
-          <div class="mb-5">
-            <label for="frequency" class="block mb-2 font-bold text-md text-white">
-              <span>Frequency:</span>
-              <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('frequency')"
-                title="Info about Frequency">ⓘ</button>
-            </label>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="frequency" class="block mb-2 font-medium text-xs text-zinc-400">Frequency</label>
             <select id="frequency"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5">
+              class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-2 focus:ring-2 focus:ring-blue-500 cursor-pointer">
               <option value="D" {% if frequency=='D' %}selected{% endif %}>Daily</option>
               <option value="W" {% if frequency=='W' %}selected{% endif %}>Weekly</option>
               <option value="M" {% if frequency=='M' %}selected{% endif %}>Monthly</option>
@@ -103,189 +321,117 @@
               <option value="Y" {% if frequency=='Y' %}selected{% endif %}>Yearly</option>
             </select>
           </div>
-
-          <div class="mb-5">
-            <label for="keywords" class="block mb-2 font-bold text-md text-white">
-              <span>Keywords:</span>
-              <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('keywords')"
-                title="Info about Keywords">ⓘ</button>
-            </label>
-            <input id="keywords"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2"
-              placeholder="{{ keywords|join(',') if keywords is defined and keywords else '' }}"
-              value="{{ keywords|join(',') if keywords is defined and keywords else '' }}" />
-          </div>
-
-          <div class="hidden mb-5">
-            <label for="fiscal_year" class="block mb-2 font-bold text-md text-white">
-              <span>Fiscal Year:</span>
-              <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('fiscal_year')"
-                title="Info about Fiscal Year">ⓘ</button>
-            </label>
-            <input type="text" id="fiscal_year"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5"
-              placeholder="e.g. 2025" value="{{ fiscal_year if fiscal_year else "" }}" />
-          </div>
-
-          <div class="mb-5">
-            <label for="llm_model" class="block mb-2 font-bold text-md text-white">
-              <span>LLM Model:</span>
-              <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('llm_model')"
-                title="Info about LLM Model">ⓘ</button>
-            </label>
-            <input type="text" id="llm_model"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5"
-              placeholder="{{ llm_model }}" value="{{ llm_model }}" />
-          </div>
-
-          <div class="mb-5">
-            <label for="document_type" class="hidden block mb-2 font-bold text-md text-white">
-              <span>Document Type:</span>
-              <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('document_type')"
-                title="Info about Document Type">ⓘ</button>
-            </label>
-            <select id="document_type"
-              class="hidden bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5">
-              <option value="all" {% if document_type=='all' %}selected{% endif %}>ALL</option>
-              <option value="filings" {% if document_type=='filings' %}selected{% endif %}>FILINGS</option>
-              <option value="transcripts" {% if document_type=='transcripts' %}selected{% endif %}>TRANSCRIPTS</option>
-              <option value="news" {% if document_type=='news' %}selected{% endif %}>NEWS</option>
-              <option value="files" {% if document_type=='files' %}selected{% endif %}>FILES</option>
-            </select>
-          </div>
-
-          <div class="mb-5">
-            <label for="rerank_threshold" class="block mb-2 font-bold text-md text-white">
-              <span>Rerank Threshold (0-1):</span>
-              <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('rerank_threshold')"
-                title="Info about Rerank Threshold">ⓘ</button>
-            </label>
+          <div>
+            <label for="rerank_threshold" class="block mb-2 font-medium text-xs text-zinc-400">Rerank (0-1)</label>
             <input type="number" id="rerank_threshold"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5"
-              placeholder="{{ rerank_threshold if rerank_threshold is defined and rerank_threshold is not none else '' }}"
+              class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-2 focus:ring-2 focus:ring-orange-500"
               value="{{ rerank_threshold if rerank_threshold is defined and rerank_threshold is not none else '' }}"
               max="1" min="0" step="0.01">
           </div>
-
-          <div class="mb-5">
-            <label for="document_limit" class="block mb-2 font-bold text-md text-white">
-              <span>Document Limit:</span>
-              <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('document_limit')"
-                title="Info about Document Limit">ⓘ</button>
-            </label>
-            <input type="number" id="document_limit"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5"
-              placeholder="{{ document_limit }}" value="{{ document_limit }}" />
-          </div>
-
-          <div class="mb-5">
-            <label for="batch_size" class="block mb-2 font-bold text-md text-white">
-              <span>Batch Size:</span>
-              <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('batch_size')"
-                title="Info about Batch Size">ⓘ</button>
-            </label>
-            <input type="number" id="batch_size"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-md rounded-lg block w-full p-2.5"
-              placeholder="{{ batch_size }}" value="{{ batch_size }}" />
-          </div>
-
         </div>
-        <hr class="my-4 border-gray-600">
-        <button type="submit"
-          class="text-white bg-blue-700 max-w-[140px] hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center mb-3">Run
-          Analysis
-        </button>
-        <div>
-          <button type="button" id="loadExampleBtn"
-            class="text-white max-w-[140px] bg-green-600 hover:bg-green-800 font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center">See
-            Example</button>
-          <button type="button" class="text-blue-500 text-sm" onclick="showInfoModal('load_example')"
-            title="Info about Load Example">ⓘ</button>
-        </div>
-      </form>
-    </div>
-    <div id="spinner" class="hidden p-2.5">⏳ Running...</div>
-
-  </div>
-  <!-- Right: Output -->
-  <!-- Drag bar -->
-  <div id="dragbar"
-    class="w-2 cursor-ew-resize bg-zinc-700 hover:bg-blue-500 transition-colors duration-100 ease-in-out z-20"
-    style="position: relative;"></div>
-  <div id="outputarea"
-    class="flex-1 min-w-[300px] bg-zinc-900 p-8 rounded-r-lg transition-all duration-100 ease-in-out">
-    <button id="showJsonBtn"
-      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center mb-4"
-      style="display:none;">Show raw JSON</button>
-    <div id="output" class="w-full">
-      <div class="flex flex-col h-full py-5">
-        <h1 class="text-3xl font-bold text-white mb-4">Risk Analyzer</h1>
-        <p class="mb-4">
-          The risk analyzing service will allow you to assess and quantify risks related to a specific theme, such as
-          US-China trade relations or supply chain disruptions. It will screen your trading universe and quantify the
-          potential impact of identified risks for each company in the universe.
-        </p>
-
-        <h2 class="text-2xl font-bold text-white mb-4">HOW TO USE:</h2>
-        <h2 class="text-xl font-bold text-blue-100 mb-4 pl-4">Option 1: Quick Start</h2>
-        <ol class="list-decimal mb-4 pl-10">
-          <li>Click <strong>"See Example"</strong> to explore a pre-configured analysis with sample data</li>
-          <li>Perfect for first-time users to understand the tool's capabilities</li>
-        </ol>
-        <h2 class="text-xl font-bold text-blue-100 mb-4 pl-4">Option 2: Custom Analysis</h2>
-        <ol class="list-decimal mb-4 pl-10">
-          <li>Configure your risk analyzer parameters in the sidebar</li>
-          <li>Click <strong>"Run Analysis"</strong> to begin analysis</li>
-          <li>Monitor the logs below to see the process working in the background</li>
-          <li>Results will appear below once processing is complete</li>
-        </ol>
-
-        <h2 class="text-2xl font-bold text-white mb-4">CURRENT LIMITATIONS:</h2>
-        <ul class="list-disc mb-4 pl-6">
-          <li>Demo version retrieves <strong>NEWS</strong> documents only, restricted to 4 temporal buckets (e.g.,
-            4 quarters)</li>
-          <li>Processing may take a few minutes for complex queries</li>
-          <li>This is an experimental tool – results should be validated independently before making investment
-            decisions</li>
-        </ul>
-
-        <p><strong>New users</strong>: We recommend starting with <strong>"See Example"</strong> to see the analyzer in action before
-          running your own analysis.<br></p>
         
-        <p class="">
-          Check our repo
-          <a href="https://github.com/Bigdata-com/bigdata-risk-analyzer" target="_blank"
-            class="font-bold hover:text-blue-200">
-            https://github.com/Bigdata-com/bigdata-risk-analyzer
-          </a> for the complete and customizable version.
-        </p>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="document_limit" class="block mb-2 font-medium text-xs text-zinc-400">Doc Limit</label>
+            <input type="number" id="document_limit"
+              class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-2 focus:ring-2 focus:ring-orange-500"
+              value="{{ document_limit }}" />
+          </div>
+          <div>
+            <label for="batch_size" class="block mb-2 font-medium text-xs text-zinc-400">Batch Size</label>
+            <input type="number" id="batch_size"
+              class="bg-zinc-900 border border-zinc-600 text-white text-sm rounded-lg block w-full p-2 focus:ring-2 focus:ring-orange-500"
+              value="{{ batch_size }}" />
+          </div>
+        </div>
+        
+        <!-- Hidden fields -->
+        <input type="text" id="fiscal_year" class="hidden"
+          value="{% if fiscal_year %}{% if fiscal_year is iterable and fiscal_year is not string %}{{ fiscal_year|join(', ') }}{% else %}{{ fiscal_year }}{% endif %}{% endif %}" />
+        <input type="text" id="llm_model" class="hidden" value="{{ llm_model }}" />
+        <select id="document_type" class="hidden">
+          <option value="all" {% if document_type=='all' %}selected{% endif %}>ALL</option>
+          <option value="filings" {% if document_type=='filings' %}selected{% endif %}>FILINGS</option>
+          <option value="transcripts" {% if document_type=='transcripts' %}selected{% endif %}>TRANSCRIPTS</option>
+          <option value="news" {% if document_type=='news' %}selected{% endif %}>NEWS</option>
+          <option value="files" {% if document_type=='files' %}selected{% endif %}>FILES</option>
+        </select>
       </div>
-    </div>
+
+      <!-- Action Buttons -->
+      <div class="space-y-3 pt-4 border-t border-zinc-700">
+        {% if demo_mode %}
+        <button type="button" disabled
+          class="w-full flex items-center justify-center gap-2 text-zinc-500 bg-zinc-700 cursor-not-allowed font-bold rounded-lg text-base px-6 py-4 opacity-50">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+          Run Analysis (Disabled)
+        </button>
+        <p class="text-xs text-amber-400 text-center leading-relaxed">
+          Demo mode activated. For access to the full version, please contact <a href="mailto:support@bigdata.com" class="underline hover:text-amber-300 transition-colors">support@bigdata.com</a> or deploy your own version from <a href="https://github.com/Bigdata-com/bigdata-thematic-screener" target="_blank" rel="noopener noreferrer" class="underline hover:text-amber-300 transition-colors">GitHub</a>.
+        </p>
+        {% else %}
+        <button type="submit"
+          class="w-full flex items-center justify-center gap-2 text-white bg-blue-600 hover:bg-blue-700 font-bold rounded-lg text-base px-6 py-4 transition-colors shadow-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Run Analysis
+        </button>
+        {% endif %}
+      </div>
+    </form>
   </div>
 </div>
-<!-- Logs below both -->
-<div class="my-8 bg-zinc-900 rounded-lg shadow-lg p-6 text-zinc-100" style="width: 100%;">
-  <h2 class="text-lg font-bold mb-4 text-sky-400">Process Logs</h2>
-  <div id="logViewer"
-    class="bg-zinc-800 border border-slate-700 rounded-md p-4 h-64 overflow-y-auto font-mono text-sm whitespace-pre-wrap break-words text-zinc-100">
+
+<!-- Spinner -->
+<div id="spinner" class="hidden fixed top-4 right-4 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 shadow-xl z-50">
+  <div class="flex items-center gap-3">
+    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-red-500"></div>
+    <span class="text-white font-medium">Running analysis...</span>
+  </div>
+</div>
+
+<!-- Logs below (Collapsible) -->
+<div class="my-8 bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-lg shadow-2xl border border-zinc-700">
+  <button onclick="toggleProcessLogs()" 
+    class="w-full flex items-center justify-between px-6 py-4 hover:bg-zinc-800/50 transition-colors rounded-t-lg">
+    <h2 class="text-lg font-bold text-sky-400 flex items-center gap-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+        </path>
+      </svg>
+      Process Logs
+    </h2>
+    <svg id="logsIcon" class="w-5 h-5 text-zinc-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+  </button>
+  <div id="logViewerContainer" class="hidden px-6 pb-6">
+    <div id="logViewer"
+      class="bg-black/30 border border-slate-600 rounded-lg p-4 h-64 overflow-y-auto font-mono text-sm whitespace-pre-wrap break-words text-zinc-100 shadow-inner">
+    </div>
   </div>
 </div>
 
 <!-- Modal for JSON output -->
-<div id="jsonModal" class="hidden fixed z-[1000] inset-0 w-screen h-screen bg-black/50">
-  <div class="bg-white relative my-20 mx-auto p-5 rounded-lg w-4/5 max-w-[900px]">
+<div id="jsonModal" class="hidden fixed z-[1000] inset-0 w-screen h-screen bg-black/70 backdrop-blur-sm">
+  <div class="bg-white relative my-20 mx-auto p-6 rounded-xl w-4/5 max-w-[900px] shadow-2xl border border-gray-200">
     <button id="copyBtn" onclick="copyJson()"
-      class="absolute top-[10px] right-[50px] text-[15px] px-[10px] py-[4px] cursor-pointer text-gray-900">Copy</button>
-    <button onclick="closeModal()" class="absolute top-2.5 right-2.5 text-lg text-gray-900">&times;</button>
-    <h2 class="text-gray-900">Raw JSON Output</h2>
+      class="absolute top-4 right-14 text-sm px-4 py-2 cursor-pointer text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors font-medium">Copy</button>
+    <button onclick="closeModal()"
+      class="absolute top-4 right-4 text-2xl text-gray-600 hover:text-gray-900 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">&times;</button>
+    <h2 class="text-gray-900 text-xl font-bold mb-4">Raw JSON Output</h2>
     <pre id="jsonContent"
-      class="bg-gray-900 text-gray-100 p-4 whitespace-pre-wrap break-words overflow-auto rounded-md mt-5"
+      class="bg-gray-900 text-gray-100 p-4 whitespace-pre-wrap break-words overflow-auto rounded-lg mt-2 border border-gray-700"
       style="max-height:60vh;"></pre>
   </div>
 </div>
 
 <script>
-
   const watchlists = {{ example_watchlists | tojson }};
 
   // Populate the dropdown with watchlists
@@ -300,7 +446,9 @@
     option.textContent = watchlist.name;
     comp_select.appendChild(option);
   });
-
+  
+  // Make watchlists globally available
+  window.watchlists = watchlists;
 
   document.getElementById('showJsonBtn').onclick = function () {
     if (lastReport) {
@@ -310,17 +458,65 @@
   };
 
   window.closeModal = closeModal;
-
-
   window.toggleMotivation = toggleMotivation;
+  
+  // Toggle explore section
+  function toggleExploreSection() {
+    const content = document.getElementById('exploreContent');
+    const icon = document.getElementById('exploreIcon');
+    
+    if (content.classList.contains('hidden')) {
+      content.classList.remove('hidden');
+      icon.style.transform = 'rotate(180deg)';
+    } else {
+      content.classList.add('hidden');
+      icon.style.transform = 'rotate(0deg)';
+    }
+  }
+  window.toggleExploreSection = toggleExploreSection;
+  
+  // Reset to start - clear results and show empty state
+  function resetToStart() {
+    // Hide dashboard and show empty state
+    const emptyState = document.getElementById('emptyState');
+    const dashboardSection = document.getElementById('dashboardSection');
+    
+    if (emptyState) emptyState.style.display = 'block';
+    if (dashboardSection) dashboardSection.classList.add('hidden');
+    
+    // Hide buttons
+    const showJsonBtn = document.getElementById('showJsonBtn');
+    const newAnalysisBtn = document.getElementById('newAnalysisBtn');
+    if (showJsonBtn) showJsonBtn.style.display = 'none';
+    if (newAnalysisBtn) newAnalysisBtn.style.display = 'none';
+    
+    // Clear last report
+    window.lastReport = null;
+    
+    // Reset tabs
+    if (window.tabController) {
+      window.tabController.reset();
+    }
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  window.resetToStart = resetToStart;
 
-  // Load Example button functionality
-  document.getElementById('loadExampleBtn').onclick = async function () {
-    const requestId = "{{ example_request_id }}";
-    await loadRequestId(requestId);
-  };
+  // Initialize tab controller when DOM is ready
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.tabController) {
+      window.tabController.init();
+    }
+  });
 </script>
+<script src="static/scripts/config_panel.js"></script>
+<script src="static/scripts/dashboard_cards.js"></script>
+<script src="static/scripts/tab_controller.js"></script>
+<script src="static/scripts/heatmap.js"></script>
+<script src="static/scripts/company_cards.js"></script>
+<script src="static/scripts/mindmap.js"></script>
+<script src="static/scripts/evidence_table.js"></script>
 <script src="static/scripts/form.js"></script>
 <script src="static/scripts/load_example.js"></script>
-</form>
 {% endblock %}

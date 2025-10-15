@@ -15,6 +15,9 @@ class Settings(BaseSettings):
 
     # Set access token to enable authentication on the endpoints
     ACCESS_TOKEN: str | None = None
+    
+    # Demo mode - disables "Run Analysis" functionality, only allows pre-computed demos
+    DEMO_MODE: bool = False
     TEMPLATES_DIR: str = str(PROJECT_DIRECTORY / "bigdata_risk_analyzer" / "templates")
 
     # Static dir configuration
