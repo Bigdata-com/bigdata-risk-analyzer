@@ -16,9 +16,9 @@ function renderMindmap(taxonomy) {
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
                         </svg>
-                        Theme Taxonomy
+                        Risk Taxonomy
                     </h3>
-                    <p class="text-zinc-400 text-sm">Hierarchical breakdown of the investment theme</p>
+                    <p class="text-zinc-400 text-sm">Hierarchical breakdown of the risk theme</p>
                 </div>
                 <div class="flex gap-2 bg-zinc-800 p-1 rounded-lg border border-zinc-700">
                     <button onclick="switchMindmapView('tree')" id="viewTree"
