@@ -111,10 +111,13 @@ function renderAtAGlanceCard(totalCompanies, totalThemes, maxScore, totalEvidenc
                         </div>
                         ${config.isDemo ? `
                             <div class="text-base text-white font-semibold">
-                                Source: Earnings Transcripts
+                                Source: News
                             </div>
                             <div class="text-base text-white font-semibold">
-                                Period: Last 4 quarters
+                                Period: Last Month
+                            </div>
+                            <div class="text-sm text-zinc-400 mt-3 pt-3 border-t border-zinc-700">
+                                Analysis generated on 15/10/2025
                             </div>
                         ` : ''}
                     </div>
