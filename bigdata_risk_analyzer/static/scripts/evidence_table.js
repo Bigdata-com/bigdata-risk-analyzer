@@ -16,7 +16,7 @@ function renderEvidenceTable(content) {
 
     // Extract unique companies and risk factors for filters
     const companies = [...new Set(content.map(item => item.company))].sort();
-    const themes = [...new Set(content.map(item => item.risk_factor || item.theme))].filter(Boolean).sort();
+    const themes = [...new Set(content.map(item => item.sub_scenario || item.risk_factor || item.theme))].filter(Boolean).sort();
 
     let html = `
         <div class="mb-6">
@@ -150,7 +150,7 @@ function renderEvidenceTableRows(page = 1) {
                 <td class="px-4 py-3 text-sm text-blue-400 cursor-pointer hover:text-blue-300 hover:underline" onclick="showDocumentModal('${chunk.document_id}')">${escapeHtml(chunk.headline)}</td>
                 <td class="px-4 py-3 text-sm text-zinc-300 italic max-w-md">${escapeHtml(chunk.quote)}</td>
                 <td class="px-4 py-3 text-sm text-zinc-300 max-w-md">${escapeHtml(chunk.motivation)}</td>
-                <td class="px-4 py-3 text-sm font-medium text-orange-400">${escapeHtml(chunk.risk_factor || chunk.theme || 'N/A')}</td>
+                <td class="px-4 py-3 text-sm font-medium text-orange-400">${escapeHtml(chunk.sub_scenario || chunk.risk_factor || chunk.theme || 'N/A')}</td>
             </tr>
         `;
     });
@@ -187,7 +187,7 @@ function applyEvidenceFilters() {
 
     filteredEvidenceData = allEvidenceData.filter(item => {
         const matchesCompany = !companyFilter || item.company.toLowerCase() === companyFilter;
-        const riskFactor = (item.risk_factor || item.theme || '').toLowerCase();
+        const riskFactor = (item.sub_scenario || item.risk_factor || item.theme || '').toLowerCase();
         const matchesTheme = !themeFilter || riskFactor === themeFilter;
         const matchesSearch = !searchTerm || 
             item.quote.toLowerCase().includes(searchTerm) ||
