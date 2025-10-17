@@ -4,9 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bigdata Research Services</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: 'Hanken Grotesk';
+  src: url('/static/fonts/HankenGrotesk-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Hanken Grotesk';
+  src: url('/static/fonts/HankenGrotesk-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+</style>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="static/scripts/visualization.js"></script>
@@ -17,7 +28,7 @@
 		theme: {
 			extend: {
 				fontFamily: {
-					sans: ['Hanken Grotesk', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+					sans: ['Hanken Grotesk', 'sans-serif'],
 				},
 				colors: {
 					bg: '#000000',
