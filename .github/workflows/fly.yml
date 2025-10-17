@@ -17,7 +17,7 @@ jobs:
     concurrency: deploy-group    # ensure only one action runs at a time
     environment: fly
     # Only run when the producing workflow completed successfully
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
 
