@@ -32,33 +32,6 @@ function toggleAdvancedOptions() {
     }
 }
 
-// Dragbar logic
-document.addEventListener('DOMContentLoaded', function () {
-    const dragbar = document.getElementById('dragbar');
-    const sidebar = document.getElementById('sidebar');
-    const outputarea = document.getElementById('outputarea');
-    let dragging = false;
-    dragbar.addEventListener('mousedown', function (e) {
-        dragging = true;
-        document.body.classList.add('cursor-ew-resize');
-        document.body.style.userSelect = 'none';
-    });
-    document.addEventListener('mousemove', function (e) {
-        if (!dragging) return;
-        const minSidebar = 250;
-        const maxSidebar = 600;
-        let newWidth = Math.min(Math.max(e.clientX - sidebar.getBoundingClientRect().left, minSidebar), maxSidebar);
-        sidebar.style.width = newWidth + 'px';
-        // outputarea will flex to fill remaining space
-    })
-    document.addEventListener('mouseup', function (e) {
-        if (dragging) {
-            dragging = false;
-            document.body.classList.remove('cursor-ew-resize');
-            document.body.style.userSelect = '';
-        }
-    });
-});
 
 // Information modal for form fields
 function showInfoModal(label) {

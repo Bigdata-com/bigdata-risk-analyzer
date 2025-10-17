@@ -289,26 +289,6 @@ function toggleDashboardCompanyInsights(button, event) {
 }
 
 // Helper functions
-function scrollToCompany(companyName) {
-    // Switch to companies tab and scroll to company
-    if (window.tabController) {
-        window.tabController.switchTab('companies');
-    }
-    // Wait for tab to render, then scroll
-    setTimeout(() => {
-        const cards = document.querySelectorAll('.company-card');
-        cards.forEach(card => {
-            if (card.getAttribute('data-company-name') === companyName.toLowerCase()) {
-                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                card.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-                setTimeout(() => {
-                    card.style.backgroundColor = '';
-                }, 2000);
-            }
-        });
-    }, 300);
-}
-
 function filterByTheme(theme) {
     // Switch to evidence tab and apply theme filter
     if (window.tabController) {
@@ -326,16 +306,9 @@ function filterByTheme(theme) {
     }, 300);
 }
 
-function exportDashboard() {
-    // For now, trigger the JSON modal
-    document.getElementById('showJsonBtn')?.click();
-}
-
 // Make functions globally accessible
 window.renderDashboardCards = renderDashboardCards;
-window.scrollToCompany = scrollToCompany;
 window.filterByTheme = filterByTheme;
-window.exportDashboard = exportDashboard;
 window.toggleDashboardCompanyThemes = toggleDashboardCompanyThemes;
 window.toggleDashboardCompanyInsights = toggleDashboardCompanyInsights;
 
