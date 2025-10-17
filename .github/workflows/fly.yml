@@ -1,11 +1,14 @@
 name: Fly Deploy
 
 on:
-  workflow_run:
-    workflows:
-      - "Build Docker image and push to ghcr"
-    types:
-      - completed
+  #workflow_run:
+  #  workflows:
+  #    - "Build Docker image and push to ghcr"
+  #  types:
+  #    - completed
+  pull_request:
+    branches:
+      - main
 
 jobs:
   deploy:
