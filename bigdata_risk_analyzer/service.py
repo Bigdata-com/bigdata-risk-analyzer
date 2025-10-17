@@ -99,8 +99,7 @@ def build_response(
         )
 
     # Return results
-    # Create response with both risk_* and theme_* fields for frontend compatibility
-    response = RiskAnalysisResponse(
+    return RiskAnalysisResponse(
         risk_taxonomy=RiskTaxonomy(**risk_tree._to_dict()),  # ty: ignore[missing-argument]
         risk_scoring=RiskScoring(root=risk_scoring),
         content=LabeledContent(
@@ -126,8 +125,6 @@ def build_response(
             ]
         ),
     )
-    
-    return response
 
 
 def process_request(
