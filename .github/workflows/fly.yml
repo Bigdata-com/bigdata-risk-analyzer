@@ -29,7 +29,7 @@ jobs:
 
       - name: Deploy using pre-built GHCR image
         run: |
-          # Use the image tag that the build workflow pushed. Here we default to 'latest'.
+          # Note that this requires the app to be already launched and secrets configured
           flyctl deploy --remote-only --image ghcr.io/bigdata-com/bigdata-risk-analyzer:latest
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
