@@ -10,6 +10,7 @@ PROJECT_DIRECTORY = Path(__file__).parent.parent
 
 UNSET: Literal["<UNSET>"] = "<UNSET>"
 
+
 class Settings(BaseSettings):
     # Demo mode - disables "Run Analysis" functionality, only allows pre-computed demos
     # Only affects the frontend, to protect the backend, set ACCESS_TOKEN
@@ -62,5 +63,6 @@ class Settings(BaseSettings):
                     "BIGDATA_API_KEY and OPENAI_API_KEY must be set when DEMO_MODE is disabled."
                 )
         return self
+
 
 settings = Settings.load_from_env()
