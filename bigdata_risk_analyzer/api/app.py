@@ -22,7 +22,7 @@ from bigdata_risk_analyzer.api.storage import StorageManager
 from bigdata_risk_analyzer.api.utils import get_example_values_from_schema
 from bigdata_risk_analyzer.models import RiskAnalysisResponse
 from bigdata_risk_analyzer.service import process_request
-from bigdata_risk_analyzer.settings import settings
+from bigdata_risk_analyzer.settings import UNSET, settings
 from bigdata_risk_analyzer.templates import loader
 from bigdata_risk_analyzer.traces import TraceEventName, send_trace
 
@@ -51,13 +51,15 @@ def lifespan(app: FastAPI):
     # Instantiate Bigdata client
     BIGDATA = Bigdata(api_key=settings.BIGDATA_API_KEY)
 
-    send_trace(
-        BIGDATA,
-        event_name=TraceEventName.SERVICE_START,
-        trace={
-            "version": __version__,
-        },
-    )
+    if settings.BIGDATA_API_KEY != UNSET:
+        send_trace(
+            BIGDATA,
+            event_name=TraceEventName.SERVICE_START,
+            trace={
+                "version": __version__,
+            },
+        )
+
     create_db_and_tables()
 
     yield

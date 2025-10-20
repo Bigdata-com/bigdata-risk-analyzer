@@ -1,6 +1,10 @@
+from bigdata_risk_analyzer import LOG_LEVEL
 from bigdata_risk_analyzer.api.app import app
+from bigdata_risk_analyzer.settings import settings
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    uvicorn.run(
+        app, host=settings.HOST, port=settings.PORT, log_level=LOG_LEVEL.lower()
+    )
