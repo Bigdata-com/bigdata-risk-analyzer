@@ -90,12 +90,13 @@ def health_check():
 )
 async def sample_frontend(_: str = Security(query_scheme)) -> HTMLResponse:
     # Get example values from the schema for all fields
-    example_values = get_example_values_from_schema(RiskAnalysisRequest)
-    example_values["example_watchlists"] = list(dict(ExampleWatchlists).values())
-    example_values["demo_mode"] = settings.DEMO_MODE
+    template_values = get_example_values_from_schema(RiskAnalysisRequest)
+    template_values["example_watchlists"] = list(dict(ExampleWatchlists).values())
+    template_values["demo_mode"] = settings.DEMO_MODE
+    template_values["version"] = f"v{__version__}"
 
     return HTMLResponse(
-        content=loader.get_template("api/index.html.jinja").render(**example_values),
+        content=loader.get_template("api/index.html.jinja").render(**template_values),
         media_type="text/html",
     )
 
