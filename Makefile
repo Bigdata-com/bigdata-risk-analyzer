@@ -12,5 +12,8 @@ lint-check:
 format:
 	@uvx ruff format bigdata_risk_analyzer/ tests/
 
+format-check:
+	@uvx ruff format --check bigdata_risk_analyzer/ tests/
+
 type-check:
 	@uvx ty check bigdata_risk_analyzer/ tests/
