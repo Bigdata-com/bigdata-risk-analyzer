@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.2] - 21-10-2025
+
+### Fixed
+- Fixed issue where the logo link in the navbar did not preserve the access token in the URL.
+
 ## [2.3.1] - 20-10-2025
 
 ### Added
