@@ -58,6 +58,9 @@ function renderDashboardCards(data) {
         isDemo: currentConfig.isDemo || false
     };
     
+    // Update configuration header
+    updateConfigurationHeader(config);
+    
     // Return the 3 cards HTML for Overview tab
     return `
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -66,6 +69,29 @@ function renderDashboardCards(data) {
             ${renderTopThemesCard(sortedThemes.slice(0, 10), totalCompanies)}
         </div>
     `;
+}
+
+function updateConfigurationHeader(config) {
+    // Update the sticky configuration header
+    const riskScenarioEl = document.getElementById('currentRiskScenario');
+    const universeEl = document.getElementById('currentUniverse');
+    const demoBadgeEl = document.getElementById('demoModeBadge');
+    
+    if (riskScenarioEl) {
+        riskScenarioEl.textContent = config.theme;
+    }
+    
+    if (universeEl) {
+        universeEl.textContent = config.universe;
+    }
+    
+    if (demoBadgeEl) {
+        if (config.isDemo) {
+            demoBadgeEl.classList.remove('hidden');
+        } else {
+            demoBadgeEl.classList.add('hidden');
+        }
+    }
 }
 
 function renderAtAGlanceCard(totalCompanies, totalThemes, maxScore, totalEvidences, runDate, config) {
@@ -95,31 +121,6 @@ function renderAtAGlanceCard(totalCompanies, totalThemes, maxScore, totalEvidenc
                 <div class="flex justify-between items-center">
                     <span class="text-zinc-300">Supporting Evidences</span>
                     <span class="text-2xl font-bold text-amber-400">${totalEvidences}</span>
-                </div>
-                <div class="pt-4 mt-4 border-t-2 border-orange-600/50">
-                    <h4 class="text-sm font-bold text-orange-300 mb-2 uppercase tracking-wide">Current Configuration</h4>
-                    <div class="space-y-1.5">
-                        ${config.isDemo ? `
-                            <div class="text-base text-amber-400 font-semibold">Demo Mode</div>
-                        ` : ''}
-                        <div class="text-base text-white font-semibold">
-                            Risk Scenario: ${escapeHtml(config.theme)}
-                        </div>
-                        <div class="text-base text-white font-semibold">
-                            Universe: ${escapeHtml(config.universe)}
-                        </div>
-                        ${config.isDemo ? `
-                            <div class="text-base text-white font-semibold">
-                                Source: News
-                            </div>
-                            <div class="text-base text-white font-semibold">
-                                Period: Last Month
-                            </div>
-                            <div class="text-sm text-zinc-400 mt-3 pt-3 border-t border-zinc-700">
-                                Analysis generated on 15/10/2025
-                            </div>
-                        ` : ''}
-                    </div>
                 </div>
             </div>
         </div>
@@ -307,6 +308,7 @@ function filterByTheme(theme) {
 
 // Make functions globally accessible
 window.renderDashboardCards = renderDashboardCards;
+window.updateConfigurationHeader = updateConfigurationHeader;
 window.filterByTheme = filterByTheme;
 window.toggleDashboardCompanyThemes = toggleDashboardCompanyThemes;
 window.toggleDashboardCompanyInsights = toggleDashboardCompanyInsights;

@@ -31,19 +31,19 @@ class WatchlistExample(BaseModel):
 
 class ExampleWatchlists(Enum):
     TOP_100_UK = WatchlistExample(
-        id="33d6f577-9256-4a53-944f-09127e42fdc2", name="Top 100 UK"
+        id="33d6f577-9256-4a53-944f-09127e42fdc2", name="UK Top 100"
     )
     TOP_50_EU = WatchlistExample(
-        id="9baef470-8cf5-46fa-b30a-352bcb35cd94", name="Top 50 Europe"
+        id="9baef470-8cf5-46fa-b30a-352bcb35cd94", name="Europe Top 50"
     )
     US_LARGE_CAP_100 = WatchlistExample(
-        id="44118802-9104-4265-b97a-2e6d88d74893", name="Top 100 US"
+        id="44118802-9104-4265-b97a-2e6d88d74893", name="US Top 100"
     )
     TOP_40_DE = WatchlistExample(
-        id="8453c26f-47c5-4e78-b5c8-acf245caccad", name="Top 40 Germany"
+        id="8453c26f-47c5-4e78-b5c8-acf245caccad", name="Germany Top 40"
     )
     TOP_40_FR = WatchlistExample(
-        id="9fb6ac2d-a552-4dbb-b62f-8657ef18bf29", name="Top 40 France"
+        id="9fb6ac2d-a552-4dbb-b62f-8657ef18bf29", name="France Top 40"
     )
     DOW_30 = WatchlistExample(id="5b78837c-343d-4559-8f06-98668b09d1df", name="Dow 30")
     NASDAQ_100 = WatchlistExample(
