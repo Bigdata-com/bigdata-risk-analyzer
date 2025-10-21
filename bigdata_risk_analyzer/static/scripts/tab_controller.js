@@ -1,9 +1,10 @@
 // Tab Controller - Manages tab navigation and content display
 class TabController {
     constructor() {
-        this.activeTab = 'summary';
+        this.activeTab = 'overview';
         this.tabsInitialized = false;
         this.loadingStates = {
+            overview: false,
             summary: false,
             companies: false,
             mindmap: false,

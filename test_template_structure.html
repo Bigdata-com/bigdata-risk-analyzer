@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Structure Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white p-8">
+    <h1 class="text-2xl font-bold mb-4">Template Structure Test</h1>
+    <div id="testResults" class="space-y-4"></div>
+
+    <script>
+        // Test the actual template structure by reading the HTML file
+        async function testTemplateStructure() {
+            const results = [];
+            
+            try {
+                // Try to fetch the actual template file
+                const response = await fetch('bigdata_risk_analyzer/templates/api/index.html.jinja');
+                if (!response.ok) {
+                    results.push('❌ Could not fetch template file');
+                    return results;
+                }
+                
+                const html = await response.text();
+                results.push('✅ Template file loaded successfully');
+                
+                // Test 1: Check if Overview tab exists in template
+                if (html.includes('data-tab-content="overview"')) {
+                    results.push('✅ Overview tab found in template');
+                } else {
+                    results.push('❌ Overview tab NOT found in template');
+                }
+                
+                // Test 2: Check if dashboardCards is inside Overview tab
+                const overviewMatch = html.match(/data-tab-content="overview"[^>]*>[\s\S]*?<\/div>/);
+                if (overviewMatch) {
+                    const overviewContent = overviewMatch[0];
+                    if (overviewContent.includes('id="dashboardCards"')) {
+                        results.push('✅ Dashboard Cards found inside Overview tab in template');
+                    } else {
+                        results.push('❌ Dashboard Cards NOT found inside Overview tab in template');
+                    }
+                    
+                    if (overviewContent.includes('id="companiesContainer"')) {
+                        results.push('✅ Companies Container found inside Overview tab in template');
+                    } else {
+                        results.push('❌ Companies Container NOT found inside Overview tab in template');
+                    }
+                } else {
+                    results.push('❌ Could not parse Overview tab content from template');
+                }
+                
+                // Test 3: Check for any dashboardCards outside the tab structure
+                const dashboardCardsMatches = html.match(/id="dashboardCards"/g);
+                if (dashboardCardsMatches && dashboardCardsMatches.length === 1) {
+                    results.push('✅ Only one dashboardCards div found in template');
+                } else {
+                    results.push(`❌ Found ${dashboardCardsMatches ? dashboardCardsMatches.length : 0} dashboardCards divs in template (should be exactly 1)`);
+                }
+                
+                // Test 4: Check for any companiesContainer outside the tab structure
+                const companiesContainerMatches = html.match(/id="companiesContainer"/g);
+                if (companiesContainerMatches && companiesContainerMatches.length === 1) {
+                    results.push('✅ Only one companiesContainer div found in template');
+                } else {
+                    results.push(`❌ Found ${companiesContainerMatches ? companiesContainerMatches.length : 0} companiesContainer divs in template (should be exactly 1)`);
+                }
+                
+            } catch (error) {
+                results.push(`❌ Error testing template: ${error.message}`);
+            }
+            
+            return results;
+        }
+        
+        // Test the JavaScript files for proper container targeting
+        async function testJavaScriptFiles() {
+            const results = [];
+            
+            try {
+                // Test dashboard_cards.js
+                const dashboardCardsResponse = await fetch('bigdata_risk_analyzer/static/scripts/dashboard_cards.js');
+                if (dashboardCardsResponse.ok) {
+                    const dashboardCardsJs = await dashboardCardsResponse.text();
+                    if (dashboardCardsJs.includes('document.getElementById(\'dashboardCards\')')) {
+                        results.push('✅ Dashboard cards script targets correct container');
+                    } else {
+                        results.push('❌ Dashboard cards script does NOT target correct container');
+                    }
+                } else {
+                    results.push('❌ Could not load dashboard_cards.js');
+                }
+                
+                // Test company_cards.js
+                const companyCardsResponse = await fetch('bigdata_risk_analyzer/static/scripts/company_cards.js');
+                if (companyCardsResponse.ok) {
+                    const companyCardsJs = await companyCardsResponse.text();
+                    if (companyCardsJs.includes('[data-tab-content="overview"]')) {
+                        results.push('✅ Company cards script targets Overview tab');
+                    } else {
+                        results.push('❌ Company cards script does NOT target Overview tab');
+                    }
+                } else {
+                    results.push('❌ Could not load company_cards.js');
+                }
+                
+                // Test report_renderer.js
+                const reportRendererResponse = await fetch('bigdata_risk_analyzer/static/scripts/report_renderer.js');
+                if (reportRendererResponse.ok) {
+                    const reportRendererJs = await reportRendererResponse.text();
+                    if (reportRendererJs.includes('renderDashboardCards(data)')) {
+                        results.push('✅ Report renderer calls dashboard cards function');
+                    } else {
+                        results.push('❌ Report renderer does NOT call dashboard cards function');
+                    }
+                    
+                    if (reportRendererJs.includes('renderCompanyCards(data.theme_scoring)')) {
+                        results.push('✅ Report renderer calls company cards function');
+                    } else {
+                        results.push('❌ Report renderer does NOT call company cards function');
+                    }
+                } else {
+                    results.push('❌ Could not load report_renderer.js');
+                }
+                
+            } catch (error) {
+                results.push(`❌ Error testing JavaScript files: ${error.message}`);
+            }
+            
+            return results;
+        }
+        
+        // Run all tests
+        async function runAllTests() {
+            const results = [];
+            
+            results.push('<h2 class="text-xl font-bold text-blue-400 mb-4">Template Structure Tests</h2>');
+            const templateResults = await testTemplateStructure();
+            results.push(...templateResults);
+            
+            results.push('<h2 class="text-xl font-bold text-green-400 mb-4 mt-8">JavaScript File Tests</h2>');
+            const jsResults = await testJavaScriptFiles();
+            results.push(...jsResults);
+            
+            const container = document.getElementById('testResults');
+            container.innerHTML = results.map(result => {
+                if (result.startsWith('<h2')) {
+                    return result;
+                }
+                return `<div class="p-4 bg-zinc-800 rounded-lg border border-zinc-700">${result}</div>`;
+            }).join('');
+        }
+        
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', runAllTests);
+    </script>
+</body>
+</html>

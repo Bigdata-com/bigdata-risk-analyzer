@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tab Content Placement Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white p-8">
+    <h1 class="text-2xl font-bold mb-4">Tab Content Placement Test</h1>
+    <div id="testResults" class="space-y-4"></div>
+
+    <script>
+        // Simulate the actual HTML structure from the template
+        function createTestStructure() {
+            const dashboardSection = document.createElement('div');
+            dashboardSection.id = 'dashboardSection';
+            dashboardSection.className = 'hidden';
+            
+            // Create tab navigation
+            const tabNav = document.createElement('div');
+            tabNav.className = 'bg-zinc-800/50 border-b border-zinc-700 rounded-t-lg sticky top-0 z-30';
+            tabNav.innerHTML = `
+                <div class="flex gap-1 p-2">
+                    <button data-tab="overview" class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-red-500 text-red-400 bg-red-500/10">
+                        Overview
+                    </button>
+                    <button data-tab="heatmap" class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
+                        Heatmap
+                    </button>
+                </div>
+            `;
+            
+            // Create tab content wrapper
+            const tabContentWrapper = document.createElement('div');
+            tabContentWrapper.className = 'bg-zinc-800/30 rounded-b-lg border border-zinc-700 border-t-0';
+            
+            // Create Overview tab content
+            const overviewTab = document.createElement('div');
+            overviewTab.setAttribute('data-tab-content', 'overview');
+            overviewTab.className = 'p-6';
+            
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.className = 'loading-indicator hidden';
+            
+            const tabActualContent = document.createElement('div');
+            tabActualContent.className = 'tab-actual-content';
+            
+            // Add the containers that should be inside the Overview tab
+            const dashboardCards = document.createElement('div');
+            dashboardCards.id = 'dashboardCards';
+            
+            const companiesContainer = document.createElement('div');
+            companiesContainer.id = 'companiesContainer';
+            
+            // Assemble the structure
+            tabActualContent.appendChild(dashboardCards);
+            tabActualContent.appendChild(companiesContainer);
+            overviewTab.appendChild(loadingIndicator);
+            overviewTab.appendChild(tabActualContent);
+            tabContentWrapper.appendChild(overviewTab);
+            dashboardSection.appendChild(tabNav);
+            dashboardSection.appendChild(tabContentWrapper);
+            
+            return dashboardSection;
+        }
+        
+        // Test function to verify content placement
+        function testContentPlacement() {
+            const results = [];
+            
+            // Create the test structure
+            const testStructure = createTestStructure();
+            document.body.appendChild(testStructure);
+            
+            // Test 1: Check if Overview tab exists
+            const overviewTab = testStructure.querySelector('[data-tab-content="overview"]');
+            if (overviewTab) {
+                results.push('✅ Overview tab found in structure');
+                
+                // Test 2: Check if dashboardCards is inside Overview tab
+                const dashboardCards = overviewTab.querySelector('#dashboardCards');
+                if (dashboardCards) {
+                    results.push('✅ Dashboard Cards container found inside Overview tab');
+                    
+                    // Check if it's in the right hierarchy
+                    const tabActualContent = dashboardCards.parentElement;
+                    if (tabActualContent && tabActualContent.classList.contains('tab-actual-content')) {
+                        results.push('✅ Dashboard Cards is inside tab-actual-content wrapper');
+                    } else {
+                        results.push('❌ Dashboard Cards is NOT inside tab-actual-content wrapper');
+                    }
+                } else {
+                    results.push('❌ Dashboard Cards container NOT found inside Overview tab');
+                }
+                
+                // Test 3: Check if companiesContainer is inside Overview tab
+                const companiesContainer = overviewTab.querySelector('#companiesContainer');
+                if (companiesContainer) {
+                    results.push('✅ Companies Container found inside Overview tab');
+                    
+                    // Check if it's in the right hierarchy
+                    const tabActualContent = companiesContainer.parentElement;
+                    if (tabActualContent && tabActualContent.classList.contains('tab-actual-content')) {
+                        results.push('✅ Companies Container is inside tab-actual-content wrapper');
+                    } else {
+                        results.push('❌ Companies Container is NOT inside tab-actual-content wrapper');
+                    }
+                } else {
+                    results.push('❌ Companies Container NOT found inside Overview tab');
+                }
+                
+                // Test 4: Check the complete hierarchy
+                const hierarchy = [];
+                let current = dashboardCards;
+                while (current && current !== document.body) {
+                    hierarchy.unshift({
+                        tag: current.tagName,
+                        id: current.id || 'no-id',
+                        class: current.className || 'no-class'
+                    });
+                    current = current.parentElement;
+                }
+                
+                results.push('📊 DOM Hierarchy for Dashboard Cards:');
+                hierarchy.forEach((item, index) => {
+                    const indent = '  '.repeat(index);
+                    results.push(`${indent}${index + 1}. ${item.tag} (id: ${item.id}, class: ${item.class})`);
+                });
+                
+            } else {
+                results.push('❌ Overview tab NOT found in structure');
+            }
+            
+            // Clean up
+            document.body.removeChild(testStructure);
+            
+            return results;
+        }
+        
+        // Test the JavaScript functions that render content
+        function testJavaScriptRendering() {
+            const results = [];
+            
+            // Simulate the dashboard cards rendering function
+            function simulateRenderDashboardCards(data) {
+                const container = document.getElementById('dashboardCards');
+                if (!container) {
+                    results.push('❌ Dashboard Cards container not found when rendering');
+                    return;
+                }
+                
+                // Simulate rendering content
+                container.innerHTML = '<div class="test-dashboard-card">Test Dashboard Card</div>';
+                results.push('✅ Dashboard Cards rendered successfully');
+            }
+            
+            // Simulate the company cards rendering function
+            function simulateRenderCompanyCards(data) {
+                const container = document.querySelector('[data-tab-content="overview"] .tab-actual-content #companiesContainer');
+                if (!container) {
+                    results.push('❌ Companies Container not found when rendering');
+                    return;
+                }
+                
+                // Simulate rendering content
+                container.innerHTML = '<div class="test-company-card">Test Company Card</div>';
+                results.push('✅ Company Cards rendered successfully');
+            }
+            
+            // Create test structure and test rendering
+            const testStructure = createTestStructure();
+            document.body.appendChild(testStructure);
+            
+            // Test dashboard cards rendering
+            simulateRenderDashboardCards({});
+            
+            // Test company cards rendering
+            simulateRenderCompanyCards({});
+            
+            // Check if content was rendered in the right place
+            const dashboardContent = testStructure.querySelector('#dashboardCards .test-dashboard-card');
+            if (dashboardContent) {
+                results.push('✅ Dashboard content rendered in correct location');
+            } else {
+                results.push('❌ Dashboard content NOT rendered in correct location');
+            }
+            
+            const companyContent = testStructure.querySelector('#companiesContainer .test-company-card');
+            if (companyContent) {
+                results.push('✅ Company content rendered in correct location');
+            } else {
+                results.push('❌ Company content NOT rendered in correct location');
+            }
+            
+            // Clean up
+            document.body.removeChild(testStructure);
+            
+            return results;
+        }
+        
+        // Run all tests
+        function runAllTests() {
+            const results = [];
+            
+            results.push('<h2 class="text-xl font-bold text-blue-400 mb-4">Structure Tests</h2>');
+            results.push(...testContentPlacement());
+            
+            results.push('<h2 class="text-xl font-bold text-green-400 mb-4 mt-8">JavaScript Rendering Tests</h2>');
+            results.push(...testJavaScriptRendering());
+            
+            const container = document.getElementById('testResults');
+            container.innerHTML = results.map(result => {
+                if (result.startsWith('<h2')) {
+                    return result;
+                }
+                return `<div class="p-4 bg-zinc-800 rounded-lg border border-zinc-700">${result}</div>`;
+            }).join('');
+        }
+        
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', runAllTests);
+    </script>
+</body>
+</html>

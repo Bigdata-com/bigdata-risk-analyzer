@@ -1,7 +1,6 @@
 // Dashboard Cards - Quick Insights
 function renderDashboardCards(data) {
-    const container = document.getElementById('dashboardCards');
-    if (!container || !data) return;
+    if (!data) return '';
 
     // Calculate stats
     const companies = Object.entries(data.theme_scoring || {});
@@ -59,8 +58,8 @@ function renderDashboardCards(data) {
         isDemo: currentConfig.isDemo || false
     };
     
-    // Render the 3 cards in a single row
-    container.innerHTML = `
+    // Return the 3 cards HTML for Overview tab
+    return `
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             ${renderAtAGlanceCard(totalCompanies, totalThemes, maxScore, totalEvidences, runDate, config)}
             ${renderTopCompaniesCard(sortedCompanies.slice(0, 10))}

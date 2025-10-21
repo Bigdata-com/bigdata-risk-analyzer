@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tab Structure Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white p-8">
+    <h1 class="text-2xl font-bold mb-4">Tab Structure Test</h1>
+    <div id="testResults" class="space-y-4"></div>
+
+    <script>
+        // Test the tab structure and content placement
+        function testTabStructure() {
+            const results = [];
+            
+            // Test 1: Check if Overview tab exists
+            const overviewTab = document.querySelector('[data-tab-content="overview"]');
+            if (overviewTab) {
+                results.push('✅ Overview tab found');
+                
+                // Test 2: Check if dashboardCards div exists inside Overview tab
+                const dashboardCards = overviewTab.querySelector('#dashboardCards');
+                if (dashboardCards) {
+                    results.push('✅ Dashboard Cards container found inside Overview tab');
+                    
+                    // Test 3: Check if companiesContainer exists inside Overview tab
+                    const companiesContainer = overviewTab.querySelector('#companiesContainer');
+                    if (companiesContainer) {
+                        results.push('✅ Companies Container found inside Overview tab');
+                    } else {
+                        results.push('❌ Companies Container NOT found inside Overview tab');
+                    }
+                } else {
+                    results.push('❌ Dashboard Cards container NOT found inside Overview tab');
+                }
+                
+                // Test 4: Check tab structure hierarchy
+                const tabActualContent = overviewTab.querySelector('.tab-actual-content');
+                if (tabActualContent) {
+                    results.push('✅ Tab actual content wrapper found');
+                    
+                    const children = tabActualContent.children;
+                    results.push(`📊 Tab content has ${children.length} direct children:`);
+                    for (let i = 0; i < children.length; i++) {
+                        const child = children[i];
+                        results.push(`   ${i + 1}. ${child.tagName} (id: ${child.id || 'no-id'}, class: ${child.className || 'no-class'})`);
+                    }
+                } else {
+                    results.push('❌ Tab actual content wrapper NOT found');
+                }
+            } else {
+                results.push('❌ Overview tab NOT found');
+            }
+            
+            // Test 5: Check if there are any dashboard cards outside the tab structure
+            const allDashboardCards = document.querySelectorAll('#dashboardCards');
+            if (allDashboardCards.length === 1) {
+                results.push('✅ Only one dashboardCards div found (correct)');
+            } else {
+                results.push(`❌ Found ${allDashboardCards.length} dashboardCards divs (should be exactly 1)`);
+            }
+            
+            // Test 6: Check if there are any companies containers outside the tab structure
+            const allCompaniesContainers = document.querySelectorAll('#companiesContainer');
+            if (allCompaniesContainers.length === 1) {
+                results.push('✅ Only one companiesContainer div found (correct)');
+            } else {
+                results.push(`❌ Found ${allCompaniesContainers.length} companiesContainer divs (should be exactly 1)`);
+            }
+            
+            return results;
+        }
+        
+        // Test the DOM structure
+        function runTests() {
+            const results = testTabStructure();
+            
+            const container = document.getElementById('testResults');
+            container.innerHTML = results.map(result => `
+                <div class="p-4 bg-zinc-800 rounded-lg border border-zinc-700">
+                    ${result}
+                </div>
+            `).join('');
+        }
+        
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', runTests);
+    </script>
+</body>
+</html>

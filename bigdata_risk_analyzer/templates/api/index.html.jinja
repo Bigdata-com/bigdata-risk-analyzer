@@ -98,107 +98,105 @@
   </div>
 </div>
 
-<!-- Dashboard Cards (shown after analysis) -->
+<!-- Dashboard Section (shown after analysis) -->
 <div id="dashboardSection" class="hidden">
-  <div id="dashboardCards"></div>
-  
-  <!-- Explore Results Section (Collapsible) -->
-  <div class="mt-8">
-    <button onclick="toggleExploreSection()" 
-      class="w-full flex items-center justify-between px-6 py-4 bg-zinc-800/50 hover:bg-zinc-800 rounded-lg border border-zinc-700 transition-colors group">
-      <div class="flex items-center gap-3">
-        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-        <h2 class="text-2xl font-bold text-white">Explore Detailed Results</h2>
+  <div id="resultsContainer">
+    <!-- Tab Navigation -->
+    <div class="bg-zinc-800/50 border-b border-zinc-700 rounded-t-lg sticky top-0 z-30">
+      <div class="flex gap-1 p-2">
+        <button data-tab="overview" 
+          class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-red-500 text-red-400 bg-red-500/10">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"></path>
+          </svg>
+          Overview
+        </button>
+        <button data-tab="summary" 
+          class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"></path>
+          </svg>
+          Risk Heatmap
+        </button>
+        <button data-tab="companies" 
+          class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+          </svg>
+          Companies
+        </button>
+        <button data-tab="mindmap" 
+          class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+          </svg>
+          Taxonomy
+        </button>
+        <button data-tab="evidence" 
+          class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          Evidence
+        </button>
       </div>
-      <svg id="exploreIcon" class="w-6 h-6 text-zinc-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-      </svg>
-    </button>
-    
-    <div id="exploreContent" class="hidden mt-4">
-      <div id="resultsContainer">
-        <!-- Tab Navigation -->
-        <div class="bg-zinc-800/50 border-b border-zinc-700 rounded-t-lg sticky top-0 z-30">
-          <div class="flex gap-1 p-2">
-            <button data-tab="summary" 
-              class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-red-500 text-red-400 bg-red-500/10">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"></path>
-              </svg>
-              Risk Heatmap
-            </button>
-            <button data-tab="companies" 
-              class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-              </svg>
-              Companies
-            </button>
-            <button data-tab="mindmap" 
-              class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
-              </svg>
-              Taxonomy
-            </button>
-            <button data-tab="evidence" 
-              class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-              Evidence
-            </button>
+    </div>
+
+    <!-- Tab Contents -->
+    <div class="bg-zinc-800/30 rounded-b-lg border border-zinc-700 border-t-0">
+      <!-- Overview Tab -->
+      <div data-tab-content="overview" class="p-6">
+        <div class="loading-indicator hidden">
+          <div class="flex items-center justify-center py-20">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+            <span class="ml-3 text-zinc-400">Loading overview...</span>
           </div>
         </div>
+        <div class="tab-actual-content"></div>
+      </div>
 
-        <!-- Tab Contents -->
-        <div class="bg-zinc-800/30 rounded-b-lg border border-zinc-700 border-t-0">
-          <!-- Summary Tab -->
-          <div data-tab-content="summary" class="p-6">
-            <div class="loading-indicator hidden">
-              <div class="flex items-center justify-center py-20">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
-                <span class="ml-3 text-zinc-400">Loading heatmap...</span>
-              </div>
-            </div>
-            <div class="tab-actual-content"></div>
-          </div>
-
-          <!-- Companies Tab -->
-          <div data-tab-content="companies" class="hidden p-6">
-            <div class="loading-indicator hidden">
-              <div class="flex items-center justify-center py-20">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
-                <span class="ml-3 text-zinc-400">Loading companies...</span>
-              </div>
-            </div>
-            <div class="tab-actual-content"></div>
-          </div>
-
-          <!-- Risk Taxonomy Tab -->
-          <div data-tab-content="mindmap" class="hidden p-6">
-            <div class="loading-indicator hidden">
-              <div class="flex items-center justify-center py-20">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
-                <span class="ml-3 text-zinc-400">Loading taxonomy...</span>
-              </div>
-            </div>
-            <div class="tab-actual-content"></div>
-          </div>
-
-          <!-- Evidence Tab -->
-          <div data-tab-content="evidence" class="hidden p-6">
-            <div class="loading-indicator hidden">
-              <div class="flex items-center justify-center py-20">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
-                <span class="ml-3 text-zinc-400">Loading evidence...</span>
-              </div>
-            </div>
-            <div class="tab-actual-content"></div>
+      <!-- Summary Tab -->
+      <div data-tab-content="summary" class="hidden p-6">
+        <div class="loading-indicator hidden">
+          <div class="flex items-center justify-center py-20">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+            <span class="ml-3 text-zinc-400">Loading heatmap...</span>
           </div>
         </div>
+        <div class="tab-actual-content"></div>
+      </div>
+
+      <!-- Companies Tab -->
+      <div data-tab-content="companies" class="hidden p-6">
+        <div class="loading-indicator hidden">
+          <div class="flex items-center justify-center py-20">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+            <span class="ml-3 text-zinc-400">Loading companies...</span>
+          </div>
+        </div>
+        <div class="tab-actual-content"></div>
+      </div>
+
+      <!-- Risk Taxonomy Tab -->
+      <div data-tab-content="mindmap" class="hidden p-6">
+        <div class="loading-indicator hidden">
+          <div class="flex items-center justify-center py-20">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+            <span class="ml-3 text-zinc-400">Loading taxonomy...</span>
+          </div>
+        </div>
+        <div class="tab-actual-content"></div>
+      </div>
+
+      <!-- Evidence Tab -->
+      <div data-tab-content="evidence" class="hidden p-6">
+        <div class="loading-indicator hidden">
+          <div class="flex items-center justify-center py-20">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+            <span class="ml-3 text-zinc-400">Loading evidence...</span>
+          </div>
+        </div>
+        <div class="tab-actual-content"></div>
       </div>
     </div>
   </div>
@@ -462,20 +460,6 @@
   window.closeModal = closeModal;
   window.toggleMotivation = toggleMotivation;
   
-  // Toggle explore section
-  function toggleExploreSection() {
-    const content = document.getElementById('exploreContent');
-    const icon = document.getElementById('exploreIcon');
-    
-    if (content.classList.contains('hidden')) {
-      content.classList.remove('hidden');
-      icon.style.transform = 'rotate(180deg)';
-    } else {
-      content.classList.add('hidden');
-      icon.style.transform = 'rotate(0deg)';
-    }
-  }
-  window.toggleExploreSection = toggleExploreSection;
   
   // Reset to start - clear results and show empty state
   function resetToStart() {

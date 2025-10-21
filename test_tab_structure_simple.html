@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tab Structure Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+        [data-tab-content] { display: none; }
+        [data-tab-content].active { display: block; }
+    </style>
+</head>
+<body>
+    <h1>Tab Structure Test</h1>
+    
+    <!-- Simulate the tab structure from the template -->
+    <div class="tab-navigation">
+        <button onclick="showTab('overview')">Overview</button>
+        <button onclick="showTab('heatmap')">Heatmap</button>
+        <button onclick="showTab('taxonomy')">Taxonomy</button>
+        <button onclick="showTab('evidence')">Evidence</button>
+        <button onclick="showTab('methodology')">Methodology</button>
+    </div>
+    
+    <!-- Overview Tab -->
+    <div data-tab-content="overview" class="active">
+        <div class="tab-actual-content">
+            <div id="dashboardCards">
+                <h3>Dashboard Cards Container</h3>
+                <p>This is where dashboard cards should appear</p>
+            </div>
+            <div id="companiesContainer">
+                <h3>Company Cards Container</h3>
+                <p>This is where company cards should appear</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Other tabs -->
+    <div data-tab-content="heatmap">
+        <h3>Heatmap Tab</h3>
+    </div>
+    
+    <div data-tab-content="taxonomy">
+        <h3>Taxonomy Tab</h3>
+    </div>
+    
+    <div data-tab-content="evidence">
+        <h3>Evidence Tab</h3>
+    </div>
+    
+    <div data-tab-content="methodology">
+        <h3>Methodology Tab</h3>
+    </div>
+    
+    <div class="test-section">
+        <h2>Container Tests</h2>
+        <div id="container-tests"></div>
+    </div>
+    
+    <script>
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('[data-tab-content]').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            const selectedTab = document.querySelector(`[data-tab-content="${tabName}"]`);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+        }
+        
+        function testContainers() {
+            const testDiv = document.getElementById('container-tests');
+            
+            const tests = [
+                {
+                    name: 'Dashboard Cards Container',
+                    selector: '[data-tab-content="overview"] .tab-actual-content #dashboardCards',
+                    element: document.querySelector('[data-tab-content="overview"] .tab-actual-content #dashboardCards')
+                },
+                {
+                    name: 'Company Cards Container',
+                    selector: '[data-tab-content="overview"] .tab-actual-content #companiesContainer',
+                    element: document.querySelector('[data-tab-content="overview"] .tab-actual-content #companiesContainer')
+                }
+            ];
+            
+            let html = '<h3>Container Tests:</h3><ul>';
+            tests.forEach(test => {
+                const status = test.element ? '✅ Found' : '❌ Not Found';
+                const className = test.element ? 'success' : 'error';
+                html += `<li class="${className}">${test.name}: ${status}</li>`;
+                if (test.element) {
+                    html += `<li>Selector: ${test.selector}</li>`;
+                }
+            });
+            html += '</ul>';
+            
+            testDiv.innerHTML = html;
+        }
+        
+        // Run tests when page loads
+        window.addEventListener('load', () => {
+            testContainers();
+        });
+    </script>
+</body>
+</html>

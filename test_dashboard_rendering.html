@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Rendering Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Dashboard Rendering Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Function Availability</h2>
+        <div id="function-test"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Demo Data Loading</h2>
+        <div id="demo-test"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Dashboard Cards Rendering</h2>
+        <div id="dashboardCards"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 4: Company Cards Rendering</h2>
+        <div id="companiesContainer"></div>
+    </div>
+
+    <!-- Load the scripts -->
+    <script src="bigdata_risk_analyzer/static/scripts/dashboard_cards.js"></script>
+    <script src="bigdata_risk_analyzer/static/scripts/company_cards.js"></script>
+    <script src="bigdata_risk_analyzer/static/scripts/report_renderer.js"></script>
+    
+    <script>
+        // Test 1: Check if functions are available
+        function testFunctionAvailability() {
+            const testDiv = document.getElementById('function-test');
+            
+            const tests = [
+                { name: 'renderDashboardCards', func: window.renderDashboardCards },
+                { name: 'renderCompanyCards', func: window.renderCompanyCards },
+                { name: 'renderScreenerReport', func: window.renderScreenerReport }
+            ];
+            
+            let html = '<h3>Function Availability:</h3><ul>';
+            tests.forEach(test => {
+                const status = test.func ? '✅ Available' : '❌ Missing';
+                const className = test.func ? 'success' : 'error';
+                html += `<li class="${className}">${test.name}: ${status}</li>`;
+            });
+            html += '</ul>';
+            
+            testDiv.innerHTML = html;
+        }
+        
+        // Test 2: Load demo data
+        function testDemoData() {
+            const testDiv = document.getElementById('demo-test');
+            
+            fetch('bigdata_risk_analyzer/static/data/import_tariffs.json')
+                .then(res => res.json())
+                .then(data => {
+                    testDiv.innerHTML = `
+                        <h3>Demo Data Loaded:</h3>
+                        <p class="success">✅ Data loaded successfully</p>
+                        <p>Keys: ${Object.keys(data).join(', ')}</p>
+                        <p>Risk scoring companies: ${data.risk_scoring ? Object.keys(data.risk_scoring).length : 0}</p>
+                    `;
+                    
+                    // Test 3: Try to render dashboard cards
+                    testDashboardRendering(data);
+                })
+                .catch(err => {
+                    testDiv.innerHTML = `<p class="error">❌ Failed to load demo data: ${err.message}</p>`;
+                });
+        }
+        
+        // Test 3: Test dashboard rendering
+        function testDashboardRendering(data) {
+            if (window.renderDashboardCards) {
+                try {
+                    window.renderDashboardCards(data);
+                    document.getElementById('dashboard-test').innerHTML = '<p class="success">✅ Dashboard cards rendered</p>';
+                } catch (err) {
+                    document.getElementById('dashboard-test').innerHTML = `<p class="error">❌ Dashboard cards error: ${err.message}</p>`;
+                }
+            }
+        }
+        
+        // Test 4: Test company cards rendering
+        function testCompanyCardsRendering(data) {
+            if (window.renderCompanyCards && data.risk_scoring) {
+                try {
+                    window.renderCompanyCards(data.risk_scoring);
+                    document.getElementById('company-test').innerHTML = '<p class="success">✅ Company cards rendered</p>';
+                } catch (err) {
+                    document.getElementById('company-test').innerHTML = `<p class="error">❌ Company cards error: ${err.message}</p>`;
+                }
+            }
+        }
+        
+        // Run tests when page loads
+        window.addEventListener('load', () => {
+            testFunctionAvailability();
+            testDemoData();
+        });
+    </script>
+</body>
+</html>
