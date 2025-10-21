@@ -81,7 +81,7 @@ function renderAtAGlanceCard(totalCompanies, totalThemes, maxScore, totalEvidenc
             </div>
             <div class="space-y-3">
                 <div class="flex justify-between items-center">
-                    <span class="text-zinc-300">Companies Analyzed</span>
+                    <span class="text-zinc-300">Companies Exposed</span>
                     <span class="text-2xl font-bold text-zinc-200">${totalCompanies}</span>
                 </div>
                 <div class="flex justify-between items-center">
