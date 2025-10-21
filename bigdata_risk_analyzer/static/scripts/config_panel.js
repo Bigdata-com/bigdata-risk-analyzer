@@ -73,17 +73,17 @@ function loadQuickStartTemplate(type) {
         'import-tariffs': {
             file: '/static/data/import_tariffs.json', 
             theme: 'US Import Tariffs Against China',
-            universe: 'Top 100 US'
+            universe: 'US Top 100'
         },
         'energy-cost': {
             file: '/static/data/energy-cost.json',
             theme: 'Energy Cost Increase Risk',
-            universe: 'Top 100 US'
+            universe: 'US Top 100'
         },
         'operational-technology': {
             file: '/static/data/operational_technology.json',
             theme: 'Operational & Technology Risk',
-            universe: 'Top 100 US'
+            universe: 'US Top 100'
         }
     };
     

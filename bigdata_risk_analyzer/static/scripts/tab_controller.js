@@ -34,15 +34,15 @@ class TabController {
         // Update active tab
         this.activeTab = tabName;
 
-        // Update tab buttons - using red theme for risk analyzer
+        // Update tab buttons - using blue theme for risk analyzer
         const tabButtons = document.querySelectorAll('[data-tab]');
         tabButtons.forEach(button => {
             const btnTabName = button.getAttribute('data-tab');
             if (btnTabName === tabName) {
-                button.classList.add('border-red-500', 'text-red-400', 'bg-red-500/10');
+                button.classList.add('border-blue-500', 'text-blue-400', 'bg-blue-500/10');
                 button.classList.remove('border-transparent', 'text-zinc-400', 'hover:text-zinc-200');
             } else {
-                button.classList.remove('border-red-500', 'text-red-400', 'bg-red-500/10');
+                button.classList.remove('border-blue-500', 'text-blue-400', 'bg-blue-500/10');
                 button.classList.add('border-transparent', 'text-zinc-400', 'hover:text-zinc-200');
             }
         });
