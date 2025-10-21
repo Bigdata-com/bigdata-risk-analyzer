@@ -59,16 +59,29 @@ function renderScreenerReport(rawData) {
     const newAnalysisBtn = document.getElementById('newAnalysisBtn');
     if (newAnalysisBtn) newAnalysisBtn.style.display = 'inline-flex';
 
-    // Render dashboard cards first (main insights)
+    // Render dashboard cards into Overview tab
     if (window.renderDashboardCards) {
-        renderDashboardCards(data);
+        const overviewContent = document.querySelector('[data-tab-content="overview"] .tab-actual-content');
+        if (overviewContent) {
+            overviewContent.innerHTML = renderDashboardCards(data);
+        }
     }
 
     // Note: Configuration badge is updated by the caller (form.js or config_panel.js)
     // Don't update it here to avoid overwriting demo configs
 
+    // Set Overview tab as active by default
+    if (window.tabController) {
+        window.tabController.switchTab('overview');
+    }
+
     // Render exploration tabs (detailed views)
     try {
+        // Overview tab - Dashboard cards (already rendered above)
+        if (data.theme_scoring) {
+            window.tabController.setLoadingState('overview', false);
+        }
+
         // Summary tab - Heatmap
         if (data.theme_scoring) {
             window.tabController.setLoadingState('summary', false);
