@@ -1,6 +1,6 @@
 // Heatmap Visualization - Companies vs Themes
 let currentHeatmapData = null;
-let currentSortField = 'score';
+let currentSortField = '';
 let currentSortDirection = 'desc';
 let isRiskView = false; // false = company view, true = risk view
 
@@ -159,7 +159,7 @@ function renderHeatmap(themeScoring) {
                 </div>
             </div>
             <!-- Top horizontal scrollbar -->
-            <div id="top-scrollbar" class="overflow-x-auto mb-2" style="height: 20px;">
+            <div id="top-scrollbar" class="overflow-x-auto mb-2" style="height: 20px; display: none;">
                 <div id="top-scroll-content" style="width: 100%; height: 1px;"></div>
             </div>
             <div id="table-container" class="overflow-x-auto">
@@ -260,7 +260,7 @@ function renderHeatmap(themeScoring) {
 
     container.innerHTML = html;
     
-    // Synchronize scrollbars
+    // Synchronize scrollbars (measure after layout; observe resizes)
     const topScrollbar = document.getElementById('top-scrollbar');
     const tableContainer = document.getElementById('table-container');
     
@@ -275,14 +275,21 @@ function renderHeatmap(themeScoring) {
             topScrollbar.scrollLeft = tableContainer.scrollLeft;
         });
         
-        // Update top scrollbar width to match table content
         const table = tableContainer.querySelector('table');
-        if (table) {
+        const topScrollContent = document.getElementById('top-scroll-content');
+        const measure = () => {
+            if (!table) return;
             const tableWidth = table.scrollWidth;
-            const topScrollContent = document.getElementById('top-scroll-content');
-            if (topScrollContent) {
-                topScrollContent.style.width = tableWidth + 'px';
-            }
+            if (topScrollContent) topScrollContent.style.width = tableWidth + 'px';
+            topScrollbar.style.display = tableWidth > tableContainer.clientWidth ? 'block' : 'none';
+        };
+        requestAnimationFrame(measure);
+        if (window.ResizeObserver) {
+            const ro = new ResizeObserver(measure);
+            ro.observe(tableContainer);
+            if (table) ro.observe(table);
+        } else {
+            window.addEventListener('resize', measure);
         }
     }
 }
@@ -309,12 +316,12 @@ function sortCompanies(companies, field, direction) {
         
         switch (field) {
             case 'coverage':
-                aValue = currentHeatmapData.coverageIntensity[a[0]].coverage;
-                bValue = currentHeatmapData.coverageIntensity[b[0]].coverage;
+                aValue = currentHeatmapData.coverageIntensity[a[0]]?.coverage || 0;
+                bValue = currentHeatmapData.coverageIntensity[b[0]]?.coverage || 0;
                 break;
             case 'intensity':
-                aValue = currentHeatmapData.coverageIntensity[a[0]].intensity;
-                bValue = currentHeatmapData.coverageIntensity[b[0]].intensity;
+                aValue = currentHeatmapData.coverageIntensity[a[0]]?.intensity || 0;
+                bValue = currentHeatmapData.coverageIntensity[b[0]]?.intensity || 0;
                 break;
             case 'score':
             default:
@@ -323,16 +330,18 @@ function sortCompanies(companies, field, direction) {
                 break;
         }
         
-        if (direction === 'asc') {
-            return aValue - bValue;
-        } else {
-            return bValue - aValue;
-        }
+        return direction === 'asc' ? (aValue - bValue) : (bValue - aValue);
     });
 }
 
 function sortHeatmap(field) {
-    if (!currentHeatmapData) return;
+    console.log('sortHeatmap called with field:', field);
+    console.log('currentHeatmapData:', currentHeatmapData);
+    
+    if (!currentHeatmapData) {
+        console.error('No heatmap data available for sorting');
+        return;
+    }
     
     // Toggle direction if same field, otherwise default to desc
     if (currentSortField === field) {
@@ -342,9 +351,23 @@ function sortHeatmap(field) {
         currentSortDirection = 'desc';
     }
     
+    console.log('Sorting by:', currentSortField, 'direction:', currentSortDirection);
+    
     // Re-sort and re-render
-    sortCompanies(currentHeatmapData.companies, currentSortField, currentSortDirection);
-    renderHeatmapFromData();
+    try {
+        console.log('About to call sortCompanies with:', currentHeatmapData.companies.length, 'companies');
+        console.log('First company data:', currentHeatmapData.companies[0]);
+        console.log('sortCompanies function exists:', typeof sortCompanies);
+        console.log('Calling sortCompanies...');
+        sortCompanies(currentHeatmapData.companies, currentSortField, currentSortDirection);
+        console.log('sortCompanies call completed');
+        console.log('About to call renderHeatmapFromData');
+        renderHeatmapFromData();
+        console.log('renderHeatmapFromData completed');
+    } catch (error) {
+        console.error('Error in sortHeatmap:', error);
+        console.error('Error stack:', error.stack);
+    }
 }
 
 function renderHeatmapFromData() {
@@ -407,7 +430,7 @@ function renderHeatmapFromData() {
                 </div>
             </div>
             <!-- Top horizontal scrollbar -->
-            <div id="top-scrollbar" class="overflow-x-auto mb-2" style="height: 20px;">
+            <div id="top-scrollbar" class="overflow-x-auto mb-2" style="height: 20px; display: none;">
                 <div id="top-scroll-content" style="width: 100%; height: 1px;"></div>
             </div>
             <div id="table-container" class="overflow-x-auto">
@@ -530,6 +553,13 @@ function renderHeatmapFromData() {
             const topScrollContent = document.getElementById('top-scroll-content');
             if (topScrollContent) {
                 topScrollContent.style.width = tableWidth + 'px';
+            }
+            
+            // Only show top scrollbar if table content is wider than container
+            if (tableWidth > tableContainer.clientWidth) {
+                topScrollbar.style.display = 'block';
+            } else {
+                topScrollbar.style.display = 'none';
             }
         }
     }
@@ -672,7 +702,7 @@ function renderRiskView() {
                 </div>
             </div>
             <!-- Top horizontal scrollbar -->
-            <div id="top-scrollbar" class="overflow-x-auto mb-2" style="height: 20px;">
+            <div id="top-scrollbar" class="overflow-x-auto mb-2" style="height: 20px; display: none;">
                 <div id="top-scroll-content" style="width: 100%; height: 1px;"></div>
             </div>
             <div id="table-container" class="overflow-x-auto">
@@ -792,6 +822,13 @@ function renderRiskView() {
             const topScrollContent = document.getElementById('top-scroll-content');
             if (topScrollContent) {
                 topScrollContent.style.width = tableWidth + 'px';
+            }
+            
+            // Only show top scrollbar if table content is wider than container
+            if (tableWidth > tableContainer.clientWidth) {
+                topScrollbar.style.display = 'block';
+            } else {
+                topScrollbar.style.display = 'none';
             }
         }
     }
