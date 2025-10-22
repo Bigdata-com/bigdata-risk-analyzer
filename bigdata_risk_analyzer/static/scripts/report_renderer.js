@@ -64,8 +64,18 @@ function renderScreenerReport(rawData) {
     if (dashboardSection) dashboardSection.classList.remove('hidden');
     
     // Re-initialize tab controller now that dashboard is visible
-    if (window.tabController) {
+    if (window.tabController && typeof window.tabController.reinit === 'function') {
         window.tabController.reinit();
+    } else {
+        console.warn('TabController not available, retrying...');
+        // Retry after a short delay
+        setTimeout(() => {
+            if (window.tabController && typeof window.tabController.reinit === 'function') {
+                window.tabController.reinit();
+            } else {
+                console.error('TabController still not available after retry');
+            }
+        }, 100);
     }
     
     // Show new analysis button (if it exists)
