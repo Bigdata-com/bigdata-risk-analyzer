@@ -120,6 +120,12 @@ function loadQuickStartTemplate(type) {
                 // Store the report globally
                 window.lastReport = data;
                 
+                // Show pre-computed demo indicator
+                const precomputedDemo = document.getElementById('precomputedDemo');
+                if (precomputedDemo) {
+                    precomputedDemo.classList.remove('hidden');
+                }
+                
                 // Update config badge with demo info
                 if (window.updateConfigBadge) {
                     updateConfigBadge({
@@ -185,6 +191,12 @@ function restartAnalysis() {
     const newAnalysisBtn = document.getElementById('newAnalysisBtn');
     if (showJsonBtn) showJsonBtn.style.display = 'none';
     if (newAnalysisBtn) newAnalysisBtn.style.display = 'none';
+    
+    // Hide pre-computed demo indicator
+    const precomputedDemo = document.getElementById('precomputedDemo');
+    if (precomputedDemo) {
+        precomputedDemo.classList.add('hidden');
+    }
     
     // Clear any stored report data
     if (window.lastReport) {

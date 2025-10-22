@@ -12,6 +12,12 @@ document.getElementById('riskForm').onsubmit = async function (e) {
     if (showJsonBtn) showJsonBtn.style.display = 'none';
     lastReport = null;
     
+    // Hide pre-computed demo indicator
+    const precomputedDemo = document.getElementById('precomputedDemo');
+    if (precomputedDemo) {
+        precomputedDemo.classList.add('hidden');
+    }
+    
     // Reset frontend: hide results, show empty state, clear dashboard
     const emptyState = document.getElementById('emptyState');
     const dashboardSection = document.getElementById('dashboardSection');
