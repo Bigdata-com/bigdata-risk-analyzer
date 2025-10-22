@@ -117,15 +117,25 @@ function renderCompanyScreener(themeScoring) {
                             <input type="text" id="searchCompany" placeholder="Company name or ticker..."
                                    class="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                                    onkeyup="handleSearchInput()">
-                            <svg class="absolute right-3 top-2.5 w-4 h-4 text-zinc-400">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
                         </div>
                     </div>
                     
-                    <!-- Sector Filter -->
+                    <!-- Top N Filter -->
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-zinc-300 mb-2">Sector</label>
+                        <label class="block text-sm font-medium text-zinc-300 mb-2">Show Results</label>
+                        <select id="filterTopN" onchange="handleFilterChange()" 
+                                class="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white text-sm">
+                            <option value="">All Companies</option>
+                            <option value="10">Top 10</option>
+                            <option value="20">Top 20</option>
+                            <option value="50">Top 50</option>
+                            <option value="100">Top 100</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Sector Filter -->
+                    <div class="mb-8">
+                        <label class="block text-sm font-medium text-zinc-300 mb-3">Sector</label>
                         <div class="space-y-2 max-h-32 overflow-y-auto">
                             ${sectors.map(sector => `
                                 <label class="flex items-center space-x-2 cursor-pointer hover:bg-zinc-700/50 p-1 rounded">
@@ -137,8 +147,8 @@ function renderCompanyScreener(themeScoring) {
                     </div>
                     
                     <!-- Industry Filter -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-zinc-300 mb-2">Industry</label>
+                    <div class="mb-8">
+                        <label class="block text-sm font-medium text-zinc-300 mb-3">Industry</label>
                         <div class="space-y-2 max-h-32 overflow-y-auto">
                             ${industries.map(industry => `
                                 <label class="flex items-center space-x-2 cursor-pointer hover:bg-zinc-700/50 p-1 rounded">
@@ -150,8 +160,8 @@ function renderCompanyScreener(themeScoring) {
                     </div>
                     
                     <!-- Risk Factors -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-zinc-300 mb-2">Risk Factors</label>
+                    <div class="mb-8">
+                        <label class="block text-sm font-medium text-zinc-300 mb-3">Risk Factors</label>
                         <div class="space-y-2 max-h-32 overflow-y-auto">
                             ${Array.from(allThemes).map(theme => `
                                 <label class="flex items-center space-x-2 cursor-pointer hover:bg-zinc-700/50 p-1 rounded">
@@ -162,18 +172,6 @@ function renderCompanyScreener(themeScoring) {
                         </div>
                     </div>
                     
-                    <!-- Top N Filter -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-zinc-300 mb-2">Show Top</label>
-                        <select id="filterTopN" onchange="handleFilterChange()" 
-                                class="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white text-sm">
-                            <option value="">All Companies</option>
-                            <option value="10">Top 10</option>
-                            <option value="20">Top 20</option>
-                            <option value="50">Top 50</option>
-                            <option value="100">Top 100</option>
-                        </select>
-                    </div>
                 </div>
                 
                 <!-- Main Content Area -->
@@ -265,20 +263,20 @@ function renderCompanyScreener(themeScoring) {
                 </td>
                 <td class="px-3 py-3 text-center border-b border-zinc-700">
                     <button onclick="toggleScreenerCompanyThemes(this, event)" 
-                        class="px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded text-orange-400 text-sm font-medium transition-colors flex items-center gap-2">
+                        class="px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded text-orange-400 text-sm font-medium transition-colors flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                         </svg>
-                        View Risks
+                        Risks
                     </button>
                 </td>
                 <td class="px-3 py-3 text-center border-b border-zinc-700">
                     <button onclick="toggleScreenerCompanyInsights(this, event)" 
-                        class="px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded text-amber-400 text-sm font-medium transition-colors flex items-center gap-2">
+                        class="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded text-amber-400 text-sm font-medium transition-colors flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                         </svg>
-                        View Insights
+                        Insights
                     </button>
                 </td>
             </tr>
@@ -305,7 +303,7 @@ function renderCompanyScreener(themeScoring) {
             </tr>
             <tr class="screener-insights-section hidden bg-zinc-900/30">
                 <td colspan="10" class="px-4 py-2">
-                    <div class="text-zinc-300 text-xs leading-relaxed">
+                    <div class="text-zinc-300 text-base leading-relaxed">
                         ${escapeHtml(scoring.motivation || 'No insights available')}
                     </div>
                 </td>
@@ -486,20 +484,20 @@ function renderScreenerTable(companies) {
                 </td>
                 <td class="px-3 py-3 text-center border-b border-zinc-700">
                     <button onclick="toggleScreenerCompanyThemes(this, event)" 
-                        class="px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded text-orange-400 text-sm font-medium transition-colors flex items-center gap-2">
+                        class="px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded text-orange-400 text-sm font-medium transition-colors flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                         </svg>
-                        View Risks
+                        Risks
                     </button>
                 </td>
                 <td class="px-3 py-3 text-center border-b border-zinc-700">
                     <button onclick="toggleScreenerCompanyInsights(this, event)" 
-                        class="px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded text-amber-400 text-sm font-medium transition-colors flex items-center gap-2">
+                        class="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded text-amber-400 text-sm font-medium transition-colors flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                         </svg>
-                        View Insights
+                        Insights
                     </button>
                 </td>
             </tr>
@@ -526,7 +524,7 @@ function renderScreenerTable(companies) {
             </tr>
             <tr class="screener-insights-section hidden bg-zinc-900/30">
                 <td colspan="10" class="px-4 py-2">
-                    <div class="text-zinc-300 text-xs leading-relaxed">
+                    <div class="text-zinc-300 text-base leading-relaxed">
                         ${escapeHtml(scoring.motivation || 'No insights available')}
                     </div>
                 </td>

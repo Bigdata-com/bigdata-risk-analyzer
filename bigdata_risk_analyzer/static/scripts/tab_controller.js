@@ -8,7 +8,8 @@ class TabController {
             summary: false,
             screener: false,
             mindmap: false,
-            evidence: false
+            evidence: false,
+            'how-it-works': false
         };
     }
 
