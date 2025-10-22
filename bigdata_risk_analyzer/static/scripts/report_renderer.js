@@ -63,7 +63,12 @@ function renderScreenerReport(rawData) {
     if (emptyState) emptyState.classList.add('hidden');
     if (dashboardSection) dashboardSection.classList.remove('hidden');
     
-    // Show new analysis button
+    // Re-initialize tab controller now that dashboard is visible
+    if (window.tabController) {
+        window.tabController.reinit();
+    }
+    
+    // Show new analysis button (if it exists)
     const newAnalysisBtn = document.getElementById('newAnalysisBtn');
     if (newAnalysisBtn) newAnalysisBtn.style.display = 'inline-flex';
 

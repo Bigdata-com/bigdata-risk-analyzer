@@ -9,7 +9,7 @@ document.getElementById('riskForm').onsubmit = async function (e) {
         closeConfigPanel();
     }
     
-    showJsonBtn.style.display = 'none';
+    if (showJsonBtn) showJsonBtn.style.display = 'none';
     lastReport = null;
     
     // Reset frontend: hide results, show empty state, clear dashboard
@@ -209,7 +209,7 @@ document.getElementById('riskForm').onsubmit = async function (e) {
                             if (window.renderRiskReport) {
                                 renderRiskReport(statusData.report);
                             }
-                            showJsonBtn.style.display = 'inline-block';
+                            if (showJsonBtn) showJsonBtn.style.display = 'inline-block';
                             
                             // Show new analysis button
                             const newAnalysisBtn = document.getElementById('newAnalysisBtn');

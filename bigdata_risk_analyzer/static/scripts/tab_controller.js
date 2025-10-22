@@ -19,8 +19,17 @@ class TabController {
         this.tabsInitialized = true;
     }
 
+    reinit() {
+        // Re-initialize tab listeners when dashboard becomes visible
+        this.setupTabListeners();
+    }
+
     setupTabListeners() {
         const tabButtons = document.querySelectorAll('[data-tab]');
+        if (tabButtons.length === 0) {
+            console.warn('No tab buttons found. Tab navigation may not be available yet.');
+            return;
+        }
         tabButtons.forEach(button => {
             button.addEventListener('click', (e) => {
                 e.preventDefault();
