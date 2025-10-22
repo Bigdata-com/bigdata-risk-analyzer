@@ -244,39 +244,23 @@
         <!-- Left: Risk Scenario & Universe Info -->
         <div class="flex items-center gap-6">
           <div class="flex items-center gap-3">
-            <svg class="w-5 h-5 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
             <span class="text-base font-semibold text-zinc-200">Risk Scenario:</span>
             <span class="text-lg font-bold text-white" id="currentRiskScenario">-</span>
           </div>
           <div class="w-px h-6 bg-zinc-500/60"></div>
           <div class="flex items-center gap-3">
-            <svg class="w-5 h-5 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-            </svg>
             <span class="text-base font-semibold text-zinc-200">Universe:</span>
             <span class="text-lg font-bold text-white" id="currentUniverse">-</span>
           </div>
-        </div>
-        
-        <!-- Right: Demo Warning + Action Buttons -->
-        <div class="flex items-center gap-4">
-          <!-- Demo Mode Warning -->
-          <div id="demoWarning" class="{% if not demo_mode %}hidden{% endif %} flex items-center gap-2 px-3 py-2 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-yellow-400 text-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-            </svg>
-            <span>Demo mode activated. For access to the full version, please contact support@bigdata.com or deploy your own version from GitHub (link @https://github.com/Bigdata-com/bigdata-risk-analyzer ) , or use our deployment service (deploy.labs.bigdata.com)</span>
-          </div>
           
-          <!-- Pre-computed Demo Notification -->
-          <div id="precomputedDemo" class="hidden flex items-center gap-2 px-3 py-2 bg-blue-500/10 border border-blue-500/30 rounded-lg text-blue-400 text-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
+          <!-- Pre-computed Demo Indicator (subtle) -->
+          <div id="precomputedDemo" class="hidden flex items-center gap-2 px-3 py-1.5 bg-orange-500/5 border border-orange-500/20 rounded-md text-orange-300 text-xs">
             <span>Pre-computed demo</span>
           </div>
+        </div>
+        
+        <!-- Right: Action Buttons -->
+        <div class="flex items-center gap-4">
           
           <!-- Action Buttons -->
           <div class="flex items-center gap-3">
