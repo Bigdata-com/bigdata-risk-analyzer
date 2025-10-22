@@ -671,7 +671,7 @@ function renderRiskView() {
                         </svg>
                         Risk-Company Heatmap
                     </h3>
-                    <p class="text-zinc-400 text-sm mt-1">Risk exposure across all companies</p>
+                    <p class="text-zinc-400 text-sm mt-1">Risk exposure scores across all companies</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <button onclick="flipHeatmapView()" 
