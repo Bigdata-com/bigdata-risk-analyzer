@@ -9,7 +9,8 @@ class TabController {
             screener: false,
             mindmap: false,
             evidence: false,
-            'how-it-works': false
+            'how-it-works': false,
+            'report-generator': false
         };
     }
 
