@@ -4,6 +4,17 @@ let currentSortField = '';
 let currentSortDirection = 'desc';
 let isRiskView = false; // false = company view, true = risk view
 
+// Numeric composite score helper (shared)
+function getNumericCompositeScore(scoring) {
+    const raw = scoring && scoring.composite_score;
+    let n = typeof raw === 'string' ? parseFloat(raw.replace(/,/g, '').trim()) : Number(raw);
+    if (!Number.isFinite(n)) {
+        const themeValues = scoring && scoring.themes ? Object.values(scoring.themes) : [];
+        n = themeValues.reduce((sum, v) => sum + (Number(v) || 0), 0);
+    }
+    return n;
+}
+
 function renderHeatmap(themeScoring) {
     const container = document.querySelector('[data-tab-content="summary"] .tab-actual-content');
     if (!container || !themeScoring) return;
@@ -95,7 +106,7 @@ function renderHeatmap(themeScoring) {
     currentHeatmapData = { companies, themes, maxScore, coverageIntensity };
     
     // Sort companies by current sort field
-    sortCompanies(companies, currentSortField, currentSortDirection);
+    sortHeatmapCompanies(companies, currentSortField, currentSortDirection);
 
     // Create HTML with only the heatmap
     let html = `
@@ -215,7 +226,8 @@ function renderHeatmap(themeScoring) {
         html += `<td class="sticky left-[260px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-medium text-purple-400 border-b border-zinc-700">${intensityPercent}%</td>`;
 
         // Composite score (update sticky position)
-        html += `<td class="sticky left-[320px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-bold text-red-400 border-b border-zinc-700">${escapeHtml(scoring.composite_score)}</td>`;
+        const compositeDisplay = getNumericCompositeScore(scoring);
+        html += `<td class="sticky left-[320px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-bold text-red-400 border-b border-zinc-700">${compositeDisplay}</td>`;
         
         // Theme scores (ordered by popularity)
         themes.forEach(theme => {
@@ -310,7 +322,10 @@ function hideHeatmapTooltip(type) {
 }
 
 // Sorting functions
-function sortCompanies(companies, field, direction) {
+function sortHeatmapCompanies(companies, field, direction) {
+    // Do not sort on initial render when no field selected
+    if (!field) return;
+    
     companies.sort((a, b) => {
         let aValue, bValue;
         
@@ -325,19 +340,22 @@ function sortCompanies(companies, field, direction) {
                 break;
             case 'score':
             default:
-                aValue = a[1].composite_score || 0;
-                bValue = b[1].composite_score || 0;
+                // Simple numeric conversion for composite_score
+                aValue = Number(a[1].composite_score) || 0;
+                bValue = Number(b[1].composite_score) || 0;
                 break;
         }
         
-        return direction === 'asc' ? (aValue - bValue) : (bValue - aValue);
+        const diff = direction === 'asc' ? (aValue - bValue) : (bValue - aValue);
+        if (diff !== 0) return diff;
+        // Tie-breaker by company name (stable ordering)
+        const nameA = a[0] || '';
+        const nameB = b[0] || '';
+        return nameA.localeCompare(nameB);
     });
 }
 
 function sortHeatmap(field) {
-    console.log('sortHeatmap called with field:', field);
-    console.log('currentHeatmapData:', currentHeatmapData);
-    
     if (!currentHeatmapData) {
         console.error('No heatmap data available for sorting');
         return;
@@ -351,23 +369,9 @@ function sortHeatmap(field) {
         currentSortDirection = 'desc';
     }
     
-    console.log('Sorting by:', currentSortField, 'direction:', currentSortDirection);
-    
     // Re-sort and re-render
-    try {
-        console.log('About to call sortCompanies with:', currentHeatmapData.companies.length, 'companies');
-        console.log('First company data:', currentHeatmapData.companies[0]);
-        console.log('sortCompanies function exists:', typeof sortCompanies);
-        console.log('Calling sortCompanies...');
-        sortCompanies(currentHeatmapData.companies, currentSortField, currentSortDirection);
-        console.log('sortCompanies call completed');
-        console.log('About to call renderHeatmapFromData');
-        renderHeatmapFromData();
-        console.log('renderHeatmapFromData completed');
-    } catch (error) {
-        console.error('Error in sortHeatmap:', error);
-        console.error('Error stack:', error.stack);
-    }
+    sortHeatmapCompanies(currentHeatmapData.companies, currentSortField, currentSortDirection);
+    renderHeatmapFromData();
 }
 
 function renderHeatmapFromData() {
@@ -486,7 +490,8 @@ function renderHeatmapFromData() {
         html += `<td class="sticky left-[260px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-medium text-purple-400 border-b border-zinc-700">${intensityPercent}%</td>`;
 
         // Composite score (update sticky position)
-        html += `<td class="sticky left-[320px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-bold text-red-400 border-b border-zinc-700">${escapeHtml(scoring.composite_score)}</td>`;
+        const compositeDisplay2 = getNumericCompositeScore(scoring);
+        html += `<td class="sticky left-[320px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-bold text-red-400 border-b border-zinc-700">${compositeDisplay2}</td>`;
         
         // Theme scores (ordered by popularity)
         themes.forEach(theme => {

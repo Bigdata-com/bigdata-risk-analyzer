@@ -388,8 +388,9 @@ function sortCompanies(companies, field, direction) {
                 valueB = (scoringB.industry || '').toLowerCase();
                 break;
             case 'composite':
-                valueA = scoringA.composite_score || 0;
-                valueB = scoringB.composite_score || 0;
+                // Convert to numbers for proper sorting
+                valueA = Number(scoringA.composite_score) || 0;
+                valueB = Number(scoringB.composite_score) || 0;
                 break;
             case 'coverage':
                 valueA = currentScreenerData.coverageIntensity[nameA].coverage;

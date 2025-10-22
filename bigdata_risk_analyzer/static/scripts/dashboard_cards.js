@@ -351,9 +351,9 @@ function renderAtAGlanceCard(totalCompanies, totalThemes, maxScore, totalEvidenc
                         <div class="flex justify-between items-center">
                             <span class="text-xs text-zinc-400">Report generated on</span>
                             <span class="text-sm font-medium text-zinc-200">10/15/2025</span>
-                        </div>
-                    </div>
-                </div>
+                            </div>
+                            </div>
+                            </div>
                 
                 <!-- Score Distribution Section -->
                 <div class="pt-4 mt-4 border-t-2 border-zinc-600/50">
@@ -382,37 +382,37 @@ function renderTopCompaniesCard(topCompanies) {
                     <!-- Rank Column -->
                     <div class="col-span-1 flex items-center justify-center">
                         <div class="flex items-center justify-center w-6 h-6 ${medalColor} font-bold text-sm">
-                            ${idx + 1}
+                        ${idx + 1}
                         </div>
                     </div>
                     <!-- Company Column -->
                     <div class="col-span-5 flex items-center gap-2 min-w-0">
-                        <span class="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded font-mono">${escapeHtml(scoring.ticker || 'N/A')}</span>
-                        <span class="text-white text-sm truncate">${escapeHtml(companyName)}</span>
-                    </div>
+                            <span class="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded font-mono">${escapeHtml(scoring.ticker || 'N/A')}</span>
+                            <span class="text-white text-sm truncate">${escapeHtml(companyName)}</span>
+                        </div>
                     <!-- Score Column -->
                     <div class="col-span-2 flex items-center justify-center">
                         <div class="text-lg font-bold text-red-400">${scoring.composite_score}</div>
                     </div>
                     <!-- Risks Column -->
                     <div class="col-span-2 flex items-center justify-center">
-                        <button onclick="toggleDashboardCompanyThemes(this, event)" 
+                    <button onclick="toggleDashboardCompanyThemes(this, event)" 
                             class="px-2 py-1 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded text-orange-400 text-xs font-medium transition-colors flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                            </svg>
-                            ${themeCount}
-                        </button>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                        ${themeCount}
+                    </button>
                     </div>
                     <!-- Insights Column -->
                     <div class="col-span-2 flex items-center justify-center">
-                        <button onclick="toggleDashboardCompanyInsights(this, event)" 
+                    <button onclick="toggleDashboardCompanyInsights(this, event)" 
                             class="px-2 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded text-amber-400 text-xs font-medium transition-colors flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                            </svg>
-                            Insights
-                        </button>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        Insights
+                    </button>
                     </div>
                 </div>
                 <div class="themes-section hidden bg-zinc-900/30 px-4 py-2">
@@ -482,7 +482,7 @@ function renderTopThemesCard(topThemes, totalCompanies) {
                     <!-- Rank Column -->
                     <div class="col-span-1 flex items-center justify-center">
                         <div class="flex items-center justify-center w-6 h-6 ${medalColor} font-bold text-sm">
-                            ${idx + 1}
+                        ${idx + 1}
                         </div>
                     </div>
                     <!-- Risk Factor Column -->
