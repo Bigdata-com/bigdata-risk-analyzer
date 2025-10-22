@@ -259,6 +259,7 @@ function downloadFile(blob, filename) {
 }
 
 // Make functions globally accessible
+window.renderEvidenceTable = renderEvidenceTable;
 window.applyEvidenceFilters = applyEvidenceFilters;
 window.clearEvidenceFilters = clearEvidenceFilters;
 window.changeEvidencePage = changeEvidencePage;

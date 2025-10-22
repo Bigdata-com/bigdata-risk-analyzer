@@ -35,7 +35,7 @@ class TestLayoutRestructure:
         # Verify tab order: Overview, Risk Heatmap, Companies, Taxonomy, Evidence
         tab_buttons = content.split('data-tab="overview"')[1].split('</div>')[0]
         assert 'data-tab="summary"' in tab_buttons, "Summary tab should come after Overview"
-        assert 'data-tab="companies"' in tab_buttons, "Companies tab should exist"
+        assert 'data-tab="screener"' in tab_buttons, "Company Screener tab should exist"
         assert 'data-tab="mindmap"' in tab_buttons, "Mindmap tab should exist"
         assert 'data-tab="evidence"' in tab_buttons, "Evidence tab should exist"
         

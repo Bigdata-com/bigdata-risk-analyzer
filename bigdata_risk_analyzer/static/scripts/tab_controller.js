@@ -6,7 +6,7 @@ class TabController {
         this.loadingStates = {
             overview: false,
             summary: false,
-            companies: false,
+            screener: false,
             mindmap: false,
             evidence: false
         };
