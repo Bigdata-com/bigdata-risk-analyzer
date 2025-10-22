@@ -129,11 +129,11 @@ function loadQuickStartTemplate(type) {
                     });
                 }
                 
-                // Show JSON button
+                // Show JSON button (if it exists)
                 const showJsonBtn = document.getElementById('showJsonBtn');
                 if (showJsonBtn) showJsonBtn.style.display = 'inline-block';
                 
-                // Show new analysis button
+                // Show new analysis button (if it exists)
                 const newAnalysisBtn = document.getElementById('newAnalysisBtn');
                 if (newAnalysisBtn) newAnalysisBtn.style.display = 'inline-flex';
                 
@@ -147,6 +147,48 @@ function loadQuickStartTemplate(type) {
                 console.error('Error loading demo:', err);
                 alert('Failed to load demo data: ' + err.message);
             });
+    }
+}
+
+// New Analysis function - opens the configuration panel
+function startNewAnalysis() {
+    toggleConfigPanel();
+}
+
+// Restart Analysis function - resets to initial landing page
+function restartAnalysis() {
+    // Hide dashboard section
+    const dashboardSection = document.getElementById('dashboardSection');
+    if (dashboardSection) {
+        dashboardSection.classList.add('hidden');
+    }
+    
+    // Show empty state
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) {
+        emptyState.style.display = 'block';
+    }
+    
+    // Clear dashboard content
+    const dashboardCards = document.getElementById('dashboardCards');
+    if (dashboardCards) {
+        dashboardCards.innerHTML = '';
+    }
+    
+    // Reset tabs
+    if (window.tabController) {
+        window.tabController.reset();
+    }
+    
+    // Hide JSON button and new analysis button (if they exist)
+    const showJsonBtn = document.getElementById('showJsonBtn');
+    const newAnalysisBtn = document.getElementById('newAnalysisBtn');
+    if (showJsonBtn) showJsonBtn.style.display = 'none';
+    if (newAnalysisBtn) newAnalysisBtn.style.display = 'none';
+    
+    // Clear any stored report data
+    if (window.lastReport) {
+        window.lastReport = null;
     }
 }
 
@@ -195,3 +237,5 @@ window.toggleConfigPanel = toggleConfigPanel;
 window.closeConfigPanel = closeConfigPanel;
 window.loadQuickStartTemplate = loadQuickStartTemplate;
 window.updateConfigBadge = updateConfigBadge;
+window.startNewAnalysis = startNewAnalysis;
+window.restartAnalysis = restartAnalysis;
