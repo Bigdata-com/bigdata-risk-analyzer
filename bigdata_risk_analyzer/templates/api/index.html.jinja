@@ -3,6 +3,91 @@
 
 <div id="infoModalsContainer"></div>
 
+<!-- Heatmap Guide Modal -->
+<div id="heatmapGuideModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-zinc-900 border border-zinc-700 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-6">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-white">How to Read This Heatmap</h2>
+        <button onclick="hideHeatmapGuide()" class="text-zinc-400 hover:text-white transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Score Explanations -->
+      <div class="space-y-6">
+        <!-- Coverage Score -->
+        <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-blue-400 mb-2">Coverage Score</h3>
+          <p class="text-zinc-300 text-sm mb-2">
+            <strong>Breadth of risk exposure.</strong> Shows what percentage of risk types affect this company.
+          </p>
+          <p class="text-zinc-400 text-xs">
+            Formula: (Number of risks with evidence) ÷ (Total number of risks) × 100%
+          </p>
+          <p class="text-zinc-400 text-xs mt-1">
+            Example: If a company is exposed to 3 out of 10 risk types, Coverage Score = 30%
+          </p>
+        </div>
+        
+        <!-- Intensity Score -->
+        <div class="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-purple-400 mb-2">Intensity Score</h3>
+          <p class="text-zinc-300 text-sm mb-2">
+            <strong>Depth of risk exposure.</strong> Shows how much evidence exists relative to the maximum for each risk.
+          </p>
+          <p class="text-zinc-400 text-xs">
+            Formula: Average of (Company's evidence for each risk) ÷ (Maximum evidence for that risk across all companies)
+          </p>
+          <p class="text-zinc-400 text-xs mt-1">
+            Example: If a company has 50% of the maximum evidence for each risk on average, Intensity Score = 50%
+          </p>
+        </div>
+        
+        <!-- Raw Score -->
+        <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-red-400 mb-2">Raw Score</h3>
+          <p class="text-zinc-300 text-sm mb-2">
+            <strong>Total evidence sum.</strong> The original composite score before normalization.
+          </p>
+          <p class="text-zinc-400 text-xs">
+            Formula: Sum of all evidence scores across all risk types for this company
+          </p>
+          <p class="text-zinc-400 text-xs mt-1">
+            Example: If a company has evidence scores of [5, 3, 2] for 3 risks, Raw Score = 10
+          </p>
+        </div>
+        
+        <!-- Risk-Based Scoring (for future implementation) -->
+        <div class="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-green-400 mb-2">Risk-Based Scoring</h3>
+          <p class="text-zinc-300 text-sm mb-2">
+            <strong>When viewing by risks:</strong> Coverage and Intensity scores show how risks affect companies.
+          </p>
+          <p class="text-zinc-400 text-xs">
+            • <strong>Risk Coverage:</strong> Percentage of companies exposed to this risk<br>
+            • <strong>Risk Intensity:</strong> Average normalized evidence per company for this risk
+          </p>
+        </div>
+        
+        <!-- Interactive Features -->
+        <div class="bg-zinc-800/50 border border-zinc-600 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-white mb-2">Interactive Features</h3>
+          <ul class="text-zinc-300 text-sm space-y-1">
+            <li>• <strong>Click column headers</strong> to sort by Coverage, Intensity, or Raw Score</li>
+            <li>• <strong>Click heatmap cells</strong> to filter evidence by company and risk</li>
+            <li>• <strong>Hover over cells</strong> to see detailed scores</li>
+            <li>• <strong>Toggle view</strong> between company-focused and risk-focused analysis</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Header with Config Button -->
 <header class="flex items-center justify-between mb-8 pb-4 border-b border-zinc-700">
   <div class="flex items-center gap-4">
