@@ -165,6 +165,16 @@
     </div>
   </div>
   <div class="flex items-center gap-3">
+    <!-- Deploy Button (Demo Mode Only) -->
+    <button id="deployBtn" style="display:{% if demo_mode %}flex{% else %}none{% endif %};"
+      class="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors shadow-lg"
+      onclick="handleDeployClick()">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+      </svg>
+      Deploy
+    </button>
+    
     <button onclick="toggleConfigPanel()" 
       class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-lg">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,6 +330,13 @@
           </svg>
           Evidence
         </button>
+        <button data-tab="how-it-works" 
+          class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          How it Works
+        </button>
       </div>
     </div>
 
@@ -378,6 +395,312 @@
           </div>
         </div>
         <div class="tab-actual-content"></div>
+      </div>
+      
+      <!-- How it Works Tab -->
+      <div data-tab-content="how-it-works" class="hidden p-6">
+        <div class="max-w-6xl mx-auto">
+          <!-- Header -->
+          <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-white mb-4">How the Risk Analyzer Works</h2>
+            <p class="text-lg text-zinc-300 max-w-3xl mx-auto">
+              The Risk Analyzer combines <strong>hybrid semantic search</strong>, <strong>risk factor taxonomies</strong>, and <strong>structured validation techniques</strong> to transform unstructured data into actionable risk intelligence.
+            </p>
+          </div>
+
+          <!-- Methodology Overview -->
+          <div class="grid md:grid-cols-2 gap-8 mb-12">
+            <div class="bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+              <h3 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                </svg>
+                Why It Matters
+              </h3>
+              <p class="text-zinc-300 text-sm leading-relaxed">
+                Understanding how companies are exposed to highly uncertain scenarios and risk channels, like geopolitical and economic risks, is critical for informed decision-making. As shifting policies, sanctions, and trade barriers redefine market dynamics, organizations must proactively assess their vulnerability to emerging threats.
+              </p>
+            </div>
+            
+            <div class="bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+              <h3 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                What It Does
+              </h3>
+              <p class="text-zinc-300 text-sm leading-relaxed">
+                The Risk Analyzer systematically analyzes corporate exposure to specific risk channels using unstructured data from news, earnings calls, and regulatory filings. It delivers targeted extraction of risk signals, standardized exposure metrics, and actionable insights for investment strategies.
+              </p>
+            </div>
+          </div>
+
+          <!-- Process Steps -->
+          <div class="mb-12">
+            <h3 class="text-2xl font-bold text-white mb-8 text-center">The Analysis Process</h3>
+            <div class="space-y-6">
+              
+              <!-- Step 1 -->
+              <div class="flex gap-6 items-start">
+                <div class="flex-shrink-0 w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">1</div>
+                <div class="flex-1 bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+                  <h4 class="text-lg font-semibold text-white mb-3">Taxonomy Creation</h4>
+                  <p class="text-zinc-300 text-sm leading-relaxed mb-4">
+                    The system automatically generates a hierarchical risk taxonomy using AI, breaking down complex risk scenarios into well-defined risks and sub-scenarios for targeted analysis.
+                  </p>
+                  <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                    <p class="text-blue-300 text-xs font-medium">Example: "US Import Tariffs against China" → Trade Relations, Supply Chain, Market Access, IP Risks</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="flex gap-6 items-start">
+                <div class="flex-shrink-0 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-lg">2</div>
+                <div class="flex-1 bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+                  <h4 class="text-lg font-semibold text-white mb-3">Content Retrieval</h4>
+                  <p class="text-zinc-300 text-sm leading-relaxed mb-4">
+                    Leverages hybrid semantic search to retrieve relevant content from massive unstructured datasets, including news articles, earnings calls, and regulatory filings.
+                  </p>
+                  <div class="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+                    <p class="text-green-300 text-xs font-medium">Searches across multiple document types with configurable date ranges and source filtering</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 3 -->
+              <div class="flex gap-6 items-start">
+                <div class="flex-shrink-0 w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold text-lg">3</div>
+                <div class="flex-1 bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+                  <h4 class="text-lg font-semibold text-white mb-3">Semantic Labeling</h4>
+                  <p class="text-zinc-300 text-sm leading-relaxed mb-4">
+                    Uses AI to analyze each text chunk and determine its relevance to specific risk sub-scenarios. Filters out content that doesn't explicitly link companies to risk factors.
+                  </p>
+                  <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+                    <p class="text-amber-300 text-xs font-medium">Each piece of evidence is validated for relevance and context before scoring</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 4 -->
+              <div class="flex gap-6 items-start">
+                <div class="flex-shrink-0 w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">4</div>
+                <div class="flex-1 bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+                  <h4 class="text-lg font-semibold text-white mb-3">Risk Scoring</h4>
+                  <p class="text-zinc-300 text-sm leading-relaxed mb-4">
+                    Calculates standardized exposure metrics for each company, including composite scores, coverage scores, and intensity scores to enable cross-firm comparison.
+                  </p>
+                  <div class="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
+                    <p class="text-purple-300 text-xs font-medium">Scores are normalized and comparable across companies, sectors, and time periods</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Key Features -->
+          <div class="mb-12">
+            <h3 class="text-2xl font-bold text-white mb-8 text-center">Key Features</h3>
+            <div class="grid md:grid-cols-3 gap-6">
+              <div class="bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+                <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
+                  <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </div>
+                <h4 class="text-lg font-semibold text-white mb-3">Targeted Extraction</h4>
+                <p class="text-zinc-300 text-sm">Extracts risk signals and supporting evidence from massive unstructured datasets with precision.</p>
+              </div>
+              
+              <div class="bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+                <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-4">
+                  <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                  </svg>
+                </div>
+                <h4 class="text-lg font-semibold text-white mb-3">Standardized Metrics</h4>
+                <p class="text-zinc-300 text-sm">Provides consistent exposure metrics to compare risk across firms, sectors, and portfolios.</p>
+              </div>
+              
+              <div class="bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+                <div class="w-12 h-12 bg-amber-500/20 rounded-lg flex items-center justify-center mb-4">
+                  <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                  </svg>
+                </div>
+                <h4 class="text-lg font-semibold text-white mb-3">Actionable Insights</h4>
+                <p class="text-zinc-300 text-sm">Generates insights that inform investment strategies and enterprise risk decisions.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Score Explanation -->
+          <div class="mb-12">
+            <h3 class="text-2xl font-bold text-white mb-8 text-center">Understanding the Scores</h3>
+            <div class="grid md:grid-cols-3 gap-6">
+              <div class="bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+                <h4 class="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                  <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+                  Composite Score
+                </h4>
+                <p class="text-zinc-300 text-sm leading-relaxed mb-3">
+                  The sum of all risk factor scores for a company, representing total exposure to the risk scenario.
+                </p>
+                <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                  <p class="text-blue-300 text-xs"><strong>Calculation:</strong> Sum of all risk factor scores for comprehensive exposure assessment</p>
+                </div>
+              </div>
+              
+              <div class="bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+                <h4 class="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                  <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                  Coverage Score
+                </h4>
+                <p class="text-zinc-300 text-sm leading-relaxed mb-3">
+                  The fraction of risk factors a company is exposed to, indicating breadth of exposure.
+                </p>
+                <div class="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+                  <p class="text-green-300 text-xs"><strong>Calculation:</strong> Percentage of risk factors the company is exposed to</p>
+                </div>
+              </div>
+              
+              <div class="bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+                <h4 class="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                  <span class="w-3 h-3 bg-amber-500 rounded-full"></span>
+                  Intensity Score
+                </h4>
+                <p class="text-zinc-300 text-sm leading-relaxed mb-3">
+                  The average normalized evidence per risk factor, indicating depth of exposure.
+                </p>
+                <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+                  <p class="text-amber-300 text-xs"><strong>Calculation:</strong> Average normalized evidence strength across risk factors</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Supporting Evidence Section -->
+          <div class="mb-12">
+            <h3 class="text-2xl font-bold text-white mb-8 text-center">Supporting Evidence & Regulatory Compliance</h3>
+            <div class="bg-zinc-800/50 rounded-lg p-8 border border-zinc-700">
+              <div class="text-center mb-6">
+                <h4 class="text-lg font-semibold text-white mb-4 flex items-center justify-center gap-2">
+                  <span class="w-3 h-3 bg-purple-500 rounded-full"></span>
+                  Evidence-Based Analysis & Regulatory Compliance
+                </h4>
+                <p class="text-zinc-300 text-sm leading-relaxed mb-4">
+                  All risk assessments are grounded in verifiable evidence from authoritative sources. Each piece of supporting evidence is a validated text segment that directly links companies to specific risk factors, ensuring transparency and auditability. Our methodology meets the highest standards for regulatory compliance in financial services.
+                </p>
+                <div class="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
+                  <p class="text-purple-300 text-xs font-medium">Every risk score is backed by documented evidence from credible sources</p>
+                </div>
+              </div>
+              
+              <div class="mt-8">
+                <h4 class="text-lg font-semibold text-white mb-4">Evidence Sources</h4>
+                <div class="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h5 class="text-md font-medium text-zinc-200 mb-3">Primary Sources</h5>
+                    <ul class="text-zinc-300 text-sm space-y-2">
+                      <li>• <strong>Regulatory Filings:</strong> SEC 10-K, 10-Q, 8-K reports</li>
+                      <li>• <strong>Earnings Calls:</strong> Management commentary and forward guidance</li>
+                      <li>• <strong>News Articles:</strong> Real-time market intelligence and analysis</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h5 class="text-md font-medium text-zinc-200 mb-3">Validation Process</h5>
+                    <ul class="text-zinc-300 text-sm space-y-2">
+                      <li>• <strong>Source Verification:</strong> All sources are validated for credibility</li>
+                      <li>• <strong>Context Validation:</strong> Evidence is verified for relevance and accuracy</li>
+                      <li>• <strong>Audit Trail:</strong> Complete traceability from source to score</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Use Cases -->
+          <div class="mb-12">
+            <h3 class="text-2xl font-bold text-white mb-8 text-center">Real-World Applications</h3>
+            <div class="grid md:grid-cols-2 gap-8">
+              <div class="bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+                <h4 class="text-lg font-semibold text-white mb-4">Investment Management</h4>
+                <ul class="text-zinc-300 text-sm space-y-2">
+                  <li>• <strong>Portfolio Risk Assessment:</strong> Identify companies with high exposure to specific risk scenarios</li>
+                  <li>• <strong>Position Sizing:</strong> Adjust portfolio weights based on risk exposure scores</li>
+                  <li>• <strong>Hedging Strategies:</strong> Develop targeted hedging approaches for high-risk positions</li>
+                  <li>• <strong>Sector Analysis:</strong> Compare risk exposure across different industries</li>
+                </ul>
+              </div>
+              
+              <div class="bg-zinc-800/50 rounded-lg p-6 border border-zinc-700">
+                <h4 class="text-lg font-semibold text-white mb-4">Enterprise Risk Management</h4>
+                <ul class="text-zinc-300 text-sm space-y-2">
+                  <li>• <strong>Vendor Risk Assessment:</strong> Evaluate supplier exposure to geopolitical risks</li>
+                  <li>• <strong>Supply Chain Monitoring:</strong> Track how external risks affect operations</li>
+                  <li>• <strong>Regulatory Compliance:</strong> Monitor exposure to changing regulations</li>
+                  <li>• <strong>Strategic Planning:</strong> Inform business decisions with risk intelligence</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Technical Details -->
+          <div class="bg-zinc-800/50 rounded-lg p-8 border border-zinc-700">
+            <h3 class="text-2xl font-bold text-white mb-6 text-center">Technical Implementation</h3>
+            <div class="grid md:grid-cols-2 gap-8">
+              <div>
+                <h4 class="text-lg font-semibold text-white mb-4">Data Sources</h4>
+                <ul class="text-zinc-300 text-sm space-y-2">
+                  <li>• <strong>News Articles:</strong> Real-time market intelligence and breaking news</li>
+                  <li>• <strong>Earnings Calls:</strong> Management commentary and forward-looking statements</li>
+                  <li>• <strong>Regulatory Filings:</strong> SEC filings, annual reports, and disclosures</li>
+                  <li>• <strong>Research Reports:</strong> Analyst insights and market research</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="text-lg font-semibold text-white mb-4">AI Technology</h4>
+                <ul class="text-zinc-300 text-sm space-y-2">
+                  <li>• <strong>Hybrid Semantic Search:</strong> Combines keyword and semantic matching</li>
+                  <li>• <strong>LLM Analysis:</strong> Latest models from OpenAI and other providers</li>
+                  <li>• <strong>Bring Your Own Model:</strong> Support for custom model integration</li>
+                  <li>• <strong>Cross-Encoder Reranking:</strong> Improves relevance scoring</li>
+                  <li>• <strong>Structured Validation:</strong> Ensures data quality and accuracy</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Learn More -->
+          <div class="text-center mt-12">
+            <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-6">
+              <h4 class="text-lg font-semibold text-white mb-3">Learn More</h4>
+              <p class="text-zinc-300 text-sm mb-4">
+                For detailed technical documentation and implementation guides, visit the Bigdata Research Tools documentation.
+              </p>
+              <div class="flex gap-4 justify-center">
+                <a href="https://docs.bigdata.com/use-cases/research-tools/risk-analyzer" target="_blank" 
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                  Risk Analyzer Docs
+                </a>
+                <a href="https://docs.bigdata.com/use-cases/docker-services/risk-analyzer" target="_blank" 
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                  Deployment Guide
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -669,6 +992,12 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   window.resetToStart = resetToStart;
+
+  // Handle deploy button click
+  function handleDeployClick() {
+    window.open('https://deploy.labs.bigdata.com', '_blank');
+  }
+  window.handleDeployClick = handleDeployClick;
 
   // Initialize tab controller when DOM is ready
   document.addEventListener('DOMContentLoaded', function() {
