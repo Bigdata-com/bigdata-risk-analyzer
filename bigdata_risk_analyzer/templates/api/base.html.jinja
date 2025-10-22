@@ -94,10 +94,8 @@
 	document.addEventListener('DOMContentLoaded', function() {
 		const deployBtn = document.getElementById('deployBtn');
 		if (deployBtn) {
-			// Check if demo mode is active by looking for demo mode indicators
-			const isDemoMode = document.body.innerHTML.includes('Demo mode activated') || 
-							  document.body.innerHTML.includes('demo_mode') ||
-							  window.location.search.includes('demo=true');
+			// Check if demo mode is active using the template variable
+			const isDemoMode = {{ demo_mode|default(false)|tojson }};
 			deployBtn.style.display = isDemoMode ? 'flex' : 'none';
 		}
 	});
