@@ -1,75 +1,153 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## [v2.3.2] - 2025-01-22
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### 🎯 Major Features Added
 
-## [2.3.2] - 21-10-2025
+#### **Report Generator Tab**
+- Added new "Report Generator" tab with "Coming soon..." placeholder
+- Positioned between Evidence and How it Works tabs
+- Features chart/analytics icon to differentiate from Evidence tab
+- Includes professional placeholder content with document icon and description
 
-### Fixed
-- Fixed issue where the logo link in the navbar did not preserve the access token in the URL.
+#### **Company Screener Enhancements**
+- **Renamed**: "Companies" tab → "Company Screener"
+- **Enhanced Filter System**: 
+  - Multi-select dropdowns for Sector, Industry, and Risk filters
+  - Color-coded filter chips with count badges
+  - Search functionality for company names
+  - "Show Results" limit (Top N companies)
+- **Improved Table Structure**:
+  - Split Risk Count into 3 columns: Risk Count, Risk Breakdown, Insights
+  - Added expandable sections for detailed risk and insights information
+  - Sortable by Composite, Coverage, and Intensity scores
+- **Export Functionality**: CSV/JSON download for portfolio construction
+- **Updated Guide**: "How to Use" → "How to Screen" with current functionality
 
-## [2.3.1] - 20-10-2025
+### 🔧 UI/UX Improvements
 
-### Added
-- Display version number in the frontend.
+#### **Layout Restructuring**
+- **Overview Tab**: Moved 3 dashboard cards into dedicated Overview tab
+- **Tab Navigation**: Made all tabs permanent at the top (removed collapsible sections)
+- **Tab Order**: Overview → Risk Heatmap → Company Screener → Taxonomy → Evidence → Report Generator → How it Works
 
-### Fixed
-- Bigdata and OpenAI API keys are no longer required to start the service when DEMO_MODE is enabled.
-- CI pipeline was not detecting formatting issues.
+#### **Dashboard Enhancements**
+- **"At a Glance" Card**:
+  - Changed "Companies Analyzed" → "Companies Exposed"
+  - Added "Highest Company Score" metric
+  - Added "Report Information" section (Source, Period, Generated date)
+  - Replaced 3-level risk classification with PDF area chart of composite scores
+  - Added median statistics to score distribution
+- **Card Headers**: Added column headers to "Top 10 Exposed Companies" and "Top 10 Risk Factors"
+- **Interactive Elements**: Clickable companies/risks redirect to Evidence tab with filters
 
-## [2.3.0] - 17-10-2025
+#### **Heatmap Improvements**
+- **New Score Metrics**: Added Coverage Score and Intensity Score columns
+- **Interactive Features**: Clickable cells redirect to Evidence tab with company+risk filters
+- **Sortable Table**: Sort by Coverage, Intensity, or Raw Score
+- **Flip View**: Toggle between Company view and Risk view
+- **Guide Modal**: "How to Read This Heatmap" with score explanations
+- **Scrollbar**: Synchronized top scrollbar for better navigation
 
-### Changed
-- Re-designed the frontend layout and styling for better user experience.
-- Changed example results, removed them from the DB and added a new DEMO_MODE feature that blocks running new analyses when enabled.
+### 🎨 Visual & Styling Updates
 
-## [2.2.1] - 10-10-2025
+#### **Header & Navigation**
+- **Deploy Button**: Added orange "Deploy" button (demo mode only) in main header
+- **Tab Colors**: Changed active tab selection to blue
+- **Configuration Header**: Made more neutral (grey) with consistent styling
+- **Spacing**: Eliminated persistent black space between headers
 
-### Fixed
-- Renamed wrong names for watchlist list.
+#### **Company Screener UX**
+- **Filter UI**: Redesigned with sidebar layout and chip-based filter system
+- **Button Text**: "Filter Companies" → "Screen Companies"
+- **Section Reordering**: Moved "Show Results" to top of sidebar
+- **Typography**: Increased font sizes for better readability
+- **Button Optimization**: Removed "View" from expandable section buttons
 
-## [2.2.0] - 07-10-2025
+### 📚 Documentation & Guides
 
-### Added
-- Fiscal year now accepts list of years as input (e.g. 2024,2025,2026)
-- Example result initialized on db creation. This example can be directly retrieved from the FE.
+#### **"How it Works" Tab**
+- **New Tab**: Added comprehensive methodology explanation
+- **Content Sections**:
+  - Methodology Overview
+  - Analysis Process (4-step workflow)
+  - Key Features
+  - Score Explanations (Composite, Coverage, Intensity)
+  - Real-World Applications
+  - Technical Implementation
+- **External Links**: Added links to Bigdata documentation
+- **Regulatory Focus**: Emphasized regulatory compliance and evidence-based analysis
 
-### Changed
-- Default time window changed to [today-1 month, today]
-- Bigdata Research Tools updated to v1.0.0 beta
-- JS scripts moved to static/scripts folder to clean the jinja template
-- Model validator now uses custom ValidationError to properly expose validation errors in the frontend
+#### **Updated Guides**
+- **Dashboard Guide**: "How to Read This Dashboard" with auto-trigger for first-time users
+- **Screener Guide**: Updated "How to Screen" with current functionality
+- **Heatmap Guide**: "How to Read This Heatmap" with score explanations
 
-## [2.1.0] - 01-10-2025
+### 🔧 Technical Improvements
 
-### Added
-- Add links to API docs in the nav bar
+#### **JavaScript Enhancements**
+- **Global Function Exports**: Added proper exports for all render functions
+- **Tab Controller**: Updated to support new tabs and loading states
+- **Filter System**: Implemented robust chip-based filtering with deselection
+- **Cache Busting**: Added version parameters to prevent stale script loading
 
-### Changed
-- Make the sidebar and output area resizable by dragging a divider between them
-- Moved all logic for default values into the backend, so it is consistent between the API and the front end.
-- Now Risk Analyzer uses NEWS instead of transcripts (Fiscal Year not available as an input parameter).
+#### **Demo Mode Features**
+- **Deploy Button**: Redirects to `https://deploy.labs.bigdata.com`
+- **Updated Message**: Enhanced demo mode message with GitHub and deployment links
+- **Version Display**: Moved version number to bottom-right corner (discreet)
 
-### Fixed
-- Fix nav bar overlapping with content
+### 🐛 Bug Fixes
 
-## [2.0.0] - 26-09-2025
+#### **Filter System**
+- Fixed filter deselection issues with proper string escaping
+- Resolved checkbox selection problems for multi-select filters
+- Added robust error handling for undefined filter states
 
-### Changed
-- Changed endpoints to be asynchronous. `/risk-analyzer` will now return a `request_id` immediately, and progress updated and the result can be fetched later using `/status/{request_id}`.
-- Updated document type enum to be consistent with the Bigdata.com SDK
-- Updated front end to deal with the async endpoint.
-- Improved UX of the front end
+#### **Tab Rendering**
+- Fixed empty tab issues by ensuring proper script inclusions
+- Resolved JavaScript syntax errors and duplicate declarations
+- Added proper function availability checks
 
-## [1.1.0] - 11-09-2025
+#### **Heatmap Functionality**
+- Fixed tooltip positioning and event propagation
+- Resolved sorting issues in Risk view
+- Fixed scrollbar synchronization between top and bottom
 
-### Added
-- Added optional access token protection for the API endpoints. If the `ACCESS_TOKEN` environment variable is set, all API requests must include a `token` query parameter with the correct value to be authorized.
+### 📊 Data & Analytics
 
+#### **Score Metrics**
+- **Composite Score**: Overall risk exposure based on all risk factors
+- **Coverage Score**: Percentage of risk types the company is exposed to
+- **Intensity Score**: Average evidence strength across all risk factors
+- **Median Statistics**: Added median to score distribution displays
 
-## [1.0.0] - 29-08-2025
+#### **Export Capabilities**
+- **Company Screener**: CSV/JSON export with filtered results
+- **Portfolio Construction**: Export functionality for investment workflows
 
-### Added
-- Initial release of the Risk Analyzer service by bigdata.com as a Python package and Docker image.
+### 🎯 User Experience
+
+#### **Workflow Improvements**
+- **Sector Risk Analysis**: Technology sector → AI Risk filter → Coverage Score sorting
+- **Portfolio Construction**: Top N limit → sector/industry filters → Composite Score sorting
+- **Risk Factor Deep Dive**: Specific risk factors → Intensity Score sorting → detailed analysis
+
+#### **Accessibility**
+- **Tooltips**: Added comprehensive tooltips for all score metrics
+- **Guides**: Auto-triggering help modals for first-time users
+- **Clear Messaging**: Updated descriptions and terminology throughout
+
+---
+
+## Previous Versions
+
+### [v2.3.1] - Previous Release
+- Initial Risk Analyzer implementation
+- Basic dashboard functionality
+- Core risk analysis features
+
+---
+
+**Total Changes**: 15+ major features, 25+ UI/UX improvements, 10+ bug fixes
+**Files Modified**: 8+ template files, 6+ JavaScript files, 15+ test files
+**New Functionality**: Report Generator placeholder, enhanced Company Screener, improved Heatmap

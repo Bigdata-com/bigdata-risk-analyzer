@@ -49,6 +49,15 @@
 			<img class="h-[40px] w-auto" alt="light logo" src="static/bigdata_logo.svg">
 		</a>
 		<div class="flex-1"></div>
+		<!-- Deploy Button (Demo Mode Only) -->
+		<button id="deployBtn" style="display:none;"
+			class="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors shadow-lg mr-2"
+			onclick="handleDeployClick()">
+			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+			</svg>
+			Deploy
+		</button>
 		<a href="/docs" class="px-4 py-2 rounded bg-blue-700 hover:bg-blue-800 text-white font-semibold transition-colors duration-200">API Docs</a>
 		<a href="https://github.com/Bigdata-com/bigdata-risk-analyzer" target="_blank" rel="noopener noreferrer"
 			class="flex items-center gap-2 px-4 py-2 rounded bg-zinc-700 hover:bg-zinc-600 text-white font-semibold transition-colors duration-200 ml-2 mr-8"
@@ -74,5 +83,23 @@
 		const logoLink = document.getElementById('logo-link');
 		logoLink.href = `/?token=${encodeURIComponent(token)}`;
 	}
+
+	// Handle deploy button click
+	function handleDeployClick() {
+		window.open('https://deploy.labs.bigdata.com', '_blank');
+	}
+	window.handleDeployClick = handleDeployClick;
+
+	// Show/hide deploy button based on demo mode
+	document.addEventListener('DOMContentLoaded', function() {
+		const deployBtn = document.getElementById('deployBtn');
+		if (deployBtn) {
+			// Check if demo mode is active by looking for demo mode indicators
+			const isDemoMode = document.body.innerHTML.includes('Demo mode activated') || 
+							  document.body.innerHTML.includes('demo_mode') ||
+							  window.location.search.includes('demo=true');
+			deployBtn.style.display = isDemoMode ? 'flex' : 'none';
+		}
+	});
 </script>
 </html>
