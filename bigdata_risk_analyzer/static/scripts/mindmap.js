@@ -10,30 +10,33 @@ function renderMindmap(taxonomy) {
 
     let html = `
         <div class="mb-6">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h3 class="text-2xl font-bold text-white mb-1 flex items-center gap-2">
+                    <h3 class="text-2xl font-bold text-white flex items-center gap-2">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
                         </svg>
                         Risk Taxonomy
                     </h3>
-                    <p class="text-zinc-400 text-sm">Hierarchical breakdown of the risk theme</p>
+                    <p class="text-zinc-400 text-sm mt-1">Hierarchical breakdown of the risk theme</p>
                 </div>
-                <div class="flex gap-2 bg-zinc-800 p-1 rounded-lg border border-zinc-700">
-                    <button onclick="switchMindmapView('tree')" id="viewTree"
-                        class="px-4 py-2 rounded text-sm font-medium transition-all duration-200 ${currentMindmapView === 'tree' ? 'bg-blue-500 text-white' : 'text-zinc-400 hover:text-zinc-200'}">
-                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <div class="flex items-center gap-3">
+                    <button onclick="switchMindmapView()" 
+                            class="flex items-center gap-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 
+                                   border border-orange-500/30 rounded-lg text-orange-400 text-sm font-medium 
+                                   transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
-                        Tree View
+                        <span id="viewToggleText">${currentMindmapView === 'tree' ? 'Switch to Graph View' : 'Switch to Tree View'}</span>
                     </button>
-                    <button onclick="switchMindmapView('graph')" id="viewGraph"
-                        class="px-4 py-2 rounded text-sm font-medium transition-all duration-200 ${currentMindmapView === 'graph' ? 'bg-blue-500 text-white' : 'text-zinc-400 hover:text-zinc-200'}">
-                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                    <button onclick="exportTaxonomy()" 
+                            class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
-                        Interactive Graph
+                        Export JSON
                     </button>
                 </div>
             </div>
@@ -52,30 +55,21 @@ function renderMindmap(taxonomy) {
     }
 }
 
-function switchMindmapView(view) {
-    currentMindmapView = view;
+function switchMindmapView() {
+    // Toggle between tree and graph view
+    currentMindmapView = currentMindmapView === 'tree' ? 'graph' : 'tree';
     
-    // Update button styles
-    const treeBtn = document.getElementById('viewTree');
-    const graphBtn = document.getElementById('viewGraph');
-    
-    if (view === 'tree') {
-        treeBtn.classList.add('bg-blue-500', 'text-white');
-        treeBtn.classList.remove('text-zinc-400', 'hover:text-zinc-200');
-        graphBtn.classList.remove('bg-blue-500', 'text-white');
-        graphBtn.classList.add('text-zinc-400', 'hover:text-zinc-200');
-    } else {
-        graphBtn.classList.add('bg-blue-500', 'text-white');
-        graphBtn.classList.remove('text-zinc-400', 'hover:text-zinc-200');
-        treeBtn.classList.remove('bg-blue-500', 'text-white');
-        treeBtn.classList.add('text-zinc-400', 'hover:text-zinc-200');
+    // Update button text
+    const toggleText = document.getElementById('viewToggleText');
+    if (toggleText) {
+        toggleText.textContent = currentMindmapView === 'tree' ? 'Switch to Graph View' : 'Switch to Tree View';
     }
     
     // Show/hide views
     const treeView = document.getElementById('mindmapTreeView');
     const graphView = document.getElementById('mindmapGraphView');
     
-    if (view === 'tree') {
+    if (currentMindmapView === 'tree') {
         treeView.classList.remove('hidden');
         graphView.classList.add('hidden');
         if (treeView.innerHTML === '') {
@@ -115,7 +109,6 @@ function renderTreeView(node, depth = 0) {
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1">
                             <span class="font-bold ${colorClass} text-lg">${escapeHtml(node.label)}</span>
-                            <span class="text-xs text-zinc-500 font-mono">Node ${node.node}</span>
                         </div>
                         ${node.summary ? `<p class="text-zinc-300 text-sm mt-1">${escapeHtml(node.summary)}</p>` : ''}
                         ${node.keywords && node.keywords.length > 0 ? `
@@ -295,3 +288,22 @@ function renderGraphView(taxonomy) {
 window.renderMindmap = renderMindmap;
 window.switchMindmapView = switchMindmapView;
 window.toggleTreeNode = toggleTreeNode;
+
+// Export taxonomy as JSON
+function exportTaxonomy() {
+    if (!mindmapData) return;
+    
+    const dataStr = JSON.stringify(mindmapData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'risk_taxonomy.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+// Make globally accessible
+window.exportTaxonomy = exportTaxonomy;
