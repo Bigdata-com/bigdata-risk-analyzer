@@ -111,36 +111,38 @@ function renderHeatmap(themeScoring) {
     // Create HTML with only the heatmap
     let html = `
         <div class="mb-6">
-            <div class="flex items-center justify-between mb-2">
-                <h3 class="text-2xl font-bold text-white flex items-center gap-2">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"></path>
-                    </svg>
-                    Company-Risk Heatmap
-                </h3>
-                <button onclick="showHeatmapGuide()" 
-                        class="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 
-                               border border-blue-500/30 rounded-lg text-blue-400 text-sm font-medium 
-                               transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Info
-                </button>
-            </div>
             <div class="flex items-center justify-between mb-6">
-                <p class="text-zinc-400 text-sm">Risk exposure scores across all companies</p>
-                <button onclick="flipHeatmapView()" 
-                        class="flex items-center gap-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 
-                               border border-orange-500/30 rounded-lg text-orange-400 text-sm font-medium 
-                               transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    <span id="flipButtonText">View by Risks</span>
-                </button>
+                <div>
+                    <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"></path>
+                        </svg>
+                        Company-Risk Heatmap
+                    </h3>
+                    <p class="text-zinc-400 text-sm mt-1">Risk exposure scores across all companies</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="flipHeatmapView()" 
+                            class="flex items-center gap-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 
+                                   border border-orange-500/30 rounded-lg text-orange-400 text-sm font-medium 
+                                   transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span id="flipButtonText">View by Risks</span>
+                    </button>
+                    <button onclick="showHeatmapGuide()" 
+                            class="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 
+                                   border border-blue-500/30 rounded-lg text-blue-400 text-sm font-medium 
+                                   transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Info
+                    </button>
+                </div>
             </div>
             
             <!-- Tooltips -->
@@ -386,36 +388,38 @@ function renderHeatmapFromData() {
     // Create HTML with only the heatmap
     let html = `
         <div class="mb-6">
-            <div class="flex items-center justify-between mb-2">
-                <h3 class="text-2xl font-bold text-white flex items-center gap-2">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"></path>
-                </svg>
-                Company-Risk Heatmap
-            </h3>
-                <button onclick="showHeatmapGuide()" 
-                        class="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 
-                               border border-blue-500/30 rounded-lg text-blue-400 text-sm font-medium 
-                               transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Info
-                </button>
-            </div>
             <div class="flex items-center justify-between mb-6">
-                <p class="text-zinc-400 text-sm">Risk exposure scores across all companies</p>
-                <button onclick="flipHeatmapView()" 
-                        class="flex items-center gap-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 
-                               border border-orange-500/30 rounded-lg text-orange-400 text-sm font-medium 
-                               transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    <span id="flipButtonText">View by Risks</span>
-                </button>
+                <div>
+                    <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"></path>
+                        </svg>
+                        Company-Risk Heatmap
+                    </h3>
+                    <p class="text-zinc-400 text-sm mt-1">Risk exposure scores across all companies</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="flipHeatmapView()" 
+                            class="flex items-center gap-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 
+                                   border border-orange-500/30 rounded-lg text-orange-400 text-sm font-medium 
+                                   transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span id="flipButtonText">View by Risks</span>
+                    </button>
+                    <button onclick="showHeatmapGuide()" 
+                            class="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 
+                                   border border-blue-500/30 rounded-lg text-blue-400 text-sm font-medium 
+                                   transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Info
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -659,36 +663,38 @@ function renderRiskView() {
     // Create HTML for risk view
     let html = `
         <div class="mb-6">
-            <div class="flex items-center justify-between mb-2">
-                <h3 class="text-2xl font-bold text-white flex items-center gap-2">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"></path>
-                    </svg>
-                    Risk-Company Heatmap
-                </h3>
-                <button onclick="showHeatmapGuide()" 
-                        class="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 
-                               border border-blue-500/30 rounded-lg text-blue-400 text-sm font-medium 
-                               transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Info
-                </button>
-            </div>
             <div class="flex items-center justify-between mb-6">
-                <p class="text-zinc-400 text-sm">Risk exposure across all companies</p>
-                <button onclick="flipHeatmapView()" 
-                        class="flex items-center gap-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 
-                               border border-orange-500/30 rounded-lg text-orange-400 text-sm font-medium 
-                               transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    <span id="flipButtonText">View by Companies</span>
-                </button>
+                <div>
+                    <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"></path>
+                        </svg>
+                        Risk-Company Heatmap
+                    </h3>
+                    <p class="text-zinc-400 text-sm mt-1">Risk exposure across all companies</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="flipHeatmapView()" 
+                            class="flex items-center gap-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 
+                                   border border-orange-500/30 rounded-lg text-orange-400 text-sm font-medium 
+                                   transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span id="flipButtonText">View by Companies</span>
+                    </button>
+                    <button onclick="showHeatmapGuide()" 
+                            class="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 
+                                   border border-blue-500/30 rounded-lg text-blue-400 text-sm font-medium 
+                                   transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Info
+                    </button>
+                </div>
             </div>
         </div>
 
