@@ -167,13 +167,13 @@ function renderHeatmap(themeScoring) {
                     <thead>
                         <tr>
                             <th class="sticky left-0 z-20 bg-zinc-800 px-4 py-3 text-left text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[200px]">Company</th>
-                            <th class="sticky left-[200px] z-20 bg-zinc-800 px-3 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[80px] cursor-pointer hover:bg-zinc-700/50" onclick="sortHeatmap('coverage')">
+                            <th class="sticky left-[200px] z-20 bg-zinc-800 px-2 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[60px] cursor-pointer hover:bg-zinc-700/50" onclick="sortHeatmap('coverage')">
                                 Coverage<br>Score
                             </th>
-                            <th class="sticky left-[280px] z-20 bg-zinc-800 px-3 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[80px] cursor-pointer hover:bg-zinc-700/50" onclick="sortHeatmap('intensity')">
+                            <th class="sticky left-[260px] z-20 bg-zinc-800 px-2 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[60px] cursor-pointer hover:bg-zinc-700/50" onclick="sortHeatmap('intensity')">
                                 Intensity<br>Score
                             </th>
-                            <th class="sticky left-[360px] z-20 bg-zinc-800 px-3 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[80px] cursor-pointer hover:bg-zinc-700/50" onclick="sortHeatmap('score')">
+                            <th class="sticky left-[320px] z-20 bg-zinc-800 px-2 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[60px] cursor-pointer hover:bg-zinc-700/50" onclick="sortHeatmap('score')">
                                 Raw<br>Score
                             </th>
     `;
@@ -207,15 +207,15 @@ function renderHeatmap(themeScoring) {
         // Coverage score
         const coverageValue = coverageIntensity[companyName].coverage;
         const coveragePercent = (coverageValue * 100).toFixed(0);
-        html += `<td class="sticky left-[200px] z-10 ${bgClass} hover:bg-zinc-700/50 px-3 py-3 text-center text-sm font-medium text-blue-400 border-b border-zinc-700">${coveragePercent}%</td>`;
+        html += `<td class="sticky left-[200px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-medium text-blue-400 border-b border-zinc-700">${coveragePercent}%</td>`;
 
         // Intensity score
         const intensityValue = coverageIntensity[companyName].intensity;
         const intensityPercent = (intensityValue * 100).toFixed(0);
-        html += `<td class="sticky left-[280px] z-10 ${bgClass} hover:bg-zinc-700/50 px-3 py-3 text-center text-sm font-medium text-purple-400 border-b border-zinc-700">${intensityPercent}%</td>`;
+        html += `<td class="sticky left-[260px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-medium text-purple-400 border-b border-zinc-700">${intensityPercent}%</td>`;
 
         // Composite score (update sticky position)
-        html += `<td class="sticky left-[360px] z-10 ${bgClass} hover:bg-zinc-700/50 px-3 py-3 text-center text-sm font-bold text-red-400 border-b border-zinc-700">${escapeHtml(scoring.composite_score)}</td>`;
+        html += `<td class="sticky left-[320px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-bold text-red-400 border-b border-zinc-700">${escapeHtml(scoring.composite_score)}</td>`;
         
         // Theme scores (ordered by popularity)
         themes.forEach(theme => {
@@ -415,13 +415,13 @@ function renderHeatmapFromData() {
                     <thead>
                         <tr>
                             <th class="sticky left-0 z-20 bg-zinc-800 px-4 py-3 text-left text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[200px]">Company</th>
-                            <th class="sticky left-[200px] z-20 bg-zinc-800 px-3 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[80px] cursor-pointer hover:bg-zinc-700/50" onclick="sortHeatmap('coverage')">
+                            <th class="sticky left-[200px] z-20 bg-zinc-800 px-2 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[60px] cursor-pointer hover:bg-zinc-700/50" onclick="sortHeatmap('coverage')">
                                 Coverage<br>Score
                             </th>
-                            <th class="sticky left-[280px] z-20 bg-zinc-800 px-3 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[80px] cursor-pointer hover:bg-zinc-700/50" onclick="sortHeatmap('intensity')">
+                            <th class="sticky left-[260px] z-20 bg-zinc-800 px-2 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[60px] cursor-pointer hover:bg-zinc-700/50" onclick="sortHeatmap('intensity')">
                                 Intensity<br>Score
                             </th>
-                            <th class="sticky left-[360px] z-20 bg-zinc-800 px-3 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[80px] cursor-pointer hover:bg-zinc-700/50" onclick="sortHeatmap('score')">
+                            <th class="sticky left-[320px] z-20 bg-zinc-800 px-2 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[60px] cursor-pointer hover:bg-zinc-700/50" onclick="sortHeatmap('score')">
                                 Raw<br>Score
                             </th>
     `;
@@ -455,15 +455,15 @@ function renderHeatmapFromData() {
         // Coverage score
         const coverageValue = coverageIntensity[companyName].coverage;
         const coveragePercent = (coverageValue * 100).toFixed(0);
-        html += `<td class="sticky left-[200px] z-10 ${bgClass} hover:bg-zinc-700/50 px-3 py-3 text-center text-sm font-medium text-blue-400 border-b border-zinc-700">${coveragePercent}%</td>`;
+        html += `<td class="sticky left-[200px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-medium text-blue-400 border-b border-zinc-700">${coveragePercent}%</td>`;
 
         // Intensity score
         const intensityValue = coverageIntensity[companyName].intensity;
         const intensityPercent = (intensityValue * 100).toFixed(0);
-        html += `<td class="sticky left-[280px] z-10 ${bgClass} hover:bg-zinc-700/50 px-3 py-3 text-center text-sm font-medium text-purple-400 border-b border-zinc-700">${intensityPercent}%</td>`;
+        html += `<td class="sticky left-[260px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-medium text-purple-400 border-b border-zinc-700">${intensityPercent}%</td>`;
 
         // Composite score (update sticky position)
-        html += `<td class="sticky left-[360px] z-10 ${bgClass} hover:bg-zinc-700/50 px-3 py-3 text-center text-sm font-bold text-red-400 border-b border-zinc-700">${escapeHtml(scoring.composite_score)}</td>`;
+        html += `<td class="sticky left-[320px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-bold text-red-400 border-b border-zinc-700">${escapeHtml(scoring.composite_score)}</td>`;
         
         // Theme scores (ordered by popularity)
         themes.forEach(theme => {
@@ -687,7 +687,7 @@ function renderRiskView() {
                                 Intensity<br>Score
                             </th>
                             <th class="sticky left-[360px] z-20 bg-zinc-800 px-3 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[80px] cursor-pointer hover:bg-zinc-700/50" onclick="sortRiskHeatmap('evidence')">
-                                Total<br>Evidence
+                                Raw<br>Score
                             </th>
     `;
 
@@ -844,6 +844,7 @@ function sortRiskHeatmap(field) {
 }
 
 // Make functions globally accessible
+window.renderHeatmap = renderHeatmap;
 window.showHeatmapTooltip = showHeatmapTooltip;
 window.hideHeatmapTooltip = hideHeatmapTooltip;
 window.sortHeatmap = sortHeatmap;

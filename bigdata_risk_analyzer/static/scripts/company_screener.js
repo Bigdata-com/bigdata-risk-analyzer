@@ -1,51 +1,4 @@
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Final Deselection Test</title>
-    <style>
-        .filter-chip { margin: 2px; padding: 4px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; }
-        .bg-blue-500/20 { background-color: rgba(59, 130, 246, 0.2); }
-        .border-blue-500/30 { border: 1px solid rgba(59, 130, 246, 0.3); }
-        .text-blue-300 { color: rgb(147, 197, 253); }
-        .text-zinc-500 { color: rgb(113, 113, 122); }
-        .text-zinc-300 { color: rgb(212, 212, 216); }
-        .bg-zinc-800/30 { background-color: rgba(39, 39, 42, 0.3); }
-        .bg-zinc-800/50 { background-color: rgba(39, 39, 42, 0.5); }
-        .hover\:bg-zinc-700/50:hover { background-color: rgba(63, 63, 70, 0.5); }
-    </style>
-</head>
-<body>
-    <h1>Final Deselection Test - Using Actual Implementation</h1>
-    
-    <div id="filter-chips" class="flex flex-wrap gap-2 min-h-[40px] p-3 bg-zinc-800/30 rounded-lg">
-        <div class="text-sm text-zinc-500 italic">No filters applied</div>
-    </div>
-    
-    <div class="w-80 bg-zinc-800/50 rounded-lg p-4 h-fit">
-        <h3 class="text-lg font-semibold text-white mb-4">Filter Companies</h3>
-        
-        <!-- Sector Filter -->
-        <div class="mb-6">
-            <label class="block text-sm font-medium text-zinc-300 mb-2">Sector</label>
-            <div class="space-y-2 max-h-32 overflow-y-auto">
-                <label class="flex items-center space-x-2 cursor-pointer hover:bg-zinc-700/50 p-1 rounded">
-                    <input type="checkbox" class="sector-filter" value="Technology" onchange="handleFilterChange()">
-                    <span class="text-sm text-zinc-300">Technology</span>
-                </label>
-                <label class="flex items-center space-x-2 cursor-pointer hover:bg-zinc-700/50 p-1 rounded">
-                    <input type="checkbox" class="sector-filter" value="Healthcare" onchange="handleFilterChange()">
-                    <span class="text-sm text-zinc-300">Healthcare</span>
-                </label>
-            </div>
-        </div>
-    </div>
-    
-    <div id="test-results"></div>
-    
-    <script>
-        // Include the actual script content
-        // Company Screener - Tabular Layout with Advanced Filtering and Export
+// Company Screener - Tabular Layout with Advanced Filtering and Export
 let currentScreenerData = null;
 let currentScreenerSortField = 'composite';
 let currentScreenerSortDirection = 'desc';
@@ -155,7 +108,7 @@ function renderCompanyScreener(themeScoring) {
             <div class="flex gap-6">
                 <!-- Filter Sidebar -->
                 <div class="w-80 bg-zinc-800/50 rounded-lg p-4 h-fit">
-                    <h3 class="text-lg font-semibold text-white mb-4">Filter Companies</h3>
+                    <h3 class="text-lg font-semibold text-white mb-4">Screen Companies</h3>
                     
                     <!-- Search -->
                     <div class="mb-6">
@@ -256,6 +209,12 @@ function renderCompanyScreener(themeScoring) {
                             <th onclick="sortScreener('risks')" class="px-3 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 cursor-pointer hover:bg-zinc-700/50">
                                 Risk Count ↕
                             </th>
+                            <th class="px-3 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600">
+                                Risk Breakdown
+                            </th>
+                            <th class="px-3 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600">
+                                Insights
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="screenerTableBody">
@@ -302,27 +261,29 @@ function renderCompanyScreener(themeScoring) {
                     ${(coverageData.intensity * 100).toFixed(0)}%
                 </td>
                 <td class="px-3 py-3 text-center text-sm font-medium text-zinc-300 border-b border-zinc-700">
-                    <div class="flex items-center justify-center gap-2">
-                        <span>${riskCount}</span>
-                        <button onclick="toggleScreenerCompanyThemes(this, event)" 
-                            class="px-2 py-1 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded text-orange-400 text-xs font-medium transition-colors flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                            </svg>
-                            Risks
-                        </button>
-                        <button onclick="toggleScreenerCompanyInsights(this, event)" 
-                            class="px-2 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded text-amber-400 text-xs font-medium transition-colors flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                            </svg>
-                            Insights
-                        </button>
-                    </div>
+                    ${riskCount}
+                </td>
+                <td class="px-3 py-3 text-center border-b border-zinc-700">
+                    <button onclick="toggleScreenerCompanyThemes(this, event)" 
+                        class="px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded text-orange-400 text-sm font-medium transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                        View Risks
+                    </button>
+                </td>
+                <td class="px-3 py-3 text-center border-b border-zinc-700">
+                    <button onclick="toggleScreenerCompanyInsights(this, event)" 
+                        class="px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded text-amber-400 text-sm font-medium transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        View Insights
+                    </button>
                 </td>
             </tr>
             <tr class="screener-themes-section hidden bg-zinc-900/30">
-                <td colspan="8" class="px-4 py-2">
+                <td colspan="10" class="px-4 py-2">
                     <div class="grid grid-cols-2 gap-1">
                         ${themesArray.map(([theme, score]) => {
                             const intensity = score > 5 ? 'high' : score > 2 ? 'medium' : 'low';
@@ -343,7 +304,7 @@ function renderCompanyScreener(themeScoring) {
                 </td>
             </tr>
             <tr class="screener-insights-section hidden bg-zinc-900/30">
-                <td colspan="8" class="px-4 py-2">
+                <td colspan="10" class="px-4 py-2">
                     <div class="text-zinc-300 text-xs leading-relaxed">
                         ${escapeHtml(scoring.motivation || 'No insights available')}
                     </div>
@@ -521,27 +482,29 @@ function renderScreenerTable(companies) {
                     ${(coverageData.intensity * 100).toFixed(0)}%
                 </td>
                 <td class="px-3 py-3 text-center text-sm font-medium text-zinc-300 border-b border-zinc-700">
-                    <div class="flex items-center justify-center gap-2">
-                        <span>${riskCount}</span>
-                        <button onclick="toggleScreenerCompanyThemes(this, event)" 
-                            class="px-2 py-1 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded text-orange-400 text-xs font-medium transition-colors flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                            </svg>
-                            Risks
-                        </button>
-                        <button onclick="toggleScreenerCompanyInsights(this, event)" 
-                            class="px-2 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded text-amber-400 text-xs font-medium transition-colors flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                            </svg>
-                            Insights
-                        </button>
-                    </div>
+                    ${riskCount}
+                </td>
+                <td class="px-3 py-3 text-center border-b border-zinc-700">
+                    <button onclick="toggleScreenerCompanyThemes(this, event)" 
+                        class="px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded text-orange-400 text-sm font-medium transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                        View Risks
+                    </button>
+                </td>
+                <td class="px-3 py-3 text-center border-b border-zinc-700">
+                    <button onclick="toggleScreenerCompanyInsights(this, event)" 
+                        class="px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded text-amber-400 text-sm font-medium transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        View Insights
+                    </button>
                 </td>
             </tr>
             <tr class="screener-themes-section hidden bg-zinc-900/30">
-                <td colspan="8" class="px-4 py-2">
+                <td colspan="10" class="px-4 py-2">
                     <div class="grid grid-cols-2 gap-1">
                         ${themesArray.map(([theme, score]) => {
                             const intensity = score > 5 ? 'high' : score > 2 ? 'medium' : 'low';
@@ -562,7 +525,7 @@ function renderScreenerTable(companies) {
                 </td>
             </tr>
             <tr class="screener-insights-section hidden bg-zinc-900/30">
-                <td colspan="8" class="px-4 py-2">
+                <td colspan="10" class="px-4 py-2">
                     <div class="text-zinc-300 text-xs leading-relaxed">
                         ${escapeHtml(scoring.motivation || 'No insights available')}
                     </div>
@@ -1039,23 +1002,40 @@ function updateFilterChips() {
 function removeFilter(type, value) {
     if (type === 'search') {
         filterState.search = '';
-        document.getElementById('searchCompany').value = '';
+        const searchInput = document.getElementById('searchCompany');
+        if (searchInput) searchInput.value = '';
     } else if (type === 'topN') {
         filterState.topN = '';
-        document.getElementById('filterTopN').value = '';
+        const topNSelect = document.getElementById('filterTopN');
+        if (topNSelect) topNSelect.value = '';
     } else {
+        // Map the type to the correct property name
+        const propertyMap = {
+            'sector': 'sectors',
+            'industry': 'industries', 
+            'risk': 'risks'
+        };
+        const propertyName = propertyMap[type] || type;
+        
         // Ensure the filter array exists before calling filter
-        if (!filterState[type]) {
-            filterState[type] = [];
+        if (!filterState[propertyName]) {
+            filterState[propertyName] = [];
         }
         
-        filterState[type] = filterState[type].filter(item => item !== value);
+        // Ensure we have a proper array to work with
+        if (!Array.isArray(filterState[propertyName])) {
+            filterState[propertyName] = [];
+        }
         
-        // Uncheck the corresponding checkbox - try both escaped and unescaped values
-        const escapedValue = value.replace(/'/g, "\\'").replace(/"/g, '\\"');
-        let checkbox = document.querySelector(`.${type}-filter[value="${escapedValue}"]`);
+        filterState[propertyName] = filterState[propertyName].filter(item => item !== value);
         
-        // If not found with escaped value, try with original value
+        // Uncheck the corresponding checkbox
+        // The value passed to removeFilter is already escaped from the chip onclick
+        // So we need to unescape it to find the original checkbox value
+        const unescapedValue = value.replace(/\\'/g, "'").replace(/\\"/g, '"');
+        let checkbox = document.querySelector(`.${type}-filter[value="${unescapedValue}"]`);
+        
+        // If not found with unescaped value, try with the original escaped value
         if (!checkbox) {
             checkbox = document.querySelector(`.${type}-filter[value="${value}"]`);
         }
@@ -1066,7 +1046,7 @@ function removeFilter(type, value) {
             // Fallback: find by iterating through all checkboxes
             const allCheckboxes = document.querySelectorAll(`.${type}-filter`);
             for (const cb of allCheckboxes) {
-                if (cb.value === value || cb.value === escapedValue) {
+                if (cb.value === unescapedValue || cb.value === value) {
                     cb.checked = false;
                     break;
                 }
@@ -1110,138 +1090,3 @@ window.handleSearchInput = handleSearchInput;
 window.handleFilterChange = handleFilterChange;
 window.removeFilter = removeFilter;
 window.clearAllFilters = clearAllFilters;
-
-        
-        // Override the renderCompanyScreener function to avoid errors
-        function renderCompanyScreener(themeScoring) {
-            console.log('renderCompanyScreener called with:', themeScoring);
-        }
-        
-        // Initialize filter state
-        filterState = {
-            search: '',
-            sectors: [],
-            industries: [],
-            risks: [],
-            topN: ''
-        };
-        
-        // Run the final test
-        function runFinalTest() {
-            console.log('🧪 Starting Final Deselection Test...');
-            
-            const resultsDiv = document.getElementById('test-results');
-            let testResults = [];
-            
-            // Test 1: Check a sector filter
-            console.log('\n=== Test 1: Check Technology sector ===');
-            const techCheckbox = document.querySelector('.sector-filter[value="Technology"]');
-            techCheckbox.checked = true;
-            techCheckbox.dispatchEvent(new Event('change'));
-            
-            setTimeout(() => {
-                const test1Result = {
-                    step: 'After checking Technology',
-                    filterState: JSON.parse(JSON.stringify(filterState)),
-                    chipsHTML: document.getElementById('filter-chips').innerHTML,
-                    checkboxChecked: techCheckbox.checked,
-                    hasChips: !document.getElementById('filter-chips').innerHTML.includes('No filters applied')
-                };
-                testResults.push(test1Result);
-                console.log('Test 1 Result:', test1Result);
-                
-                // Test 2: Uncheck the same filter
-                console.log('\n=== Test 2: Uncheck Technology sector ===');
-                techCheckbox.checked = false;
-                techCheckbox.dispatchEvent(new Event('change'));
-                
-                setTimeout(() => {
-                    const test2Result = {
-                        step: 'After unchecking Technology',
-                        filterState: JSON.parse(JSON.stringify(filterState)),
-                        chipsHTML: document.getElementById('filter-chips').innerHTML,
-                        checkboxChecked: techCheckbox.checked,
-                        hasChips: !document.getElementById('filter-chips').innerHTML.includes('No filters applied')
-                    };
-                    testResults.push(test2Result);
-                    console.log('Test 2 Result:', test2Result);
-                    
-                    // Test 3: Check again, then remove via chip
-                    console.log('\n=== Test 3: Check Technology again, then remove via chip ===');
-                    techCheckbox.checked = true;
-                    techCheckbox.dispatchEvent(new Event('change'));
-                    
-                    setTimeout(() => {
-                        // Now try to remove via chip
-                        const chipButton = document.querySelector('button[onclick*="removeFilter"]');
-                        if (chipButton) {
-                            console.log('Found chip button, clicking it...');
-                            chipButton.click();
-                            
-                            setTimeout(() => {
-                                const test3Result = {
-                                    step: 'After removing via chip',
-                                    filterState: JSON.parse(JSON.stringify(filterState)),
-                                    chipsHTML: document.getElementById('filter-chips').innerHTML,
-                                    checkboxChecked: techCheckbox.checked,
-                                    hasChips: !document.getElementById('filter-chips').innerHTML.includes('No filters applied')
-                                };
-                                testResults.push(test3Result);
-                                console.log('Test 3 Result:', test3Result);
-                                
-                                // Final analysis
-                                console.log('\n=== FINAL ANALYSIS ===');
-                                const test1Passed = test1Result.hasChips && test1Result.filterState.sectors.length === 1;
-                                const test2Passed = !test2Result.hasChips && test2Result.filterState.sectors.length === 0;
-                                const test3Passed = !test3Result.hasChips && test3Result.filterState.sectors.length === 0;
-                                const overallSuccess = test1Passed && test2Passed && test3Passed;
-                                
-                                const analysis = {
-                                    test1Passed,
-                                    test2Passed,
-                                    test3Passed,
-                                    overallSuccess
-                                };
-                                
-                                console.log('Final Analysis:', analysis);
-                                
-                                // Display results
-                                resultsDiv.innerHTML = `
-                                    <h2>Final Test Results</h2>
-                                    <div style="background: ${overallSuccess ? '#d4edda' : '#f8d7da'}; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                                        <strong>Overall Result: ${overallSuccess ? '✅ PASSED' : '❌ FAILED'}</strong>
-                                    </div>
-                                    <h3>Individual Tests:</h3>
-                                    <ul>
-                                        <li>Test 1 (Check): ${test1Passed ? '✅ PASSED' : '❌ FAILED'}</li>
-                                        <li>Test 2 (Uncheck): ${test2Passed ? '✅ PASSED' : '❌ FAILED'}</li>
-                                        <li>Test 3 (Chip removal): ${test3Passed ? '✅ PASSED' : '❌ FAILED'}</li>
-                                    </ul>
-                                    <h3>Detailed Results:</h3>
-                                    <pre>${JSON.stringify(testResults, null, 2)}</pre>
-                                    <h3>Analysis:</h3>
-                                    <pre>${JSON.stringify(analysis, null, 2)}</pre>
-                                `;
-                                
-                                if (overallSuccess) {
-                                    console.log('🎉 ALL TESTS PASSED! Deselection is working correctly!');
-                                } else {
-                                    console.log('❌ SOME TESTS FAILED! Deselection has issues.');
-                                }
-                            }, 100);
-                        } else {
-                            console.log('No chip button found for test 3');
-                        }
-                    }, 100);
-                }, 100);
-            }, 100);
-        }
-        
-        // Run test when page loads
-        window.addEventListener('load', () => {
-            setTimeout(runFinalTest, 200);
-        });
-    </script>
-</body>
-</html>
-    

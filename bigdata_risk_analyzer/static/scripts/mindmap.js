@@ -292,5 +292,6 @@ function renderGraphView(taxonomy) {
 }
 
 // Make functions globally accessible
+window.renderMindmap = renderMindmap;
 window.switchMindmapView = switchMindmapView;
 window.toggleTreeNode = toggleTreeNode;

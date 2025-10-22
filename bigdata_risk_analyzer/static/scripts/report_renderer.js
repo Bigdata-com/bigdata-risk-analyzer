@@ -31,7 +31,7 @@ function renderScreenerReport(rawData) {
         // Show empty state in all tabs
         if (window.tabController) {
             window.tabController.showEmptyState('summary', 'No data to display');
-            window.tabController.showEmptyState('companies', 'No data to display');
+            window.tabController.showEmptyState('screener', 'No data to display');
             window.tabController.showEmptyState('mindmap', 'No data to display');
             window.tabController.showEmptyState('evidence', 'No data to display');
         }
@@ -46,6 +46,14 @@ function renderScreenerReport(rawData) {
         hasThemeTaxonomy: !!data.theme_taxonomy,
         hasContent: !!data.content,
         companyCount: data.theme_scoring ? Object.keys(data.theme_scoring).length : 0
+    });
+    
+    console.log('Available functions:', {
+        renderDashboardCards: typeof window.renderDashboardCards,
+        renderHeatmap: typeof window.renderHeatmap,
+        renderCompanyScreener: typeof window.renderCompanyScreener,
+        renderMindmap: typeof window.renderMindmap,
+        renderEvidenceTable: typeof window.renderEvidenceTable
     });
 
     // Hide empty state, show dashboard
@@ -84,35 +92,60 @@ function renderScreenerReport(rawData) {
 
         // Summary tab - Heatmap
         if (data.theme_scoring) {
+            console.log('Rendering heatmap...');
             window.tabController.setLoadingState('summary', false);
-            renderHeatmap(data.theme_scoring);
+            if (window.renderHeatmap) {
+                renderHeatmap(data.theme_scoring);
+            } else {
+                console.error('renderHeatmap function not available');
+            }
+        } else {
+            console.log('No theme_scoring data for heatmap');
         }
 
         // Companies tab - Company cards
         if (data.theme_scoring) {
-            window.tabController.setLoadingState('companies', false);
-            renderCompanyCards(data.theme_scoring);
+            console.log('Rendering company screener...');
+            window.tabController.setLoadingState('screener', false);
+            if (window.renderCompanyScreener) {
+                renderCompanyScreener(data.theme_scoring);
+            } else {
+                console.error('renderCompanyScreener function not available');
+            }
+        } else {
+            console.log('No theme_scoring data for company screener');
         }
 
         // Mindmap tab - Taxonomy visualization
         if (data.theme_taxonomy) {
+            console.log('Rendering mindmap...');
             window.tabController.setLoadingState('mindmap', false);
-            renderMindmap(data.theme_taxonomy);
+            if (window.renderMindmap) {
+                renderMindmap(data.theme_taxonomy);
+            } else {
+                console.error('renderMindmap function not available');
+            }
+        } else {
+            console.log('No theme_taxonomy data for mindmap');
         }
 
         // Evidence tab - Filterable table
         if (data.content) {
+            console.log('Rendering evidence table...');
             window.tabController.setLoadingState('evidence', false);
-            renderEvidenceTable(data.content);
+            if (window.renderEvidenceTable) {
+                renderEvidenceTable(data.content);
+            } else {
+                console.error('renderEvidenceTable function not available');
+            }
+        } else {
+            console.log('No content data for evidence table');
         }
     } catch (error) {
         console.error('Error rendering report:', error);
     }
 }
 
-// Alias for Risk Analyzer - same functionality
-const renderRiskReport = renderScreenerReport;
-
 // Make both functions globally available
 window.renderScreenerReport = renderScreenerReport;
-window.renderRiskReport = renderRiskReport;
+window.renderRiskReport = renderScreenerReport; // Alias for Risk Analyzer

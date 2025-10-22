@@ -3,6 +3,71 @@
 
 <div id="infoModalsContainer"></div>
 
+<!-- Screener Guide Modal -->
+<div id="screenerGuideModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-zinc-900 border border-zinc-700 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-6">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-white">How to Use the Company Screener</h2>
+        <button onclick="hideScreenerGuide()" class="text-zinc-400 hover:text-white transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Guide Content -->
+      <div class="space-y-6">
+        <!-- Multi-Select Filters -->
+        <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-blue-400 mb-2">Multi-Select Filters</h3>
+          <p class="text-zinc-300 text-sm mb-2">
+            <strong>Hold Ctrl/Cmd and click</strong> to select multiple options in Sector, Industry, and Risk filters.
+          </p>
+          <ul class="text-zinc-400 text-xs space-y-1">
+            <li>• <strong>Sector Filter:</strong> Select multiple sectors to focus on specific industries</li>
+            <li>• <strong>Industry Filter:</strong> Choose multiple industries within selected sectors</li>
+            <li>• <strong>Risk Filter:</strong> Select specific risk factors to analyze exposure</li>
+            <li>• <strong>Filter Counts:</strong> Colored badges show how many options are selected</li>
+          </ul>
+        </div>
+        
+        
+        <!-- Table Features -->
+        <div class="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-green-400 mb-2">Table Features</h3>
+          <ul class="text-zinc-300 text-sm space-y-1">
+            <li>• <strong>Sortable Columns:</strong> Click headers to sort by any metric</li>
+            <li>• <strong>Top Risks:</strong> Shows top 3 risk factors for each company</li>
+            <li>• <strong>Insights:</strong> AI-generated risk exposure summary</li>
+            <li>• <strong>Export:</strong> Download filtered results as CSV or JSON</li>
+          </ul>
+        </div>
+        
+        <!-- Workflow Examples -->
+        <div class="bg-zinc-800/50 border border-zinc-600 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-white mb-2">Common Workflows</h3>
+          <div class="space-y-3">
+            <div>
+              <h4 class="text-sm font-semibold text-zinc-200 mb-1">1. Sector Analysis</h4>
+              <p class="text-zinc-400 text-xs">Select "Technology" sector → Choose specific industries → Filter by "AI Risk" → Export results</p>
+            </div>
+            <div>
+              <h4 class="text-sm font-semibold text-zinc-200 mb-1">2. Risk-Focused Analysis</h4>
+              <p class="text-zinc-400 text-xs">Select multiple risk factors → Sort by Coverage Score → Identify most exposed companies</p>
+            </div>
+            <div>
+              <h4 class="text-sm font-semibold text-zinc-200 mb-1">3. Portfolio Screening</h4>
+              <p class="text-zinc-400 text-xs">Set Top N limit → Apply filters → Export for portfolio construction</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Heatmap Guide Modal -->
 <div id="heatmapGuideModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
   <div class="bg-zinc-900 border border-zinc-700 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -234,12 +299,12 @@
           </svg>
           Risk Heatmap
         </button>
-        <button data-tab="companies" 
+        <button data-tab="screener" 
           class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
           </svg>
-          Companies
+          Company Screener
         </button>
         <button data-tab="mindmap" 
           class="flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200">
@@ -283,11 +348,11 @@
       </div>
 
       <!-- Companies Tab -->
-      <div data-tab-content="companies" class="hidden p-6">
+      <div data-tab-content="screener" class="hidden p-6">
         <div class="loading-indicator hidden">
           <div class="flex items-center justify-center py-20">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
-            <span class="ml-3 text-zinc-400">Loading companies...</span>
+            <span class="ml-3 text-zinc-400">Loading company screener...</span>
           </div>
         </div>
         <div class="tab-actual-content"></div>
@@ -616,9 +681,10 @@
 <script src="static/scripts/dashboard_cards.js"></script>
 <script src="static/scripts/tab_controller.js"></script>
 <script src="static/scripts/heatmap.js"></script>
-<script src="static/scripts/company_cards.js"></script>
-<script src="static/scripts/mindmap.js"></script>
-<script src="static/scripts/evidence_table.js"></script>
+<script src="static/scripts/company_screener.js?v={{ range(1000, 9999) | random }}"></script>
+<script src="static/scripts/mindmap.js?v={{ range(1000, 9999) | random }}"></script>
+<script src="static/scripts/evidence_table.js?v={{ range(1000, 9999) | random }}"></script>
+<script src="static/scripts/report_renderer.js?v={{ range(1000, 9999) | random }}"></script>
 <script src="static/scripts/form.js"></script>
 
 <!-- Version number at bottom of page -->
