@@ -99,6 +99,9 @@ function renderDashboardCards(data) {
     // Update configuration header
     updateConfigurationHeader(config);
     
+    // Check if this is first time and auto-show guide
+    checkAndShowFirstTimeGuide();
+    
     // Return the 3 cards HTML for Overview tab
     return `
         <div class="flex items-center justify-between mb-6">
@@ -374,7 +377,8 @@ function renderTopCompaniesCard(topCompanies) {
         
         return `
             <div class="dashboard-company-item border-b border-zinc-700 last:border-b-0" data-company="${escapeHtml(companyName)}">
-                <div class="grid grid-cols-12 gap-2 px-4 py-2 hover:bg-zinc-700/30 transition-colors">
+                <div class="grid grid-cols-12 gap-2 px-4 py-2 hover:bg-zinc-700/30 transition-colors cursor-pointer"
+                     onclick="filterByCompany('${escapeHtml(companyName)}')">
                     <!-- Rank Column -->
                     <div class="col-span-1 flex items-center justify-center">
                         <div class="flex items-center justify-center w-6 h-6 ${medalColor} font-bold text-sm">
@@ -421,7 +425,8 @@ function renderTopCompaniesCard(topCompanies) {
                                 low: 'bg-red-900 text-red-300 border-red-800'
                             };
                             return `
-                                <div class="flex items-center justify-between ${colorClasses[intensity]} border rounded px-2 py-1">
+                                <div class="flex items-center justify-between ${colorClasses[intensity]} border rounded px-2 py-1 cursor-pointer hover:opacity-80 transition-opacity"
+                                     onclick="filterByCompanyAndTheme('${escapeHtml(companyName)}', '${escapeHtml(theme)}')">
                                     <span class="text-xs font-medium truncate flex-1 mr-1" title="${escapeHtml(theme)}">${escapeHtml(theme)}</span>
                                     <span class="font-bold text-xs flex-shrink-0">${score}</span>
                                 </div>
@@ -566,7 +571,53 @@ function filterByTheme(theme) {
     // Wait for tab to render, then apply filter
     setTimeout(() => {
         const themeFilter = document.getElementById('filterTheme');
+        const companyFilter = document.getElementById('filterCompany');
         if (themeFilter) {
+            themeFilter.value = theme;
+            // Clear company filter when selecting only theme
+            if (companyFilter) {
+                companyFilter.value = '';
+            }
+            if (window.applyEvidenceFilters) {
+                window.applyEvidenceFilters();
+            }
+        }
+    }, 300);
+}
+
+function filterByCompany(company) {
+    // Switch to evidence tab and apply company filter
+    if (window.tabController) {
+        window.tabController.switchTab('evidence');
+    }
+    // Wait for tab to render, then apply filter
+    setTimeout(() => {
+        const companyFilter = document.getElementById('filterCompany');
+        const themeFilter = document.getElementById('filterTheme');
+        if (companyFilter) {
+            companyFilter.value = company;
+            // Clear theme filter when selecting only company
+            if (themeFilter) {
+                themeFilter.value = '';
+            }
+            if (window.applyEvidenceFilters) {
+                window.applyEvidenceFilters();
+            }
+        }
+    }, 300);
+}
+
+function filterByCompanyAndTheme(company, theme) {
+    // Switch to evidence tab and apply both company and theme filters
+    if (window.tabController) {
+        window.tabController.switchTab('evidence');
+    }
+    // Wait for tab to render, then apply filters
+    setTimeout(() => {
+        const companyFilter = document.getElementById('filterCompany');
+        const themeFilter = document.getElementById('filterTheme');
+        if (companyFilter && themeFilter) {
+            companyFilter.value = company;
             themeFilter.value = theme;
             if (window.applyEvidenceFilters) {
                 window.applyEvidenceFilters();
@@ -658,15 +709,30 @@ function hideDashboardGuide() {
     }
 }
 
+function checkAndShowFirstTimeGuide() {
+    // Check if user has seen the guide before
+    const hasSeenGuide = localStorage.getItem('riskAnalyzer_hasSeenGuide');
+    
+    if (!hasSeenGuide) {
+        // Show guide immediately for first-time users
+        showDashboardGuide();
+        // Mark as seen
+        localStorage.setItem('riskAnalyzer_hasSeenGuide', 'true');
+    }
+}
+
 
 // Make functions globally accessible
 window.renderDashboardCards = renderDashboardCards;
 window.updateConfigurationHeader = updateConfigurationHeader;
 window.filterByTheme = filterByTheme;
+window.filterByCompany = filterByCompany;
+window.filterByCompanyAndTheme = filterByCompanyAndTheme;
 window.toggleDashboardCompanyThemes = toggleDashboardCompanyThemes;
 window.toggleDashboardCompanyInsights = toggleDashboardCompanyInsights;
 window.showTooltip = showTooltip;
 window.hideTooltip = hideTooltip;
 window.showDashboardGuide = showDashboardGuide;
 window.hideDashboardGuide = hideDashboardGuide;
+window.checkAndShowFirstTimeGuide = checkAndShowFirstTimeGuide;
 
