@@ -64,8 +64,8 @@ function renderDashboardCards(data) {
     // Count total supporting evidences
     const totalEvidences = (data.content || []).length;
     
-    // Get current date/time
-    const runDate = new Date().toLocaleString();
+    // Get runDate from data (for pre-computed cases) or current date/time
+    const runDate = data.runDate || new Date().toLocaleString();
     
     // Calculate theme popularity
     const themePopularity = {};
@@ -350,8 +350,8 @@ function renderAtAGlanceCard(totalCompanies, totalThemes, maxScore, totalEvidenc
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-xs text-zinc-400">Report generated on</span>
-                            <span class="text-sm font-medium text-zinc-200">10/15/2025</span>
-                            </div>
+                            <span class="text-sm font-medium text-zinc-200">${runDate}</span>
+                        </div>
                             </div>
                             </div>
                 

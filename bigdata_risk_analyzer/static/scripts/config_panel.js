@@ -70,20 +70,23 @@ function adaptRiskDataToThemeFormat(riskData) {
 
 function loadQuickStartTemplate(type) {
     const jsonFiles = {
-        'import-tariffs': {
-            file: '/static/data/import_tariffs.json', 
-            theme: 'US Import Tariffs Against China',
-            universe: 'US Top 100'
+        'us-gov-shutdown': {
+            file: '/static/data/risk_analyzer_us_gov_shutdown.json', 
+            theme: 'US Government Shutdown',
+            universe: 'US Top 100',
+            runDate: '23/10/2025'
         },
         'energy-cost': {
             file: '/static/data/energy-cost.json',
             theme: 'Energy Cost Increase Risk',
-            universe: 'US Top 100'
+            universe: 'US Top 100',
+            runDate: '15/10/2025'
         },
         'operational-technology': {
             file: '/static/data/operational_technology.json',
             theme: 'Operational & Technology Risk',
-            universe: 'US Top 100'
+            universe: 'US Top 100',
+            runDate: '15/10/2025'
         }
     };
     
@@ -116,6 +119,9 @@ function loadQuickStartTemplate(type) {
                 
                 // Adapt risk data to theme format
                 const data = adaptRiskDataToThemeFormat(riskData);
+                
+                // Add runDate to the data
+                data.runDate = template.runDate;
                 
                 // Store the report globally
                 window.lastReport = data;
