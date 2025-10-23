@@ -132,39 +132,90 @@ function renderCompanyScreener(themeScoring) {
                     <!-- Sector Filter -->
                     <div class="mb-8">
                         <label class="block text-sm font-medium text-zinc-300 mb-3">Sector</label>
-                        <div class="space-y-2 max-h-32 overflow-y-auto">
-                            ${sectors.map(sector => `
-                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-zinc-700/50 p-1 rounded">
-                                    <input type="checkbox" class="sector-filter" value="${escapeHtml(sector)}" onchange="handleFilterChange()">
-                                    <span class="text-sm text-zinc-300">${escapeHtml(sector)}</span>
-                                </label>
-                            `).join('')}
+                        <div class="relative">
+                            <input type="text" 
+                                   id="sectorSearch" 
+                                   placeholder="Search sector here or scroll below..." 
+                                   class="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                   onkeyup="filterSectorOptions(this.value)">
+                            <div class="absolute right-2 top-2">
+                                <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mt-2 max-h-48 overflow-y-auto border border-zinc-600 rounded-lg bg-zinc-800/50 enhanced-scrollbar">
+                            <div class="p-2 space-y-1" id="sectorOptions">
+                                ${sectors.map(sector => `
+                                    <label class="flex items-center justify-between p-2 hover:bg-zinc-700/50 rounded cursor-pointer transition-colors filter-option">
+                                        <div class="flex items-center space-x-2">
+                                            <input type="checkbox" class="sector-filter" value="${escapeHtml(sector)}" onchange="handleFilterChange()">
+                                            <span class="text-sm text-zinc-300">${escapeHtml(sector)}</span>
+                                        </div>
+                                        <span class="text-xs text-zinc-500 bg-zinc-600 px-2 py-1 rounded-full sector-count count-badge" data-sector="${escapeHtml(sector)}">0</span>
+                                    </label>
+                                `).join('')}
+                            </div>
                         </div>
                     </div>
                     
                     <!-- Industry Filter -->
                     <div class="mb-8">
                         <label class="block text-sm font-medium text-zinc-300 mb-3">Industry</label>
-                        <div class="space-y-2 max-h-32 overflow-y-auto">
-                            ${industries.map(industry => `
-                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-zinc-700/50 p-1 rounded">
-                                    <input type="checkbox" class="industry-filter" value="${escapeHtml(industry)}" onchange="handleFilterChange()">
-                                    <span class="text-sm text-zinc-300">${escapeHtml(industry)}</span>
-                                </label>
-                            `).join('')}
+                        <div class="relative">
+                            <input type="text" 
+                                   id="industrySearch" 
+                                   placeholder="Search industry here or scroll below..." 
+                                   class="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                   onkeyup="filterIndustryOptions(this.value)">
+                            <div class="absolute right-2 top-2">
+                                <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mt-2 max-h-48 overflow-y-auto border border-zinc-600 rounded-lg bg-zinc-800/50 enhanced-scrollbar">
+                            <div class="p-2 space-y-1" id="industryOptions">
+                                ${industries.map(industry => `
+                                    <label class="flex items-center justify-between p-2 hover:bg-zinc-700/50 rounded cursor-pointer transition-colors filter-option">
+                                        <div class="flex items-center space-x-2">
+                                            <input type="checkbox" class="industry-filter" value="${escapeHtml(industry)}" onchange="handleFilterChange()">
+                                            <span class="text-sm text-zinc-300">${escapeHtml(industry)}</span>
+                                        </div>
+                                        <span class="text-xs text-zinc-500 bg-zinc-600 px-2 py-1 rounded-full industry-count count-badge" data-industry="${escapeHtml(industry)}">0</span>
+                                    </label>
+                                `).join('')}
+                            </div>
                         </div>
                     </div>
                     
                     <!-- Risk Factors -->
                     <div class="mb-8">
                         <label class="block text-sm font-medium text-zinc-300 mb-3">Risk Factors</label>
-                        <div class="space-y-2 max-h-32 overflow-y-auto">
-                            ${Array.from(allThemes).map(theme => `
-                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-zinc-700/50 p-1 rounded">
-                                    <input type="checkbox" class="risk-filter" value="${escapeHtml(theme)}" onchange="handleFilterChange()">
-                                    <span class="text-sm text-zinc-300">${escapeHtml(theme)}</span>
-                                </label>
-                            `).join('')}
+                        <div class="relative">
+                            <input type="text" 
+                                   id="riskSearch" 
+                                   placeholder="Search risk here or scroll below..." 
+                                   class="w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                   onkeyup="filterRiskOptions(this.value)">
+                            <div class="absolute right-2 top-2">
+                                <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mt-2 max-h-48 overflow-y-auto border border-zinc-600 rounded-lg bg-zinc-800/50 enhanced-scrollbar">
+                            <div class="p-2 space-y-1" id="riskOptions">
+                                ${Array.from(allThemes).map(theme => `
+                                    <label class="flex items-center justify-between p-2 hover:bg-zinc-700/50 rounded cursor-pointer transition-colors filter-option">
+                                        <div class="flex items-center space-x-2">
+                                            <input type="checkbox" class="risk-filter" value="${escapeHtml(theme)}" onchange="handleFilterChange()">
+                                            <span class="text-sm text-zinc-300">${escapeHtml(theme)}</span>
+                                        </div>
+                                        <span class="text-xs text-zinc-500 bg-zinc-600 px-2 py-1 rounded-full risk-count count-badge" data-risk="${escapeHtml(theme)}">0</span>
+                                    </label>
+                                `).join('')}
+                            </div>
                         </div>
                     </div>
                     
@@ -317,6 +368,11 @@ function renderCompanyScreener(themeScoring) {
     `;
 
     container.innerHTML = html;
+    
+    // Update filter counts after rendering
+    setTimeout(() => {
+        updateFilterCounts();
+    }, 100);
 }
 
 // Calculate coverage and intensity scores (reused from heatmap)
@@ -701,39 +757,7 @@ function getCompanyInsights(scoring) {
     return { summary, details };
 }
 
-// Multi-select filter handling
-function updateFilterCounts() {
-    const sectorSelect = document.getElementById('filterSector');
-    const industrySelect = document.getElementById('filterIndustry');
-    const riskSelect = document.getElementById('filterRisk');
-    
-    if (sectorSelect) {
-        const sectorCount = sectorSelect.selectedOptions.length;
-        const sectorCountEl = document.getElementById('sectorCount');
-        if (sectorCountEl) {
-            sectorCountEl.textContent = sectorCount;
-            sectorCountEl.style.display = sectorCount > 0 ? 'block' : 'none';
-        }
-    }
-    
-    if (industrySelect) {
-        const industryCount = industrySelect.selectedOptions.length;
-        const industryCountEl = document.getElementById('industryCount');
-        if (industryCountEl) {
-            industryCountEl.textContent = industryCount;
-            industryCountEl.style.display = industryCount > 0 ? 'block' : 'none';
-        }
-    }
-    
-    if (riskSelect) {
-        const riskCount = riskSelect.selectedOptions.length;
-        const riskCountEl = document.getElementById('riskCount');
-        if (riskCountEl) {
-            riskCountEl.textContent = riskCount;
-            riskCountEl.style.display = riskCount > 0 ? 'block' : 'none';
-        }
-    }
-}
+// Legacy function - replaced by enhanced updateFilterCounts below
 
 // Enhanced filter function with multi-select support
 function filterScreener() {
@@ -1078,6 +1102,103 @@ function clearAllFilters() {
     filterScreener();
 }
 
+// Enhanced search filter functions
+function filterSectorOptions(searchTerm) {
+    const options = document.querySelectorAll('#sectorOptions label');
+    const term = searchTerm.toLowerCase();
+    
+    options.forEach(option => {
+        const text = option.querySelector('span').textContent.toLowerCase();
+        const shouldShow = text.includes(term);
+        option.style.display = shouldShow ? 'flex' : 'none';
+    });
+}
+
+function filterIndustryOptions(searchTerm) {
+    const options = document.querySelectorAll('#industryOptions label');
+    const term = searchTerm.toLowerCase();
+    
+    options.forEach(option => {
+        const text = option.querySelector('span').textContent.toLowerCase();
+        const shouldShow = text.includes(term);
+        option.style.display = shouldShow ? 'flex' : 'none';
+    });
+}
+
+function filterRiskOptions(searchTerm) {
+    const options = document.querySelectorAll('#riskOptions label');
+    const term = searchTerm.toLowerCase();
+    
+    options.forEach(option => {
+        const text = option.querySelector('span').textContent.toLowerCase();
+        const shouldShow = text.includes(term);
+        option.style.display = shouldShow ? 'flex' : 'none';
+    });
+}
+
+// Update filter counts based on current data
+function updateFilterCounts() {
+    if (!currentScreenerData) return;
+    
+    const companies = currentScreenerData.companies;
+    
+    // Update sector counts
+    const sectorCounts = {};
+    const industryCounts = {};
+    const riskCounts = {};
+    
+    companies.forEach(([companyName, scoring]) => {
+        // Count sectors
+        if (scoring.sector) {
+            sectorCounts[scoring.sector] = (sectorCounts[scoring.sector] || 0) + 1;
+        }
+        
+        // Count industries
+        if (scoring.industry) {
+            industryCounts[scoring.industry] = (industryCounts[scoring.industry] || 0) + 1;
+        }
+        
+        // Count risk factors
+        if (scoring.themes) {
+            Object.keys(scoring.themes).forEach(theme => {
+                if (scoring.themes[theme] > 0) {
+                    riskCounts[theme] = (riskCounts[theme] || 0) + 1;
+                }
+            });
+        }
+    });
+    
+    // Update sector count badges
+    document.querySelectorAll('.sector-count').forEach(badge => {
+        const sector = badge.getAttribute('data-sector');
+        const count = sectorCounts[sector] || 0;
+        badge.textContent = count;
+        badge.className = count > 0 ? 
+            'text-xs text-blue-400 bg-blue-600/20 px-2 py-1 rounded-full sector-count' : 
+            'text-xs text-zinc-500 bg-zinc-600 px-2 py-1 rounded-full sector-count';
+    });
+    
+    // Update industry count badges
+    document.querySelectorAll('.industry-count').forEach(badge => {
+        const industry = badge.getAttribute('data-industry');
+        const count = industryCounts[industry] || 0;
+        badge.textContent = count;
+        badge.className = count > 0 ? 
+            'text-xs text-blue-400 bg-blue-600/20 px-2 py-1 rounded-full industry-count' : 
+            'text-xs text-zinc-500 bg-zinc-600 px-2 py-1 rounded-full industry-count';
+    });
+    
+    // Update risk count badges
+    document.querySelectorAll('.risk-count').forEach(badge => {
+        const risk = badge.getAttribute('data-risk');
+        const count = riskCounts[risk] || 0;
+        badge.textContent = count;
+        badge.className = count > 0 ? 
+            'text-xs text-blue-400 bg-blue-600/20 px-2 py-1 rounded-full risk-count' : 
+            'text-xs text-zinc-500 bg-zinc-600 px-2 py-1 rounded-full risk-count';
+    });
+}
+
 // Make functions globally accessible
 window.renderCompanyScreener = renderCompanyScreener;
 window.filterScreener = filterScreener;
@@ -1093,3 +1214,7 @@ window.handleSearchInput = handleSearchInput;
 window.handleFilterChange = handleFilterChange;
 window.removeFilter = removeFilter;
 window.clearAllFilters = clearAllFilters;
+window.filterSectorOptions = filterSectorOptions;
+window.filterIndustryOptions = filterIndustryOptions;
+window.filterRiskOptions = filterRiskOptions;
+window.updateFilterCounts = updateFilterCounts;
