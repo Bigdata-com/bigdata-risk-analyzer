@@ -192,7 +192,7 @@ function renderCompanyScreener(themeScoring) {
                                 Industry
                             </th>
                             <th onclick="sortScreener('composite')" class="px-3 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 cursor-pointer hover:bg-zinc-700/50">
-                                Composite Score ↕
+                                Raw Score ↕
                             </th>
                             <th onclick="sortScreener('coverage')" class="px-3 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 cursor-pointer hover:bg-zinc-700/50">
                                 Coverage Score ↕
@@ -570,7 +570,7 @@ function exportCSV() {
     }
     
     // Create CSV content
-    const headers = ['Company', 'Ticker', 'Sector', 'Industry', 'Composite Score', 'Coverage %', 'Intensity %', 'Risk Count'];
+    const headers = ['Company', 'Ticker', 'Sector', 'Industry', 'Raw Score', 'Coverage %', 'Intensity %', 'Risk Count'];
     const rows = filteredCompanies.map(([companyName, scoring]) => {
         const coverageData = currentScreenerData.coverageIntensity[companyName];
         const riskCount = Object.values(scoring.themes || {}).filter(score => score > 0).length;
