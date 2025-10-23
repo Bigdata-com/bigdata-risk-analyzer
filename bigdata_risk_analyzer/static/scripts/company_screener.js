@@ -540,13 +540,17 @@ function clearFilters() {
 
 // Export to CSV
 function exportCSV() {
-    if (!currentScreenerData) return;
+    if (!currentScreenerData) {
+        console.error('No screener data available for export');
+        return;
+    }
     
-    const searchTerm = document.getElementById('searchCompany').value.toLowerCase();
-    const sectorFilter = document.getElementById('filterSector').value;
-    const industryFilter = document.getElementById('filterIndustry').value;
-    const riskFilter = document.getElementById('filterRisk').value;
-    const topN = document.getElementById('filterTopN').value;
+    // Use current filter state instead of reading from DOM
+    const searchTerm = filterState.search ? filterState.search.toLowerCase() : '';
+    const sectorFilter = filterState.sectors && filterState.sectors.length > 0 ? filterState.sectors[0] : '';
+    const industryFilter = filterState.industries && filterState.industries.length > 0 ? filterState.industries[0] : '';
+    const riskFilter = filterState.risks && filterState.risks.length > 0 ? filterState.risks[0] : '';
+    const topN = filterState.topN || '';
     
     // Apply same filters as display
     let filteredCompanies = currentScreenerData.companies.filter(([companyName, scoring]) => {
@@ -601,13 +605,17 @@ function exportCSV() {
 
 // Export to JSON
 function exportJSON() {
-    if (!currentScreenerData) return;
+    if (!currentScreenerData) {
+        console.error('No screener data available for export');
+        return;
+    }
     
-    const searchTerm = document.getElementById('searchCompany').value.toLowerCase();
-    const sectorFilter = document.getElementById('filterSector').value;
-    const industryFilter = document.getElementById('filterIndustry').value;
-    const riskFilter = document.getElementById('filterRisk').value;
-    const topN = document.getElementById('filterTopN').value;
+    // Use current filter state instead of reading from DOM
+    const searchTerm = filterState.search ? filterState.search.toLowerCase() : '';
+    const sectorFilter = filterState.sectors && filterState.sectors.length > 0 ? filterState.sectors[0] : '';
+    const industryFilter = filterState.industries && filterState.industries.length > 0 ? filterState.industries[0] : '';
+    const riskFilter = filterState.risks && filterState.risks.length > 0 ? filterState.risks[0] : '';
+    const topN = filterState.topN || '';
     
     // Apply same filters as display
     let filteredCompanies = currentScreenerData.companies.filter(([companyName, scoring]) => {
