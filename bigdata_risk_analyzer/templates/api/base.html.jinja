@@ -139,10 +139,14 @@
 		</div>
 	</nav>
 
-	<main class="py-8 text-left ml-0">
+    <main class="py-8 pb-16 text-left ml-0">
 		{% block content %}{% endblock %}
 	</main>
 
+	<!-- Main has extra bottom padding (pb-16) so content never overlaps this badge. -->
+	<div class="fixed right-4 bottom-4 z-50 pointer-events-none bg-zinc-900/60 text-zinc-400 px-2 py-1 rounded text-xs" aria-hidden="false">
+		<span class="pointer-events-auto">{{ version }}</span>
+	</div>
 </body>
 
 <!-- Make the logo link keep the current token -->
