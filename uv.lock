@@ -149,7 +149,7 @@ wheels = [
 [[package]]
 name = "bigdata-research-tools"
 version = "1.0.0b1"
-source = { git = "https://github.com/Bigdata-com/bigdata-research-tools?rev=2e9324f8c1253a9032779a5bee18fd9f250f7990#2e9324f8c1253a9032779a5bee18fd9f250f7990" }
+source = { git = "https://github.com/Bigdata-com/bigdata-research-tools?rev=4d1bb23e0dae25f10e0afc537532da5cab2f7359#4d1bb23e0dae25f10e0afc537532da5cab2f7359" }
 dependencies = [
     { name = "bigdata-client" },
     { name = "graphviz" },
@@ -169,7 +169,7 @@ openai = [
 
 [[package]]
 name = "bigdata-risk-analyzer"
-version = "2.3.4"
+version = "2.3.5"
 source = { editable = "." }
 dependencies = [
     { name = "bigdata-client" },
@@ -192,7 +192,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "bigdata-client", specifier = "==2.19.0" },
-    { name = "bigdata-research-tools", extras = ["openai"], git = "https://github.com/Bigdata-com/bigdata-research-tools?rev=2e9324f8c1253a9032779a5bee18fd9f250f7990" },
+    { name = "bigdata-research-tools", extras = ["openai"], git = "https://github.com/Bigdata-com/bigdata-research-tools?rev=4d1bb23e0dae25f10e0afc537532da5cab2f7359" },
     { name = "fastapi", specifier = ">=0.116.1" },
     { name = "jinja2", specifier = "==3.1.6" },
     { name = "pydantic", specifier = ">=2.10.6" },
