@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.4] - 24-10-2025
+
+### Fix
+- Ticker was expected, but not always received. Now it is optional.
+- Bigdata research tools was stuck on an old commit, it now points to the latest v1 beta commit.
+
 ## [2.3.3] - 24-10-2025
 
 ### Added
