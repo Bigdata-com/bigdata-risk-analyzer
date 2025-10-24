@@ -15,8 +15,8 @@ class LabeledChunk(BaseModel):
     company: str
     sector: str
     industry: str
-    country: str
-    ticker: str
+    country: str | None
+    ticker: str | None
     document_id: str
     headline: str
     quote: str
@@ -36,7 +36,7 @@ class RiskScore(RootModel):
 
 
 class CompanyScoring(BaseModel):
-    ticker: str
+    ticker: str | None
     sector: str
     industry: str
     composite_score: int
