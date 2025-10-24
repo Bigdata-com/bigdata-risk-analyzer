@@ -1022,14 +1022,14 @@
 <script src="static/scripts/dashboard_cards.js"></script>
 <script src="static/scripts/tab_controller.js"></script>
 <script src="static/scripts/heatmap.js"></script>
-<script src="static/scripts/company_screener.js?v={{ range(1000, 9999) | random }}"></script>
-<script src="static/scripts/mindmap.js?v={{ range(1000, 9999) | random }}"></script>
-<script src="static/scripts/evidence_table.js?v={{ range(1000, 9999) | random }}"></script>
-<script src="static/scripts/report_renderer.js?v={{ range(1000, 9999) | random }}"></script>
+<script src="static/scripts/company_screener.js"></script>
+<script src="static/scripts/mindmap.js"></script>
+<script src="static/scripts/evidence_table.js"></script>
+<script src="static/scripts/report_renderer.js"></script>
 <script src="static/scripts/form.js"></script>
 
 <!-- Version number at bottom of page -->
 <div class="text-right pr-4 pb-4">
-  <span class="text-xs text-zinc-500">v2.3.2</span>
+  <span class="text-xs text-zinc-500">{{version}}</span>
 </div>
 {% endblock %}
