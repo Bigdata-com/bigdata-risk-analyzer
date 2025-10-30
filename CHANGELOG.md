@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.3.5] - Unreleased
+## [2.3.6] - 30-10-2025
+
+## Added
+- New use-case for govt shutdown
+- Minor naming changes
+
+## [2.3.5] - 27-10-2025
 
 ## Added
 - Added version query parameter to static scripts to invalidate browser cache when a new version is released.
