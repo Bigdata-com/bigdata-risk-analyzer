@@ -71,9 +71,9 @@ function adaptRiskDataToThemeFormat(riskData) {
 function loadQuickStartTemplate(type) {
     const jsonFiles = {
         'us-gov-shutdown': {
-            file: '/static/data/risk_analyzer_us_gov_shutdown.json', 
+            file: '/static/data/risk_analyzer_gov_shutdown_nasdaq100.json', 
             theme: 'US Government Shutdown',
-            universe: 'US Top 100',
+            universe: 'Nasdaq 100',
             runDate: '23/10/2025'
         },
         'energy-cost': {
