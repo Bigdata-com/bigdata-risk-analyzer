@@ -105,15 +105,17 @@
 	<!-- Header 1: Brand & Navigation -->
 	<nav class="flex items-center justify-between px-6 py-4 border-b border-zinc-700 bg-gradient-to-b from-[#101116d9] to-[#080c1e99]" role="navigation" aria-label="main navigation">
 		<!-- Left: Icon + Title + Subtitle -->
-		<div class="flex items-center gap-4">
-			<svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-			</svg>
-			<div class="flex flex-col gap-0.5">
-				<h1 class="text-2xl font-bold text-white">Risk Analyzer</h1>
-				<p class="text-base text-zinc-500 -mt-1.5">Powered by Bigdata.com</p>
+		<a id="logo-link" class="inline-flex items-center gap-2 no-underline text-text font-semibold" href="/">
+			<div class="flex items-center gap-4">
+				<svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+				</svg>
+				<div class="flex flex-col gap-0.5">
+					<h1 class="text-2xl font-bold text-white">Risk Analyzer</h1>
+					<p class="text-base text-zinc-500 -mt-1.5">Powered by Bigdata.com</p>
+				</div>
 			</div>
-		</div>
+		</a>
 		
 		<!-- Right: Navigation Buttons -->
 		<div class="flex items-center gap-3">
@@ -145,10 +147,15 @@
 
 </body>
 
-<!-- Token handling (if needed in future) -->
+<!-- Make the logo link keep the current token -->
 <script>
 	const urlParams = new URLSearchParams(window.location.search);
 	const token = urlParams.get('token');
+
+	if (token) {
+		const logoLink = document.getElementById('logo-link');
+		logoLink.href = `/?token=${encodeURIComponent(token)}`;
+	}
 
 	// Handle deploy button click
 	function handleDeployClick() {
