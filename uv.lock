@@ -169,7 +169,7 @@ openai = [
 
 [[package]]
 name = "bigdata-risk-analyzer"
-version = "2.3.6"
+version = "2.3.7"
 source = { editable = "." }
 dependencies = [
     { name = "bigdata-client" },
