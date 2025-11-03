@@ -425,14 +425,17 @@ function processTimeSeriesData(series) {
     });
 
     // Convert to array of {date, value} objects
+    // Normalize dates to midnight local time to ensure proper alignment with axis ticks
     let dataPoints = Object.entries(dateCounts)
         .map(([date, value]) => {
             const dateObj = new Date(date);
             if (isNaN(dateObj.getTime())) {
                 return null;
             }
+            // Normalize to midnight local time to avoid timezone issues
+            const normalizedDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
             return {
-                date: dateObj,
+                date: normalizedDate,
                 value: value
             };
         })
