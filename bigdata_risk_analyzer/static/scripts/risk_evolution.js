@@ -8,18 +8,6 @@ let selectedDateRange = { start: null, end: null }; // User-selected date range 
 let currentChart = null;
 let resizeTimeout = null;
 
-// Escape HTML helper (use global if available, otherwise define)
-if (typeof escapeHtml === 'undefined') {
-    function escapeHtml(text) {
-        if (text === null || text === undefined) return '';
-        const str = String(text);
-        return str.replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/\"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    }
-}
 
 // Color palette for series
 const SERIES_COLORS = [

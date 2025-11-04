@@ -3,12 +3,6 @@ let currentScreenerData = null;
 let currentScreenerSortField = 'composite';
 let currentScreenerSortDirection = 'desc';
 
-// Utility function to escape HTML
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
 
 function renderCompanyScreener(themeScoring) {
     const container = document.querySelector('[data-tab-content="screener"] .tab-actual-content');
