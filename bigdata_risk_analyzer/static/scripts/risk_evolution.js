@@ -4,6 +4,7 @@ let activeSeries = [];
 let availableCompanies = [];
 let availableRisks = [];
 let dateRange = { min: null, max: null };
+let selectedDateRange = { start: null, end: null }; // User-selected date range filter
 let currentChart = null;
 let resizeTimeout = null;
 
@@ -130,6 +131,9 @@ function renderRiskEvolution(content, themeScoring) {
     if (dates.length > 0) {
         dateRange.min = new Date(Math.min(...dates));
         dateRange.max = new Date(Math.max(...dates));
+        // Initialize selected date range to full range
+        selectedDateRange.start = new Date(dateRange.min);
+        selectedDateRange.end = new Date(dateRange.max);
     }
 
     // Calculate date range in days
@@ -141,6 +145,21 @@ function renderRiskEvolution(content, themeScoring) {
     const dateRangeText = dateRange.min && dateRange.max
         ? `${dateRange.min.toISOString().split('T')[0]} to ${dateRange.max.toISOString().split('T')[0]}`
         : 'N/A';
+    
+    // Calculate available range for presets
+    const today = new Date();
+    const dataStartDate = dateRange.min ? new Date(dateRange.min) : null;
+    const dataEndDate = dateRange.max ? new Date(dateRange.max) : null;
+    
+    // Check which presets are feasible
+    const daysSinceStart = dataStartDate ? Math.ceil((today - dataStartDate) / (1000 * 60 * 60 * 24)) : 0;
+    const daysSinceEnd = dataEndDate ? Math.ceil((today - dataEndDate) / (1000 * 60 * 60 * 24)) : 0;
+    const yearStart = new Date(today.getFullYear(), 0, 1);
+    const hasYTD = dataStartDate && dataStartDate <= yearStart;
+    
+    const canDoLast7 = daysSinceEnd >= 7;
+    const canDoLast30 = daysSinceEnd >= 30;
+    const canDoLast90 = daysSinceEnd >= 90;
 
     let html = `
         <div class="mb-6">
@@ -153,48 +172,110 @@ function renderRiskEvolution(content, themeScoring) {
                         Risk Evolution
                     </h3>
                     <p class="text-zinc-400 text-sm">Time series visualization of raw scores over time</p>
-                    <p class="text-zinc-400 text-xs mt-1">Date range: ${dateRangeText} (${dateRangeDays} days)</p>
+                    <p class="text-zinc-400 text-xs mt-1">Available range: ${dateRangeText} (${dateRangeDays} days)</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="exportRiskEvolutionCSV()" 
+                        class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Export CSV
+                    </button>
+                    <button onclick="exportRiskEvolutionPNG()" 
+                        class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Export PNG
+                    </button>
                 </div>
             </div>
 
-            <!-- Control Panel -->
-            <div class="bg-zinc-800/50 rounded-lg border border-zinc-700 p-4 mb-4">
-                <h4 class="text-lg font-semibold text-white mb-4">Add Time Series</h4>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-zinc-300 mb-2">Company</label>
-                        <select id="riskEvolutionCompany" 
-                            class="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 rounded-lg text-zinc-200 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer">
-                            <option value="">All Companies</option>
-                            ${availableCompanies.map(company => `<option value="${escapeHtml(company)}">${escapeHtml(company)}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-zinc-300 mb-2">Risk Factor</label>
-                        <select id="riskEvolutionRisk" 
-                            class="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 rounded-lg text-zinc-200 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer">
-                            <option value="">All Risk Factors</option>
-                            ${availableRisks.map(risk => `<option value="${escapeHtml(risk)}">${escapeHtml(risk)}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-zinc-300 mb-2">Aggregation Window</label>
-                        <select id="riskEvolutionWindow" 
-                            class="w-full px-3 py-2 bg-zinc-900 border border-zinc-600 rounded-lg text-zinc-200 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer">
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly (7-day rolling)</option>
-                            <option value="monthly" ${dateRangeDays < 30 ? 'disabled' : ''}>Monthly (30-day rolling)${dateRangeDays < 30 ? ' (min 30 days required)' : ''}</option>
-                        </select>
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="addRiskEvolutionSeries()" 
-                            class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                            </svg>
-                            Add Series
+            <!-- Date Range Selection - Compact Single Row -->
+            <div class="bg-zinc-800/50 rounded-lg border border-zinc-700 p-3 mb-3">
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="text-sm font-medium text-zinc-400">Date Range:</span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="applyDateRangePreset('last7')" 
+                            class="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-white rounded text-sm font-medium transition-colors ${!canDoLast7 ? 'opacity-50 cursor-not-allowed' : ''}"
+                            ${!canDoLast7 ? 'disabled' : ''}>
+                            7d
+                        </button>
+                        <button onclick="applyDateRangePreset('last30')" 
+                            class="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-white rounded text-sm font-medium transition-colors ${!canDoLast30 ? 'opacity-50 cursor-not-allowed' : ''}"
+                            ${!canDoLast30 ? 'disabled' : ''}>
+                            30d
+                        </button>
+                        <button onclick="applyDateRangePreset('last90')" 
+                            class="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-white rounded text-sm font-medium transition-colors ${!canDoLast90 ? 'opacity-50 cursor-not-allowed' : ''}"
+                            ${!canDoLast90 ? 'disabled' : ''}>
+                            90d
+                        </button>
+                        <button onclick="applyDateRangePreset('ytd')" 
+                            class="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-white rounded text-sm font-medium transition-colors ${!hasYTD ? 'opacity-50 cursor-not-allowed' : ''}"
+                            ${!hasYTD ? 'disabled' : ''}>
+                            YTD
+                        </button>
+                        <button onclick="applyDateRangePreset('all')" 
+                            class="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-white rounded text-sm font-medium transition-colors">
+                            All
                         </button>
                     </div>
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="riskEvolutionStartDate" 
+                            value="${selectedDateRange.start ? selectedDateRange.start.toISOString().split('T')[0] : ''}"
+                            min="${dateRange.min ? dateRange.min.toISOString().split('T')[0] : ''}"
+                            max="${dateRange.max ? dateRange.max.toISOString().split('T')[0] : ''}"
+                            class="px-3 py-1.5 bg-zinc-900 border border-zinc-600 rounded text-zinc-200 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                        <span class="text-zinc-500 text-sm">to</span>
+                        <input type="date" id="riskEvolutionEndDate" 
+                            value="${selectedDateRange.end ? selectedDateRange.end.toISOString().split('T')[0] : ''}"
+                            min="${dateRange.min ? dateRange.min.toISOString().split('T')[0] : ''}"
+                            max="${dateRange.max ? dateRange.max.toISOString().split('T')[0] : ''}"
+                            class="px-3 py-1.5 bg-zinc-900 border border-zinc-600 rounded text-zinc-200 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                        <button onclick="applyDateRangeFilter()" 
+                            class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors">
+                            Apply
+                        </button>
+                    </div>
+                    <div class="ml-auto text-sm text-zinc-400">
+                        <span id="activeDateRangeText">
+                            ${selectedDateRange.start && selectedDateRange.end 
+                                ? `${selectedDateRange.start.toISOString().split('T')[0]} to ${selectedDateRange.end.toISOString().split('T')[0]}`
+                                : 'All dates'}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Time Series - Compact Single Row -->
+            <div class="bg-zinc-800/50 rounded-lg border border-zinc-700 p-3 mb-3">
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="text-sm font-medium text-zinc-400">Add Series:</span>
+                    <select id="riskEvolutionCompany" 
+                        class="px-3 py-1.5 bg-zinc-900 border border-zinc-600 rounded text-zinc-200 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer">
+                        <option value="">All Companies</option>
+                        ${availableCompanies.map(company => `<option value="${escapeHtml(company)}">${escapeHtml(company)}</option>`).join('')}
+                    </select>
+                    <select id="riskEvolutionRisk" 
+                        class="px-3 py-1.5 bg-zinc-900 border border-zinc-600 rounded text-zinc-200 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer">
+                        <option value="">All Risk Factors</option>
+                        ${availableRisks.map(risk => `<option value="${escapeHtml(risk)}">${escapeHtml(risk)}</option>`).join('')}
+                    </select>
+                    <select id="riskEvolutionWindow" 
+                        class="px-3 py-1.5 bg-zinc-900 border border-zinc-600 rounded text-zinc-200 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly" ${dateRangeDays < 30 ? 'disabled' : ''}>Monthly</option>
+                    </select>
+                    <button onclick="addRiskEvolutionSeries()" 
+                        class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Add
+                    </button>
                 </div>
             </div>
 
@@ -384,11 +465,23 @@ function processTimeSeriesData(series) {
         }))
     });
 
+    // First filter by date range if selected
+    let dateFiltered = riskEvolutionData;
+    if (selectedDateRange.start && selectedDateRange.end) {
+        dateFiltered = riskEvolutionData.filter(item => {
+            if (!item.date) return false;
+            const itemDate = new Date(item.date);
+            // Normalize to midnight local time for comparison
+            const normalizedItemDate = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
+            return normalizedItemDate >= selectedDateRange.start && normalizedItemDate <= selectedDateRange.end;
+        });
+    }
+    
     // Filter content based on company and risk factor
     // The selected risk factor comes from themeScoring.themes keys (most granular level from taxonomy)
     // Try to match against risk_factor first (most granular), then fallback to sub_scenario if needed
     // This handles cases where the taxonomy leaf node might be stored in different fields
-    let filtered = riskEvolutionData.filter(item => {
+    let filtered = dateFiltered.filter(item => {
         const matchCompany = !series.company || item.company === series.company;
         
         if (!series.risk) {
@@ -704,7 +797,7 @@ function renderTimeSeriesChart(seriesArray, containerId) {
             .attr("d", line)
             .style("opacity", 0.8);
 
-        // Data points
+        // Data points - make clickable with visual feedback
         g.selectAll(`.dot-${index}`)
             .data(series.data)
             .enter().append("circle")
@@ -714,10 +807,33 @@ function renderTimeSeriesChart(seriesArray, containerId) {
             .attr("r", 3)
             .attr("fill", series.color)
             .style("cursor", "pointer")
+            .style("transition", "r 0.2s")
             .on("mouseover", function(event, d) {
+                d3.select(this).attr("r", 5); // Enlarge on hover
                 showTooltip(event, d, series.label);
             })
-            .on("mouseout", hideTooltip);
+            .on("mouseout", function() {
+                d3.select(this).attr("r", 3); // Restore size
+                hideTooltip();
+            })
+            .on("click", function(event, d) {
+                // Stop event propagation to prevent tooltip issues
+                event.stopPropagation();
+                
+                // Find the actual series object to get company and risk
+                const actualSeries = activeSeries.find(s => {
+                    const seriesId = `${s.company || 'All'}_${s.risk || 'All'}_${s.window}`;
+                    return seriesId === seriesArray[index].id;
+                });
+                
+                if (actualSeries) {
+                    showEvidenceModal(
+                        actualSeries.company || null,
+                        actualSeries.risk || null,
+                        d.date
+                    );
+                }
+            });
     });
 
     // Tooltip
@@ -755,8 +871,377 @@ function renderTimeSeriesChart(seriesArray, containerId) {
     }
 }
 
+// Apply date range preset
+function applyDateRangePreset(preset) {
+    if (!dateRange.min || !dateRange.max) return;
+    
+    const today = new Date();
+    const endDate = new Date(dateRange.max);
+    let startDate = null;
+    
+    switch(preset) {
+        case 'last7':
+            startDate = new Date(endDate);
+            startDate.setDate(startDate.getDate() - 6); // Include end date
+            break;
+        case 'last30':
+            startDate = new Date(endDate);
+            startDate.setDate(startDate.getDate() - 29);
+            break;
+        case 'last90':
+            startDate = new Date(endDate);
+            startDate.setDate(startDate.getDate() - 89);
+            break;
+        case 'ytd':
+            startDate = new Date(today.getFullYear(), 0, 1);
+            // Ensure we don't go before data start
+            if (startDate < dateRange.min) {
+                startDate = new Date(dateRange.min);
+            }
+            break;
+        case 'all':
+            startDate = new Date(dateRange.min);
+            endDate.setTime(dateRange.max.getTime());
+            break;
+        default:
+            return;
+    }
+    
+    selectedDateRange.start = startDate;
+    selectedDateRange.end = new Date(endDate);
+    
+    // Update date inputs
+    const startInput = document.getElementById('riskEvolutionStartDate');
+    const endInput = document.getElementById('riskEvolutionEndDate');
+    if (startInput) startInput.value = startDate.toISOString().split('T')[0];
+    if (endInput) endInput.value = selectedDateRange.end.toISOString().split('T')[0];
+    
+    // Apply filter and update chart
+    applyDateRangeFilter();
+}
+
+// Apply date range filter from manual inputs
+function applyDateRangeFilter() {
+    const startInput = document.getElementById('riskEvolutionStartDate');
+    const endInput = document.getElementById('riskEvolutionEndDate');
+    
+    if (!startInput || !endInput) return;
+    
+    const startDateStr = startInput.value;
+    const endDateStr = endInput.value;
+    
+    if (!startDateStr || !endDateStr) {
+        alert('Please select both start and end dates');
+        return;
+    }
+    
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
+    
+    // Normalize to midnight local time
+    selectedDateRange.start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    selectedDateRange.end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+    
+    // Validate range
+    if (selectedDateRange.start > selectedDateRange.end) {
+        alert('Start date must be before or equal to end date');
+        return;
+    }
+    
+    // Ensure within data range
+    if (selectedDateRange.start < dateRange.min) {
+        selectedDateRange.start = new Date(dateRange.min);
+    }
+    if (selectedDateRange.end > dateRange.max) {
+        selectedDateRange.end = new Date(dateRange.max);
+    }
+    
+    // Update active range display
+    const activeRangeText = document.getElementById('activeDateRangeText');
+    if (activeRangeText) {
+        activeRangeText.textContent = `${selectedDateRange.start.toISOString().split('T')[0]} to ${selectedDateRange.end.toISOString().split('T')[0]}`;
+    }
+    
+    // Update chart with filtered data
+    updateChart();
+}
+
+// Export CSV functionality
+function exportRiskEvolutionCSV() {
+    if (activeSeries.length === 0) {
+        alert('No series to export. Please add at least one time series first.');
+        return;
+    }
+    
+    // Collect all data points from all active series
+    const allData = [];
+    
+    activeSeries.forEach(series => {
+        const data = processTimeSeriesData(series);
+        const companyLabel = series.company || 'All Companies';
+        const riskLabel = series.risk || 'All Risk Factors';
+        const windowLabel = series.window === 'daily' ? 'Daily' 
+            : series.window === 'weekly' ? 'Weekly (7-day rolling)' 
+            : 'Monthly (30-day rolling)';
+        const seriesLabel = `${companyLabel} - ${riskLabel} (${windowLabel})`;
+        
+        data.forEach(point => {
+            allData.push({
+                date: point.date.toISOString().split('T')[0],
+                series: seriesLabel,
+                value: point.value
+            });
+        });
+    });
+    
+    if (allData.length === 0) {
+        alert('No data to export.');
+        return;
+    }
+    
+    // Create CSV content
+    const headers = ['Date', 'Series', 'Value'];
+    const csvRows = [headers.join(',')];
+    
+    allData.forEach(row => {
+        const csvRow = [
+            row.date,
+            `"${row.series.replace(/"/g, '""')}"`, // Escape quotes in CSV
+            row.value
+        ];
+        csvRows.push(csvRow.join(','));
+    });
+    
+    const csvContent = csvRows.join('\n');
+    
+    // Create download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `risk_evolution_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Export PNG functionality
+function exportRiskEvolutionPNG() {
+    const svgElement = document.getElementById('riskEvolutionSvg');
+    if (!svgElement) {
+        alert('No chart to export. Please add at least one time series first.');
+        return;
+    }
+    
+    if (activeSeries.length === 0) {
+        alert('No series to export. Please add at least one time series first.');
+        return;
+    }
+    
+    try {
+        // Get SVG content
+        const svgData = new XMLSerializer().serializeToString(svgElement);
+        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+        
+        // Create image from SVG
+        const img = new Image();
+        img.onload = function() {
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = svgElement.clientWidth || 800;
+            canvas.height = svgElement.clientHeight || 500;
+            const ctx = canvas.getContext('2d');
+            
+            // Fill white background (or transparent)
+            ctx.fillStyle = '#18181b'; // zinc-900 background
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw image
+            ctx.drawImage(img, 0, 0);
+            
+            // Convert to PNG and download
+            canvas.toBlob(function(blob) {
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `risk_evolution_chart_${new Date().toISOString().split('T')[0]}.png`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+            
+            URL.revokeObjectURL(url);
+        };
+        
+        img.onerror = function() {
+            alert('Error exporting chart. Please try again.');
+        };
+        
+        img.src = url;
+    } catch (error) {
+        console.error('Error exporting PNG:', error);
+        alert('Error exporting chart: ' + error.message);
+    }
+}
+
+// Show evidence modal for clicked data point
+function showEvidenceModal(company, riskFactor, date) {
+    if (!riskEvolutionData || riskEvolutionData.length === 0) {
+        alert('No evidence data available');
+        return;
+    }
+    
+    // Store the selected risk factor for display purposes
+    const selectedRiskFactor = riskFactor;
+    
+    // Filter evidence by company, risk factor, and date
+    const filteredEvidence = riskEvolutionData.filter(item => {
+        // Date filter - normalize to midnight for comparison
+        if (!item.date) return false;
+        const itemDate = new Date(item.date);
+        const normalizedItemDate = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
+        const normalizedTargetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const dateMatch = normalizedItemDate.getTime() === normalizedTargetDate.getTime();
+        
+        if (!dateMatch) return false;
+        
+        // Company filter
+        const companyMatch = !company || item.company === company;
+        
+        // Risk factor filter - try risk_factor first, then sub_scenario
+        // The selected riskFactor is the most granular level from themeScoring
+        const riskMatch = !riskFactor || 
+            item.risk_factor === riskFactor || 
+            item.sub_scenario === riskFactor;
+        
+        return companyMatch && riskMatch;
+    }).map(item => {
+        // Enhance each item with the most granular risk factor for display
+        // If we filtered by a specific granular risk, show that
+        // Otherwise, prioritize sub_scenario (most granular) over risk_factor (parent)
+        let displayRiskFactor = item.risk_factor;
+        if (selectedRiskFactor) {
+            // If sub_scenario matches the selected granular risk, use that
+            if (item.sub_scenario === selectedRiskFactor) {
+                displayRiskFactor = item.sub_scenario;
+            } else if (item.risk_factor === selectedRiskFactor) {
+                displayRiskFactor = item.risk_factor;
+            } else {
+                // Fallback: use sub_scenario if available (more granular than risk_factor)
+                displayRiskFactor = item.sub_scenario || item.risk_factor;
+            }
+        } else {
+            // No specific filter - use most granular available
+            displayRiskFactor = item.sub_scenario || item.risk_factor || item.theme;
+        }
+        
+        return {
+            ...item,
+            _displayRiskFactor: displayRiskFactor // Store for display
+        };
+    });
+    
+    // Update modal filters display
+    const filtersElement = document.getElementById('evidenceModalFilters');
+    if (filtersElement) {
+        const dateStr = date.toISOString().split('T')[0];
+        filtersElement.innerHTML = `
+            <div class="flex flex-wrap gap-4">
+                <span><strong>Date:</strong> ${dateStr}</span>
+                ${company ? `<span><strong>Company:</strong> ${escapeHtml(company)}</span>` : '<span><strong>Company:</strong> All Companies</span>'}
+                ${riskFactor ? `<span><strong>Risk Factor:</strong> ${escapeHtml(riskFactor)}</span>` : '<span><strong>Risk Factor:</strong> All Risk Factors</span>'}
+                <span><strong>Evidence Count:</strong> ${filteredEvidence.length}</span>
+            </div>
+        `;
+    }
+    
+    // Render evidence content
+    renderEvidenceModalContent(filteredEvidence);
+    
+    // Show modal
+    const modal = document.getElementById('riskEvolutionEvidenceModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+// Render evidence content in modal
+function renderEvidenceModalContent(evidence) {
+    const contentElement = document.getElementById('evidenceModalContent');
+    if (!contentElement) return;
+    
+    if (evidence.length === 0) {
+        contentElement.innerHTML = `
+            <div class="text-center py-12">
+                <p class="text-zinc-400 text-lg">No evidence found for the selected criteria</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Create evidence table
+    let html = `
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead class="bg-gradient-to-r from-zinc-800 to-zinc-700 sticky top-0">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Date</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Company</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Headline</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Quote</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Motivation</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Risk Factor</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-700 bg-zinc-900">
+    `;
+    
+    evidence.forEach((item, index) => {
+        const bgClass = index % 2 === 0 ? 'bg-zinc-900' : 'bg-zinc-800/50';
+        html += `
+            <tr class="${bgClass} hover:bg-zinc-700/50 transition-colors duration-150">
+                <td class="px-4 py-3 text-sm text-zinc-300">${escapeHtml(item.date || 'N/A')}</td>
+                <td class="px-4 py-3 text-sm font-medium text-zinc-200">${escapeHtml(item.company || 'N/A')}</td>
+                <td class="px-4 py-3 text-sm text-blue-400 cursor-pointer hover:text-blue-300 hover:underline" 
+                    ${item.document_id ? `onclick="showDocumentModal('${item.document_id}')"` : ''}>
+                    ${escapeHtml(item.headline || 'N/A')}
+                </td>
+                <td class="px-4 py-3 text-sm text-zinc-300 italic max-w-md">${escapeHtml(item.quote || 'N/A')}</td>
+                <td class="px-4 py-3 text-sm text-zinc-300 max-w-md">${escapeHtml(item.motivation || 'N/A')}</td>
+                <td class="px-4 py-3 text-sm font-medium text-orange-400">${escapeHtml(item._displayRiskFactor || 'N/A')}</td>
+            </tr>
+        `;
+    });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    contentElement.innerHTML = html;
+}
+
+// Close evidence modal
+function closeEvidenceModal() {
+    const modal = document.getElementById('riskEvolutionEvidenceModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
 // Make functions globally available
 window.renderRiskEvolution = renderRiskEvolution;
 window.addRiskEvolutionSeries = addRiskEvolutionSeries;
 window.removeRiskEvolutionSeries = removeRiskEvolutionSeries;
+window.applyDateRangePreset = applyDateRangePreset;
+window.applyDateRangeFilter = applyDateRangeFilter;
+window.exportRiskEvolutionCSV = exportRiskEvolutionCSV;
+window.exportRiskEvolutionPNG = exportRiskEvolutionPNG;
+window.showEvidenceModal = showEvidenceModal;
+window.closeEvidenceModal = closeEvidenceModal;
 

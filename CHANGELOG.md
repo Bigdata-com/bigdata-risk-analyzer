@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.8] - 4-11-2025
+
+### Added
+- Risk Evolution tab with time series visualization of raw scores over time
+- Date range filtering with presets (Last 7/30/90 days, YTD, All Time) and manual date pickers
+- Export functionality: CSV export for time series data and PNG export for charts
+- Clickable data points on time series charts to view filtered evidence in a modal
+- Evidence modal showing evidence filtered by company, risk factor, and date
+- Responsive chart that adapts to screen size with window resize handler
+
 ## [2.3.7] - 31-10-2025
 
 ## Added
