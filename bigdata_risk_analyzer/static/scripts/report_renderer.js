@@ -7,10 +7,18 @@ function adaptRiskDataToThemeFormat(riskData) {
     
     // Convert risk_scoring to theme_scoring
     // Note: We keep risk_taxonomy as-is (hierarchical) for mindmap compatibility
+    // Handle RootModel structure for content (content.root) or direct array
+    let contentArray = riskData.content;
+    if (contentArray && typeof contentArray === 'object' && contentArray.root && Array.isArray(contentArray.root)) {
+        contentArray = contentArray.root;
+    } else if (!Array.isArray(contentArray)) {
+        contentArray = [];
+    }
+    
     const adapted = {
         theme_scoring: {},
         theme_taxonomy: riskData.risk_taxonomy || {},
-        content: riskData.content || []
+        content: contentArray
     };
     
     // Transform each company's risk data to theme format
@@ -155,6 +163,26 @@ function renderScreenerReport(rawData) {
             }
         } else {
             console.log('No content data for evidence table');
+        }
+
+        // Risk Evolution tab - Time series visualization
+        if (data.content) {
+            console.log('Rendering risk evolution...', {
+                hasContent: !!data.content,
+                isArray: Array.isArray(data.content),
+                hasRoot: !!(data.content && typeof data.content === 'object' && data.content.root),
+                contentType: typeof data.content
+            });
+            window.tabController.setLoadingState('risk-evolution', false);
+            if (window.renderRiskEvolution) {
+                // Handle RootModel structure
+                const contentData = Array.isArray(data.content) ? data.content : (data.content.root || data.content);
+                renderRiskEvolution(contentData, data.theme_scoring);
+            } else {
+                console.error('renderRiskEvolution function not available');
+            }
+        } else {
+            console.log('No content data for risk evolution');
         }
     } catch (error) {
         console.error('Error rendering report:', error);

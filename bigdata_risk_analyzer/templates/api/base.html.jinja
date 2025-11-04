@@ -77,7 +77,13 @@
 }
 </style>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script>
+  // Fallback if CDN fails
+  if (typeof d3 === 'undefined') {
+    console.error('D3.js failed to load. Charts may not work.');
+  }
+</script>
 <script src="static/scripts/visualization.js?version={{version}}"></script>
 <script src="static/scripts/validators.js?version={{version}}"></script>
 <script>

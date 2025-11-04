@@ -62,13 +62,13 @@ function showDocumentModal(document_id) {
 
 // Escape HTML
 function escapeHtml(text) {
-    if (text === null || text === undefined) return '';
-    const str = String(text);
-    return str.replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+  if (text == null) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 

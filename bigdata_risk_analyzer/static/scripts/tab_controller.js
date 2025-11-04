@@ -6,6 +6,7 @@ class TabController {
         this.loadingStates = {
             overview: false,
             summary: false,
+            'risk-evolution': false,
             screener: false,
             mindmap: false,
             evidence: false,
