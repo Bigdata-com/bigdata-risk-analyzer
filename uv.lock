@@ -149,7 +149,7 @@ wheels = [
 [[package]]
 name = "bigdata-research-tools"
 version = "1.0.0b1"
-source = { git = "https://github.com/Bigdata-com/bigdata-research-tools?rev=4d1bb23e0dae25f10e0afc537532da5cab2f7359#4d1bb23e0dae25f10e0afc537532da5cab2f7359" }
+source = { git = "https://github.com/Bigdata-com/bigdata-research-tools?rev=a2860ac1379d577073b5c26c844e5f030ab3c5cf#a2860ac1379d577073b5c26c844e5f030ab3c5cf" }
 dependencies = [
     { name = "bigdata-client" },
     { name = "graphviz" },
@@ -192,7 +192,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "bigdata-client", specifier = "==2.19.0" },
-    { name = "bigdata-research-tools", extras = ["openai"], git = "https://github.com/Bigdata-com/bigdata-research-tools?rev=4d1bb23e0dae25f10e0afc537532da5cab2f7359" },
+    { name = "bigdata-research-tools", extras = ["openai"], git = "https://github.com/Bigdata-com/bigdata-research-tools?rev=a2860ac1379d577073b5c26c844e5f030ab3c5cf" },
     { name = "fastapi", specifier = ">=0.116.1" },
     { name = "jinja2", specifier = "==3.1.6" },
     { name = "pydantic", specifier = ">=2.10.6" },

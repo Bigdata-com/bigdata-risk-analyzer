@@ -17,7 +17,7 @@ dependencies = [
     "bigdata-client==2.19.0",
     # Bigdata research tools is working on a v1.0.0 version that is on beta, while we wait for its release we pin to a commit 
     # including the required features https://github.com/Bigdata-com/bigdata-research-tools/tree/preparation_for_v1
-    "bigdata-research-tools[openai] @ git+https://github.com/Bigdata-com/bigdata-research-tools@4d1bb23e0dae25f10e0afc537532da5cab2f7359",
+    "bigdata-research-tools[openai] @ git+https://github.com/Bigdata-com/bigdata-research-tools@a2860ac1379d577073b5c26c844e5f030ab3c5cf",
     "sqlmodel>=0.0.24",
 ]
 

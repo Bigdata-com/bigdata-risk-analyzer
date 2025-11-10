@@ -106,7 +106,7 @@ class RiskAnalysisRequest(BaseModel):
         example=None,
     )
 
-    llm_model: str = Field(
+    llm_model_config: str | dict = Field(
         default="openai::gpt-4o-mini",
         description="LLM model identifier used for taxonomy creation and semantic analysis.",
         example="openai::gpt-4o-mini",
