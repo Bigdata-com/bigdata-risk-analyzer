@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.9] - 12-11-2025
+
+### Added
+- Audit column in Evidence table to accept/reject individual evidence items
+- Bulk toggle functionality for filtered evidence via column header click
+- Evidence status affects all visualizations: Overview, Risk Heatmap, Risk Evolution, and Company Screener tabs
+- Real-time score recalculation based on accepted evidence only
+- Sector aggregation in heatmao
+
 ## [2.3.8] - 4-11-2025
 
 ### Added
