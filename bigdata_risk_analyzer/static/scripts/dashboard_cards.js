@@ -61,8 +61,8 @@ function renderDashboardCards(data) {
         }
     });
     
-    // Count total supporting evidences
-    const totalEvidences = (data.content || []).length;
+    // Count total supporting evidences (only accepted)
+    const totalEvidences = window.getAcceptedEvidenceCount ? window.getAcceptedEvidenceCount() : (data.content || []).length;
     
     // Get runDate from data (for pre-computed cases) or current date/time
     const runDate = data.runDate || new Date().toLocaleString();
