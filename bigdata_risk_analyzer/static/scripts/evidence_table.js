@@ -1,6 +1,8 @@
 // Evidence Table with Filters
 let allEvidenceData = [];
 let filteredEvidenceData = [];
+// Evidence audit status: { [index]: boolean } where true = accepted, false = discarded
+let evidenceAuditStatus = {};
 
 function renderEvidenceTable(content) {
     const container = document.querySelector('[data-tab-content="evidence"] .tab-actual-content');
@@ -12,7 +14,32 @@ function renderEvidenceTable(content) {
     }
 
     allEvidenceData = content;
-    filteredEvidenceData = [...content];
+    filteredEvidenceData = allEvidenceData.map((item, index) => ({
+        ...item,
+        _originalIndex: index
+    }));
+    
+    // Initialize evidenceAuditStatus for all items if not already set
+    // Default to true (accepted) for all items
+    const previousLength = Object.keys(evidenceAuditStatus).length;
+    if (previousLength === 0 || allEvidenceData.length !== previousLength) {
+        // Initialize all items to accepted (true)
+        evidenceAuditStatus = {};
+        allEvidenceData.forEach((_, index) => {
+            evidenceAuditStatus[index] = true;
+        });
+    } else {
+        // Preserve existing status, but ensure all indices are present
+        allEvidenceData.forEach((_, index) => {
+            if (evidenceAuditStatus[index] === undefined) {
+                evidenceAuditStatus[index] = true;
+            }
+        });
+    }
+    
+    // Make globally accessible
+    window.allEvidenceData = allEvidenceData;
+    window.evidenceAuditStatus = evidenceAuditStatus;
 
     // Extract unique companies and risk factors for filters
     const companies = [...new Set(content.map(item => item.company))].sort();
@@ -98,6 +125,9 @@ function renderEvidenceTable(content) {
                         <th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Quote</th>
                         <th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Motivation</th>
                         <th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-left text-sm font-semibold text-white border-b border-zinc-600">Risk Factor</th>
+                        <th class="sticky top-0 z-10 bg-gradient-to-r from-zinc-800 to-zinc-700 px-4 py-3 text-center text-sm font-semibold text-white border-b border-zinc-600 cursor-pointer hover:bg-zinc-700/50" onclick="toggleAllFilteredEvidence(event)" title="Click to toggle all filtered evidence">
+                            Audit (accept/reject)
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="evidenceTableBody" class="divide-y divide-zinc-700 bg-zinc-900">
@@ -141,9 +171,20 @@ function renderEvidenceTableRows(page = 1) {
 
     let html = '';
     pageData.forEach((chunk, idx) => {
+        // Get original index from stored property
+        const originalIndex = chunk._originalIndex !== undefined ? chunk._originalIndex : allEvidenceData.findIndex(item => 
+            item.company === chunk.company &&
+            item.date === chunk.date &&
+            item.quote === chunk.quote &&
+            (item.sub_scenario || item.risk_factor || item.theme) === (chunk.sub_scenario || chunk.risk_factor || chunk.theme)
+        );
+        
+        const isAccepted = originalIndex >= 0 ? (evidenceAuditStatus[originalIndex] !== false) : true;
         const bgClass = idx % 2 === 0 ? 'bg-zinc-900' : 'bg-zinc-800/50';
+        const rowClass = isAccepted ? '' : 'opacity-50';
+        
         html += `
-            <tr class="${bgClass} hover:bg-zinc-700/50 transition-colors duration-150">
+            <tr class="${bgClass} ${rowClass} hover:bg-zinc-700/50 transition-colors duration-150">
                 <td class="px-4 py-3 text-sm text-zinc-300">${escapeHtml(chunk.time_period)}</td>
                 <td class="px-4 py-3 text-sm text-zinc-300">${escapeHtml(chunk.date)}</td>
                 <td class="px-4 py-3 text-sm font-medium text-zinc-200">${escapeHtml(chunk.company)}</td>
@@ -151,6 +192,21 @@ function renderEvidenceTableRows(page = 1) {
                 <td class="px-4 py-3 text-sm text-zinc-300 italic max-w-md">${escapeHtml(chunk.quote)}</td>
                 <td class="px-4 py-3 text-sm text-zinc-300 max-w-md">${escapeHtml(chunk.motivation)}</td>
                 <td class="px-4 py-3 text-sm font-medium text-orange-400">${escapeHtml(chunk.sub_scenario || chunk.risk_factor || chunk.theme || 'N/A')}</td>
+                <td class="px-4 py-3 text-center">
+                    <button onclick="toggleEvidenceStatus(${originalIndex}, event)" 
+                            class="p-2 rounded-lg transition-colors ${isAccepted ? 'text-green-400 hover:bg-green-500/20' : 'text-red-400 hover:bg-red-500/20'}"
+                            title="${isAccepted ? 'Accepted - Click to discard' : 'Discarded - Click to accept'}">
+                        ${isAccepted ? `
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        ` : `
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        `}
+                    </button>
+                </td>
             </tr>
         `;
     });
@@ -185,7 +241,10 @@ function applyEvidenceFilters() {
     const themeFilter = document.getElementById('filterTheme').value.toLowerCase();
     const searchTerm = document.getElementById('searchEvidence').value.toLowerCase();
 
-    filteredEvidenceData = allEvidenceData.filter(item => {
+    filteredEvidenceData = allEvidenceData.map((item, index) => ({
+        ...item,
+        _originalIndex: index  // Store original index for audit status lookup
+    })).filter(item => {
         const matchesCompany = !companyFilter || item.company.toLowerCase() === companyFilter;
         const riskFactor = (item.sub_scenario || item.risk_factor || item.theme || '').toLowerCase();
         const matchesTheme = !themeFilter || riskFactor === themeFilter;
@@ -205,7 +264,10 @@ function clearEvidenceFilters() {
     document.getElementById('filterCompany').value = '';
     document.getElementById('filterTheme').value = '';
     document.getElementById('searchEvidence').value = '';
-    filteredEvidenceData = [...allEvidenceData];
+    filteredEvidenceData = allEvidenceData.map((item, index) => ({
+        ...item,
+        _originalIndex: index
+    }));
     document.getElementById('evidenceCount').textContent = filteredEvidenceData.length;
     renderEvidenceTableRows(1);
 }
@@ -217,25 +279,31 @@ function exportEvidence(format) {
     }
 
     if (format === 'json') {
-        const dataStr = JSON.stringify(filteredEvidenceData, null, 2);
+        // Remove _originalIndex before exporting
+        const exportData = filteredEvidenceData.map(({ _originalIndex, ...item }) => item);
+        const dataStr = JSON.stringify(exportData, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json' });
         downloadFile(blob, 'evidence_export.json');
     } else if (format === 'csv') {
         const headers = ['Time Period', 'Date', 'Company', 'Ticker', 'Sector', 'Industry', 'Country', 'Document ID', 'Headline', 'Quote', 'Motivation', 'Theme'];
-        const rows = filteredEvidenceData.map(item => [
-            item.time_period,
-            item.date,
-            item.company,
-            item.ticker || '',
-            item.sector,
-            item.industry,
-            item.country,
-            item.document_id,
-            item.headline,
-            item.quote,
-            item.motivation,
-            item.theme
-        ]);
+        const rows = filteredEvidenceData.map(item => {
+            // Remove _originalIndex
+            const { _originalIndex, ...cleanItem } = item;
+            return [
+                cleanItem.time_period,
+                cleanItem.date,
+                cleanItem.company,
+                cleanItem.ticker || '',
+                cleanItem.sector,
+                cleanItem.industry,
+                cleanItem.country,
+                cleanItem.document_id,
+                cleanItem.headline,
+                cleanItem.quote,
+                cleanItem.motivation,
+                cleanItem.theme
+            ];
+        });
         
         const csvContent = [
             headers.join(','),
@@ -258,10 +326,213 @@ function downloadFile(blob, filename) {
     URL.revokeObjectURL(url);
 }
 
+// Toggle individual evidence status
+function toggleEvidenceStatus(index, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    if (index < 0 || index >= allEvidenceData.length) return;
+    
+    // Ensure status is initialized (default to true if undefined)
+    if (evidenceAuditStatus[index] === undefined) {
+        evidenceAuditStatus[index] = true;
+    }
+    
+    // Toggle status immediately
+    evidenceAuditStatus[index] = !evidenceAuditStatus[index];
+    
+    // Update global reference
+    window.evidenceAuditStatus = evidenceAuditStatus;
+    
+    // Update UI immediately - re-render current page to show updated status
+    renderEvidenceTableRows(currentPage);
+    
+    // Then recalculate scores and update all visualizations
+    recalculateAndUpdateVisualizations();
+}
+
+// Toggle all filtered evidence
+function toggleAllFilteredEvidence(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    if (filteredEvidenceData.length === 0) return;
+    
+    // Get indices from filtered evidence
+    const filteredIndices = filteredEvidenceData
+        .map(chunk => chunk._originalIndex)
+        .filter(idx => idx !== undefined && idx >= 0);
+    
+    // Check if any filtered evidence is discarded
+    const hasDiscarded = filteredIndices.some(idx => evidenceAuditStatus[idx] === false);
+    
+    // Set all filtered evidence to the same state immediately
+    const targetState = hasDiscarded ? true : false;
+    filteredIndices.forEach(idx => {
+        evidenceAuditStatus[idx] = targetState;
+    });
+    
+    // Update global reference
+    window.evidenceAuditStatus = evidenceAuditStatus;
+    
+    // Update UI immediately - re-render current page to show updated status
+    renderEvidenceTableRows(currentPage);
+    
+    // Then recalculate scores and update all visualizations
+    recalculateAndUpdateVisualizations();
+}
+
+// Recalculate scores from accepted evidence only
+function recalculateScoresFromAcceptedEvidence() {
+    // Get accepted evidence only
+    const acceptedEvidence = allEvidenceData.filter((_, index) => evidenceAuditStatus[index] !== false);
+    
+    if (acceptedEvidence.length === 0) {
+        return {};
+    }
+    
+    // Group evidence by company and theme
+    const companyThemeCounts = {};
+    
+    acceptedEvidence.forEach(item => {
+        const company = item.company;
+        const theme = item.sub_scenario || item.risk_factor || item.theme || 'Unknown';
+        
+        if (!companyThemeCounts[company]) {
+            // Initialize company data from first accepted evidence item
+            companyThemeCounts[company] = {
+                themes: {},
+                composite_score: 0,
+                ticker: item.ticker,
+                sector: item.sector,
+                industry: item.industry,
+                country: item.country,
+                motivation: item.motivation || ''
+            };
+        }
+        
+        // Count evidence per theme
+        if (!companyThemeCounts[company].themes[theme]) {
+            companyThemeCounts[company].themes[theme] = 0;
+        }
+        companyThemeCounts[company].themes[theme]++;
+        companyThemeCounts[company].composite_score++;
+    });
+    
+    return companyThemeCounts;
+}
+
+// Recalculate and update all visualizations
+function recalculateAndUpdateVisualizations() {
+    // Update UI immediately - no debounce for better UX
+    // Recalculate theme_scoring from accepted evidence
+    const recalculatedScoring = recalculateScoresFromAcceptedEvidence();
+    
+    // Update window.lastReport with recalculated data
+    if (window.lastReport) {
+        // Preserve current active tab and filter states
+        const currentTab = window.tabController ? window.tabController.activeTab : 'overview';
+        
+        // Preserve filter states from company screener
+        const preservedFilterState = window.filterState ? {...window.filterState} : null;
+        const preservedScreenerSort = {
+            field: window.currentScreenerSortField,
+            direction: window.currentScreenerSortDirection
+        };
+        
+        // Preserve evidence table filters
+        const preservedCompanyFilter = document.getElementById('filterCompany')?.value || '';
+        const preservedThemeFilter = document.getElementById('filterTheme')?.value || '';
+        const preservedDateFilter = document.getElementById('filterDate')?.value || '';
+        
+        // Create a copy to avoid mutating the original
+        const updatedReport = {
+            ...window.lastReport,
+            theme_scoring: recalculatedScoring
+        };
+        
+        // Re-render all tabs with updated scores
+        // Note: content still contains all evidence, but scores are recalculated from accepted only
+        if (window.renderScreenerReport) {
+            window.renderScreenerReport(updatedReport);
+            // Update window.lastReport to reflect the new scores
+            window.lastReport.theme_scoring = recalculatedScoring;
+            
+            // Restore filter states after a brief delay to ensure DOM is ready
+            setTimeout(() => {
+                // Restore company screener filters
+                if (preservedFilterState) {
+                    // Update both filterState and window.filterState
+                    if (window.filterState) {
+                        Object.assign(window.filterState, preservedFilterState);
+                    }
+                    // Also update the local filterState if it exists
+                    const filterStateVar = window.filterState || {};
+                    Object.assign(filterStateVar, preservedFilterState);
+                    window.filterState = filterStateVar;
+                    
+                    if (window.updateFilterChips) {
+                        window.updateFilterChips();
+                    }
+                    if (window.filterScreener) {
+                        window.filterScreener();
+                    }
+                }
+                
+                // Restore screener sort
+                if (preservedScreenerSort.field) {
+                    if (typeof window.currentScreenerSortField !== 'undefined') {
+                        window.currentScreenerSortField = preservedScreenerSort.field;
+                    }
+                    if (typeof window.currentScreenerSortDirection !== 'undefined') {
+                        window.currentScreenerSortDirection = preservedScreenerSort.direction;
+                    }
+                }
+                
+                // Restore evidence table filters
+                const companyFilterEl = document.getElementById('filterCompany');
+                const themeFilterEl = document.getElementById('filterTheme');
+                const dateFilterEl = document.getElementById('filterDate');
+                if (companyFilterEl && preservedCompanyFilter) {
+                    companyFilterEl.value = preservedCompanyFilter;
+                }
+                if (themeFilterEl && preservedThemeFilter) {
+                    themeFilterEl.value = preservedThemeFilter;
+                }
+                if (dateFilterEl && preservedDateFilter) {
+                    dateFilterEl.value = preservedDateFilter;
+                }
+                if ((preservedCompanyFilter || preservedThemeFilter || preservedDateFilter) && window.applyEvidenceFilters) {
+                    window.applyEvidenceFilters();
+                }
+                
+                // Restore the active tab
+                if (window.tabController && currentTab) {
+                    window.tabController.switchTab(currentTab);
+                }
+            }, 100);
+        }
+    }
+}
+
+// Get accepted evidence count
+function getAcceptedEvidenceCount() {
+    return allEvidenceData.filter((_, index) => evidenceAuditStatus[index] !== false).length;
+}
+
 // Make functions globally accessible
 window.renderEvidenceTable = renderEvidenceTable;
 window.applyEvidenceFilters = applyEvidenceFilters;
 window.clearEvidenceFilters = clearEvidenceFilters;
 window.changeEvidencePage = changeEvidencePage;
 window.exportEvidence = exportEvidence;
+window.toggleEvidenceStatus = toggleEvidenceStatus;
+window.toggleAllFilteredEvidence = toggleAllFilteredEvidence;
+window.recalculateScoresFromAcceptedEvidence = recalculateScoresFromAcceptedEvidence;
+window.recalculateAndUpdateVisualizations = recalculateAndUpdateVisualizations;
+window.getAcceptedEvidenceCount = getAcceptedEvidenceCount;
 

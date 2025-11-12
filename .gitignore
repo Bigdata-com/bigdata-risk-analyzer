@@ -8,3 +8,4 @@ __pycache__/
 coverage-reports/
 .coverage
 .vscode/
+.DS_Store
