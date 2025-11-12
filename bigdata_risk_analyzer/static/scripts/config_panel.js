@@ -77,16 +77,16 @@ function loadQuickStartTemplate(type) {
             runDate: '23/10/2025'
         },
         'energy-cost': {
-            file: '/static/data/energy-cost.json',
-            theme: 'Energy Cost Increase Risk',
-            universe: 'US Top 100',
-            runDate: '15/10/2025'
+            file: '/static/data/china_tariffs.json',
+            theme: 'US Import Tariffs against China',
+            universe: 'Nasdaq 100',
+            runDate: '11/11/2025'
         },
         'operational-technology': {
-            file: '/static/data/operational_technology.json',
-            theme: 'Operational & Technology Risk',
-            universe: 'US Top 100',
-            runDate: '15/10/2025'
+            file: '/static/data/europe_regulation.json',
+            theme: 'Geopolitical Tensions and Energy Transition',
+            universe: 'Europe Top 50',
+            runDate: '11/11/2025'
         }
     };
     
