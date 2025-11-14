@@ -16,4 +16,4 @@ format-check:
 	@uvx ruff format --check bigdata_risk_analyzer/ tests/
 
 type-check:
-	@uvx ty check bigdata_risk_analyzer/ tests/
+	@uvx ty@0.0.1a26 check bigdata_risk_analyzer/ tests/
