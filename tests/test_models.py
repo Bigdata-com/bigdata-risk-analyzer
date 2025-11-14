@@ -9,7 +9,7 @@ from bigdata_risk_analyzer.api.models import (
 
 
 @pytest.mark.parametrize(
-    "main_theme,focus,companies,control_entities,start_date,end_date,keywords,llm_model,document_type,rerank_threshold,frequency,document_limit,batch_size,fiscal_year,expected_error",
+    "main_theme,focus,companies,control_entities,start_date,end_date,keywords,llm_model_config,document_type,rerank_threshold,frequency,document_limit,batch_size,fiscal_year,expected_error",
     [
         # Missing both companies
         (
@@ -93,7 +93,7 @@ def test_risk_analysis_request_model_invalid(
     start_date,
     end_date,
     keywords,
-    llm_model,
+    llm_model_config,
     document_type,
     rerank_threshold,
     frequency,
@@ -111,7 +111,7 @@ def test_risk_analysis_request_model_invalid(
             start_date=start_date,
             end_date=end_date,
             keywords=keywords,
-            llm_model=llm_model,
+            llm_model_config=llm_model_config,
             document_type=document_type,
             rerank_threshold=rerank_threshold,
             frequency=frequency,
@@ -123,7 +123,7 @@ def test_risk_analysis_request_model_invalid(
 
 
 @pytest.mark.parametrize(
-    "main_theme,focus,companies,control_entities,start_date,end_date,keywords,llm_model,document_type,rerank_threshold,frequency,document_limit,batch_size,fiscal_year",
+    "main_theme,focus,companies,control_entities,start_date,end_date,keywords,llm_model_config,document_type,rerank_threshold,frequency,document_limit,batch_size,fiscal_year",
     [
         # Minimal valid input with companies
         (
@@ -251,7 +251,7 @@ def test_risk_analysis_request_model(
     start_date,
     end_date,
     keywords,
-    llm_model,
+    llm_model_config,
     document_type,
     rerank_threshold,
     frequency,
@@ -267,7 +267,7 @@ def test_risk_analysis_request_model(
         start_date=start_date,
         end_date=end_date,
         keywords=keywords,
-        llm_model=llm_model,
+        llm_model_config=llm_model_config,
         document_type=document_type,
         rerank_threshold=rerank_threshold,
         frequency=frequency,
@@ -279,7 +279,7 @@ def test_risk_analysis_request_model(
     assert req.focus == focus
     assert req.start_date == start_date
     assert req.end_date == end_date
-    assert req.llm_model == llm_model
+    assert req.llm_model_config == llm_model_config
     assert req.document_type == document_type
     assert req.frequency == frequency
     assert req.document_limit == document_limit

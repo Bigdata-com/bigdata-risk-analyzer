@@ -3,6 +3,7 @@ from enum import Enum, StrEnum
 from typing import List, Literal, Optional, Self
 
 from bigdata_client.models.search import DocumentType
+from bigdata_research_tools.llm.base import LLMConfig
 from pydantic import BaseModel, Field, model_validator
 from pydantic_core import ValidationError
 
@@ -106,9 +107,9 @@ class RiskAnalysisRequest(BaseModel):
         example=None,
     )
 
-    llm_model: str = Field(
+    llm_model_config: str | LLMConfig = Field(
         default="openai::gpt-4o-mini",
-        description="LLM model identifier used for taxonomy creation and semantic analysis.",
+        description="LLM model configuration with model name, temperature or reasoning effort, and custom chat kwargs. Used for taxonomy creation and semantic analysis.",
         example="openai::gpt-4o-mini",
     )
     document_type: Literal[DocumentType.NEWS] = Field(

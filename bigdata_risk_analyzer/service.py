@@ -143,7 +143,7 @@ def process_request(
         resolved_companies = prepare_companies(request.companies, bigdata)
 
         analyzer = RiskAnalyzer(
-            llm_model=request.llm_model,
+            llm_model_config=request.llm_model_config,
             main_theme=request.main_theme,
             companies=resolved_companies,
             start_date=request.start_date,
