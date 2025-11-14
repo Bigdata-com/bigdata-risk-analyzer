@@ -7,6 +7,8 @@ from sqlmodel import JSON, Column, Field, SQLModel
 from bigdata_risk_analyzer.api.models import RiskAnalysisRequest
 from bigdata_risk_analyzer.models import RiskAnalysisResponse
 
+from bigdata_research_tools.llm.base import LLMConfig
+
 
 class SQLWorkflowStatus(SQLModel, table=True):
     id: UUID = Field(primary_key=True)
@@ -21,7 +23,7 @@ class SQLRiskAnalyzerReport(SQLModel, table=True):
     id: UUID = Field(primary_key=True)
     created_at: datetime = Field(default_factory=datetime.now)
     companies: str | list[str] = Field(sa_column=Column(JSON))
-    llm_model: str | dict = Field(sa_column=Column(JSON))
+    llm_model: str | LLMConfig = Field(sa_column=Column(JSON))
     theme: str
     focus: str | None = None
     start_date: datetime
@@ -43,7 +45,7 @@ class SQLRiskAnalyzerReport(SQLModel, table=True):
         return SQLRiskAnalyzerReport(
             id=request_id,
             companies=request.companies,
-            llm_model=request.llm_model_config, #.get("model") if isinstance(request.llm_model_config, dict) else request.llm_model_config,
+            llm_model=request.llm_model_config,
             theme=request.main_theme,
             focus=request.focus,
             start_date=datetime.fromisoformat(request.start_date),
