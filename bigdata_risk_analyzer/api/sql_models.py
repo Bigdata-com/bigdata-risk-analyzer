@@ -1,13 +1,12 @@
 from datetime import datetime
 from uuid import UUID
 
+from bigdata_research_tools.llm.base import LLMConfig
 from sqlalchemy.ext.mutable import MutableList
 from sqlmodel import JSON, Column, Field, SQLModel
 
 from bigdata_risk_analyzer.api.models import RiskAnalysisRequest
 from bigdata_risk_analyzer.models import RiskAnalysisResponse
-
-from bigdata_research_tools.llm.base import LLMConfig
 
 
 class SQLWorkflowStatus(SQLModel, table=True):

@@ -57,13 +57,13 @@ def prepare_companies(
     if len(entities) == 0:
         raise ValueError("No entities found in the provided universe or watchlist.")
 
-    companies = [
+    companies_obj = [
         Company(**e.model_dump())  # ty: ignore[missing-argument]
         for e in entities
         if e is not None and e.entity_type == "COMP"
     ]
 
-    dedupped_companies = {c.id: c for c in companies}
+    dedupped_companies = {c.id: c for c in companies_obj}
 
     return list(dedupped_companies.values())
 

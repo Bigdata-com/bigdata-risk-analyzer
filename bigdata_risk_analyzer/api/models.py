@@ -156,6 +156,7 @@ class RiskAnalysisRequest(BaseModel):
         return self
 
     @model_validator(mode="before")
+    @classmethod
     def check_date_range(cls, values):
         try:
             start_date = values["start_date"]
@@ -182,6 +183,7 @@ class RiskAnalysisRequest(BaseModel):
         return values
 
     @model_validator(mode="before")
+    @classmethod
     def check_frequency_vs_date_range(cls, values):
         start_date = values["start_date"]
         end_date = values["end_date"]

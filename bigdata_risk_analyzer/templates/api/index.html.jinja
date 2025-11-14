@@ -891,7 +891,7 @@
         <!-- Hidden fields -->
         <input type="text" id="fiscal_year" class="hidden"
           value="{% if fiscal_year %}{% if fiscal_year is iterable and fiscal_year is not string %}{{ fiscal_year|join(', ') }}{% else %}{{ fiscal_year }}{% endif %}{% endif %}" />
-        <input type="text" id="llm_model" class="hidden" value="{{ llm_model }}" />
+        <input type="text" id="llm_model" class="hidden" value="{{ llm_model_config }}" />
         <select id="document_type" class="hidden">
           <option value="all" {% if document_type=='all' %}selected{% endif %}>ALL</option>
           <option value="filings" {% if document_type=='filings' %}selected{% endif %}>FILINGS</option>
