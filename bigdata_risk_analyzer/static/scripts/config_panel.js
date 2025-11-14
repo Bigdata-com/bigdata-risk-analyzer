@@ -77,16 +77,16 @@ function loadQuickStartTemplate(type) {
             runDate: '23/10/2025'
         },
         'energy-cost': {
-            file: '/static/data/energy-cost.json',
-            theme: 'Energy Cost Increase Risk',
-            universe: 'US Top 100',
-            runDate: '15/10/2025'
+            file: '/static/data/china_tariffs.json',
+            theme: 'US Import Tariffs against China',
+            universe: 'Nasdaq 100',
+            runDate: '11/11/2025'
         },
         'operational-technology': {
-            file: '/static/data/operational_technology.json',
-            theme: 'Operational & Technology Risk',
-            universe: 'US Top 100',
-            runDate: '15/10/2025'
+            file: '/static/data/europe_regulation.json',
+            theme: 'Geopolitical Tensions and Energy Transition',
+            universe: 'Europe Top 50',
+            runDate: '11/11/2025'
         }
     };
     
@@ -126,6 +126,9 @@ function loadQuickStartTemplate(type) {
                 // Store the report globally
                 window.lastReport = data;
                 
+                // Update download button state
+                updateDownloadButtonState();
+                
                 // Show pre-computed demo indicator
                 const precomputedDemo = document.getElementById('precomputedDemo');
                 if (precomputedDemo) {
@@ -159,6 +162,150 @@ function loadQuickStartTemplate(type) {
                 console.error('Error loading demo:', err);
                 alert('Failed to load demo data: ' + err.message);
             });
+    }
+}
+
+// Trigger file input click
+function triggerFileUpload() {
+    const fileInput = document.getElementById('jsonFileInput');
+    if (fileInput) {
+        fileInput.click();
+    }
+}
+
+// Handle JSON file upload
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) {
+        return;
+    }
+    
+    // Validate file type
+    if (!file.name.endsWith('.json')) {
+        showUploadMessage('Please select a JSON file.', 'error');
+        return;
+    }
+    
+    // Show loading spinner
+    const spinner = document.getElementById('spinner');
+    if (spinner) spinner.classList.remove('hidden');
+    
+    // Reset frontend: hide empty state, clear dashboard
+    const emptyState = document.getElementById('emptyState');
+    const dashboardSection = document.getElementById('dashboardSection');
+    const dashboardCards = document.getElementById('dashboardCards');
+    
+    if (emptyState) emptyState.style.display = 'none';
+    if (dashboardSection) dashboardSection.classList.add('hidden');
+    if (dashboardCards) dashboardCards.innerHTML = '';
+    
+    // Reset tabs
+    if (window.tabController) {
+        window.tabController.reset();
+    }
+    
+    // Read file
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            // Parse JSON
+            const riskData = JSON.parse(e.target.result);
+            
+            // Validate JSON structure (should have risk_scoring or theme_scoring)
+            if (!riskData.risk_scoring && !riskData.theme_scoring) {
+                throw new Error('Invalid JSON format: missing risk_scoring or theme_scoring');
+            }
+            
+            // Adapt risk data to theme format
+            const data = adaptRiskDataToThemeFormat(riskData);
+            
+            // Add runDate from current date
+            const now = new Date();
+            data.runDate = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
+            
+            // Store the report globally
+            window.lastReport = data;
+            
+            // Update download button state
+            updateDownloadButtonState();
+            
+            // Hide spinner
+            if (spinner) spinner.classList.add('hidden');
+            
+            // Close config panel
+            closeConfigPanel();
+            
+            // Hide pre-computed demo indicator (since this is an uploaded file)
+            const precomputedDemo = document.getElementById('precomputedDemo');
+            if (precomputedDemo) {
+                precomputedDemo.classList.add('hidden');
+            }
+            
+            // Update config badge with file info
+            if (window.updateConfigBadge) {
+                updateConfigBadge({
+                    theme: 'Uploaded Report',
+                    companies: file.name.replace('.json', ''),
+                    isDemo: false
+                });
+            }
+            
+            // Show JSON button (if it exists)
+            const showJsonBtn = document.getElementById('showJsonBtn');
+            if (showJsonBtn) showJsonBtn.style.display = 'inline-block';
+            
+            // Show new analysis button (if it exists)
+            const newAnalysisBtn = document.getElementById('newAnalysisBtn');
+            if (newAnalysisBtn) newAnalysisBtn.style.display = 'inline-flex';
+            
+            // Render the report
+            if (window.renderScreenerReport) {
+                renderScreenerReport(data);
+            }
+            
+            // Show success message
+            showUploadMessage(`Successfully loaded ${file.name}`, 'success');
+            
+            // Reset file input
+            event.target.value = '';
+            
+        } catch (error) {
+            if (spinner) spinner.classList.add('hidden');
+            console.error('Error processing JSON file:', error);
+            showUploadMessage(`Error: ${error.message}`, 'error');
+            event.target.value = '';
+        }
+    };
+    
+    reader.onerror = function() {
+        if (spinner) spinner.classList.add('hidden');
+        showUploadMessage('Error reading file. Please try again.', 'error');
+        event.target.value = '';
+    };
+    
+    reader.readAsText(file);
+}
+
+// Show upload message
+function showUploadMessage(message, type) {
+    const messageEl = document.getElementById('uploadMessage');
+    if (messageEl) {
+        messageEl.textContent = message;
+        messageEl.classList.remove('hidden');
+        messageEl.classList.remove('text-green-400', 'text-red-400');
+        
+        if (type === 'success') {
+            messageEl.classList.add('text-green-400');
+        } else if (type === 'error') {
+            messageEl.classList.add('text-red-400');
+        } else {
+            messageEl.classList.add('text-zinc-400');
+        }
+        
+        // Hide message after 5 seconds
+        setTimeout(() => {
+            messageEl.classList.add('hidden');
+        }, 5000);
     }
 }
 
@@ -208,6 +355,9 @@ function restartAnalysis() {
     if (window.lastReport) {
         window.lastReport = null;
     }
+    
+    // Update download button state
+    updateDownloadButtonState();
 }
 
 function updateConfigBadge(config) {
@@ -248,7 +398,123 @@ document.addEventListener('DOMContentLoaded', function() {
             closeConfigPanel();
         }
     });
+    
+    // Initialize download button state
+    updateDownloadButtonState();
+    
+    // Wire up file upload event handler
+    const fileInput = document.getElementById('jsonFileInput');
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileUpload);
+    }
 });
+
+// Convert adapted format back to original JSON format
+function convertToOriginalFormat(adaptedData) {
+    // If data is already in original format, return as-is
+    if (adaptedData.risk_scoring) {
+        return adaptedData;
+    }
+    
+    // Convert theme_scoring back to risk_scoring
+    const original = {
+        risk_scoring: {},
+        risk_taxonomy: adaptedData.theme_taxonomy || adaptedData.risk_taxonomy || {},
+        content: adaptedData.content || []
+    };
+    
+    // Transform each company's theme data back to risk format
+    if (adaptedData.theme_scoring) {
+        for (const [companyName, companyData] of Object.entries(adaptedData.theme_scoring)) {
+            // Create a copy without themes property
+            const { themes, ...rest } = companyData;
+            original.risk_scoring[companyName] = {
+                ...rest,
+                risks: themes || companyData.risks || {}
+            };
+        }
+    }
+    
+    return original;
+}
+
+// Download report as JSON
+function downloadReportJSON() {
+    if (!window.lastReport) {
+        const messageEl = document.getElementById('downloadReportMessage');
+        if (messageEl) {
+            messageEl.textContent = 'No report data available. Please load or generate a report first.';
+            messageEl.classList.remove('hidden');
+            messageEl.classList.add('text-red-400');
+            setTimeout(() => {
+                messageEl.classList.add('hidden');
+                messageEl.classList.remove('text-red-400');
+            }, 3000);
+        }
+        return;
+    }
+    
+    try {
+        // Convert adapted format back to original format
+        const originalData = convertToOriginalFormat(window.lastReport);
+        
+        // Create JSON string with pretty formatting
+        const jsonString = JSON.stringify(originalData, null, 2);
+        
+        // Create blob and download
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        
+        // Generate filename with timestamp
+        const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
+        const theme = window.currentConfig?.theme || 'risk_analysis';
+        const filename = `${theme.toLowerCase().replace(/\s+/g, '_')}_${timestamp}.json`;
+        link.download = filename;
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        // Show success message
+        const messageEl = document.getElementById('downloadReportMessage');
+        if (messageEl) {
+            messageEl.textContent = `Report downloaded as ${filename}`;
+            messageEl.classList.remove('hidden');
+            messageEl.classList.remove('text-red-400');
+            messageEl.classList.add('text-green-400');
+            setTimeout(() => {
+                messageEl.classList.add('hidden');
+            }, 3000);
+        }
+    } catch (error) {
+        console.error('Error downloading report:', error);
+        const messageEl = document.getElementById('downloadReportMessage');
+        if (messageEl) {
+            messageEl.textContent = 'Error downloading report. Please try again.';
+            messageEl.classList.remove('hidden');
+            messageEl.classList.add('text-red-400');
+            setTimeout(() => {
+                messageEl.classList.add('hidden');
+                messageEl.classList.remove('text-red-400');
+            }, 3000);
+        }
+    }
+}
+
+// Update download button state based on report availability
+function updateDownloadButtonState() {
+    const downloadBtn = document.getElementById('downloadReportBtn');
+    if (downloadBtn) {
+        if (window.lastReport) {
+            downloadBtn.disabled = false;
+        } else {
+            downloadBtn.disabled = true;
+        }
+    }
+}
 
 // Make functions globally accessible
 window.toggleConfigPanel = toggleConfigPanel;
@@ -257,3 +523,7 @@ window.loadQuickStartTemplate = loadQuickStartTemplate;
 window.updateConfigBadge = updateConfigBadge;
 window.startNewAnalysis = startNewAnalysis;
 window.restartAnalysis = restartAnalysis;
+window.downloadReportJSON = downloadReportJSON;
+window.updateDownloadButtonState = updateDownloadButtonState;
+window.triggerFileUpload = triggerFileUpload;
+window.handleFileUpload = handleFileUpload;

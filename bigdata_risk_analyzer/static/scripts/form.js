@@ -10,7 +10,10 @@ document.getElementById('riskForm').onsubmit = async function (e) {
     }
     
     if (showJsonBtn) showJsonBtn.style.display = 'none';
-    lastReport = null;
+    window.lastReport = null;
+    if (window.updateDownloadButtonState) {
+        window.updateDownloadButtonState();
+    }
     
     // Hide pre-computed demo indicator
     const precomputedDemo = document.getElementById('precomputedDemo');
@@ -221,7 +224,10 @@ document.getElementById('riskForm').onsubmit = async function (e) {
                             const newAnalysisBtn = document.getElementById('newAnalysisBtn');
                             if (newAnalysisBtn) newAnalysisBtn.style.display = 'inline-flex';
                             
-                            lastReport = statusData.report;
+                            window.lastReport = statusData.report;
+                            if (window.updateDownloadButtonState) {
+                                window.updateDownloadButtonState();
+                            }
                         }
                         spinner.style.display = 'none';
                         submitBtn.disabled = false;

@@ -3,6 +3,10 @@ let currentScreenerData = null;
 let currentScreenerSortField = 'composite';
 let currentScreenerSortDirection = 'desc';
 
+// Make globally accessible for state preservation
+window.currentScreenerSortField = currentScreenerSortField;
+window.currentScreenerSortDirection = currentScreenerSortDirection;
+
 
 function renderCompanyScreener(themeScoring) {
     const container = document.querySelector('[data-tab-content="screener"] .tab-actual-content');
@@ -474,6 +478,10 @@ function sortScreener(field) {
         currentScreenerSortDirection = 'desc';
     }
     
+    // Keep window properties in sync
+    window.currentScreenerSortField = currentScreenerSortField;
+    window.currentScreenerSortDirection = currentScreenerSortDirection;
+    
     // Re-apply filters with new sorting
     filterScreener();
 }
@@ -883,6 +891,9 @@ let filterState = {
     risks: [],
     topN: ''
 };
+
+// Make globally accessible for state preservation
+window.filterState = filterState;
 
 // Handle search input with debouncing
 let searchTimeout;

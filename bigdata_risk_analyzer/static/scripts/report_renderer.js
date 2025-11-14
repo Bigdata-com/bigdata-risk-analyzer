@@ -101,9 +101,16 @@ function renderScreenerReport(rawData) {
     // Note: Configuration badge is updated by the caller (form.js or config_panel.js)
     // Don't update it here to avoid overwriting demo configs
 
-    // Set Overview tab as active by default
+    // Set Overview tab as active by default (only on initial load)
+    // Don't switch tabs if we're already on a different tab (e.g., during evidence recalculation)
     if (window.tabController) {
-        window.tabController.switchTab('overview');
+        const currentTab = window.tabController.activeTab;
+        // Only switch to overview if no tab is set or if we're explicitly on overview
+        // This prevents switching away from evidence/risk-evolution tabs during re-renders
+        if (!currentTab || currentTab === 'overview') {
+            window.tabController.switchTab('overview');
+        }
+        // Otherwise, preserve the current tab - it will be restored by the caller if needed
     }
 
     // Render exploration tabs (detailed views)

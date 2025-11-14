@@ -52,6 +52,30 @@ function renderRiskEvolution(content, themeScoring) {
         sampleItem: Array.isArray(contentArray) && contentArray.length > 0 ? contentArray[0] : null
     });
 
+    // Filter out discarded evidence if audit status is available
+    if (window.evidenceAuditStatus && Array.isArray(contentArray) && contentArray.length > 0) {
+        // Get allEvidenceData from evidence_table.js if available
+        const allEvidence = window.allEvidenceData || contentArray;
+        
+        contentArray = contentArray.filter(item => {
+            // Find index in allEvidenceData
+            const index = allEvidence.findIndex(ev => 
+                ev.company === item.company &&
+                ev.date === item.date &&
+                ev.quote === item.quote &&
+                (ev.sub_scenario || ev.risk_factor || ev.theme) === (item.sub_scenario || item.risk_factor || item.theme)
+            );
+            
+            // If found and audit status exists, check if accepted
+            if (index >= 0 && window.evidenceAuditStatus[index] !== undefined) {
+                return window.evidenceAuditStatus[index] !== false;
+            }
+            
+            // If not found or no audit status, include by default
+            return true;
+        });
+    }
+
     if (!contentArray || !Array.isArray(contentArray) || contentArray.length === 0) {
         container.innerHTML = `
             <div class="text-center py-20">

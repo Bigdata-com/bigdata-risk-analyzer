@@ -3,6 +3,7 @@ let currentHeatmapData = null;
 let currentSortField = '';
 let currentSortDirection = 'desc';
 let isRiskView = false; // false = company view, true = risk view
+let isSectorAggregated = false; // false = company view, true = sector aggregated view
 
 // Numeric composite score helper (shared)
 function getNumericCompositeScore(scoring) {
@@ -42,7 +43,7 @@ function renderHeatmap(themeScoring) {
         .sort((a, b) => b[1] - a[1])
         .map(([theme, _]) => theme);
 
-    // Find max score for color scaling
+    // Find max score for color scaling (from individual companies)
     let maxScore = 0;
     companies.forEach(([_, scoring]) => {
         if (scoring.themes) {
@@ -99,14 +100,88 @@ function renderHeatmap(themeScoring) {
         return results;
     }
 
+    // Aggregate companies by sector
+    function aggregateBySector(companies, themes) {
+        const sectorGroups = {};
+        
+        // Group companies by sector
+        companies.forEach(([companyName, scoring]) => {
+            const sector = scoring.sector || 'Unknown';
+            if (!sectorGroups[sector]) {
+                sectorGroups[sector] = {
+                    companies: [],
+                    aggregatedThemes: {},
+                    composite_score: 0,
+                    sector: sector
+                };
+            }
+            sectorGroups[sector].companies.push(companyName);
+            
+            // Aggregate theme scores (sum across companies in sector)
+            if (scoring.themes) {
+                Object.entries(scoring.themes).forEach(([theme, score]) => {
+                    if (!sectorGroups[sector].aggregatedThemes[theme]) {
+                        sectorGroups[sector].aggregatedThemes[theme] = 0;
+                    }
+                    sectorGroups[sector].aggregatedThemes[theme] += score || 0;
+                });
+            }
+            
+            // Sum composite scores
+            const compScore = getNumericCompositeScore(scoring);
+            sectorGroups[sector].composite_score += compScore;
+        });
+        
+        // Convert to array format similar to companies array
+        const aggregatedCompanies = Object.entries(sectorGroups).map(([sectorName, sectorData]) => {
+            return [sectorName, {
+                sector: sectorName,
+                themes: sectorData.aggregatedThemes,
+                composite_score: sectorData.composite_score,
+                company_count: sectorData.companies.length,
+                companies: sectorData.companies // Store list of companies for reference
+            }];
+        });
+        
+        return aggregatedCompanies;
+    }
+
     // Calculate Coverage and Intensity
     const coverageIntensity = calculateCoverageAndIntensity(companies, themes, maxScore);
     
-    // Store data globally for sorting
-    currentHeatmapData = { companies, themes, maxScore, coverageIntensity };
+    // Store data globally for sorting (store both original and aggregated)
+    const aggregatedSectors = aggregateBySector(companies, themes);
+    const aggregatedCoverageIntensity = calculateCoverageAndIntensity(aggregatedSectors, themes, maxScore);
     
-    // Sort companies by current sort field
-    sortHeatmapCompanies(companies, currentSortField, currentSortDirection);
+    // Calculate max score for aggregated sectors (for color scaling)
+    let aggregatedMaxScore = 0;
+    aggregatedSectors.forEach(([_, scoring]) => {
+        if (scoring.themes) {
+            Object.values(scoring.themes).forEach(score => {
+                if (score > aggregatedMaxScore) aggregatedMaxScore = score;
+            });
+        }
+    });
+    
+    currentHeatmapData = { 
+        companies, 
+        themes, 
+        maxScore, 
+        aggregatedMaxScore,
+        coverageIntensity,
+        aggregatedSectors,
+        aggregatedCoverageIntensity
+    };
+    
+    // Use aggregated data if sector aggregation is enabled
+    const displayData = isSectorAggregated ? aggregatedSectors : companies;
+    const displayCoverageIntensity = isSectorAggregated ? aggregatedCoverageIntensity : coverageIntensity;
+    
+    // Use appropriate maxScore based on aggregation mode
+    const displayMaxScore = isSectorAggregated ? aggregatedMaxScore : maxScore;
+    
+    // Sort companies/sectors by current sort field
+    sortHeatmapCompanies(displayData, currentSortField, currentSortDirection);
 
     // Create HTML with only the heatmap
     let html = `
@@ -131,6 +206,16 @@ function renderHeatmap(themeScoring) {
                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
                         <span id="flipButtonText">View by Risks</span>
+                    </button>
+                    <button onclick="toggleSectorAggregation()" 
+                            class="flex items-center gap-2 px-4 py-2 bg-green-500/10 hover:bg-green-500/20 
+                                   border border-green-500/30 rounded-lg text-green-400 text-sm font-medium 
+                                   transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                        <span id="sectorAggButtonText">Aggregate by sector</span>
                     </button>
                     <button onclick="showHeatmapGuide()" 
                             class="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 
@@ -167,7 +252,7 @@ function renderHeatmap(themeScoring) {
                 </div>
                 <div class="flex-1 h-4 bg-gradient-to-r from-zinc-800 via-red-700 to-red-400 rounded max-w-xs"></div>
                 <div class="flex items-center gap-1">
-                    <span>${maxScore}</span>
+                    <span>${displayMaxScore}</span>
                     <div class="w-6 h-4 bg-red-400 border border-red-300 rounded"></div>
                 </div>
             </div>
@@ -179,7 +264,7 @@ function renderHeatmap(themeScoring) {
                 <table class="w-full border-collapse">
                     <thead>
                         <tr>
-                            <th class="sticky left-0 z-20 bg-zinc-800 px-4 py-3 text-left text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[200px]">Company</th>
+                            <th class="sticky left-0 z-20 bg-zinc-800 px-4 py-3 text-left text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[200px]">${isSectorAggregated ? 'Sector' : 'Company'}</th>
                             <th class="sticky left-[200px] z-20 bg-zinc-800 px-2 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[60px] cursor-pointer hover:bg-zinc-700/50" onclick="sortHeatmap('coverage')">
                                 Coverage<br>Score
                             </th>
@@ -204,26 +289,35 @@ function renderHeatmap(themeScoring) {
 
     html += `</tr></thead><tbody>`;
 
-    // Company rows
-    companies.forEach(([companyName, scoring], rowIdx) => {
+    // Company/Sector rows
+    displayData.forEach(([itemName, scoring], rowIdx) => {
         const bgClass = rowIdx % 2 === 0 ? 'bg-zinc-900/50' : 'bg-zinc-800/30';
         html += `<tr class="${bgClass} hover:bg-zinc-700/50 transition-colors">`;
         
-        // Company name (sticky)
-        html += `<td class="sticky left-0 z-10 ${bgClass} hover:bg-zinc-700/50 px-4 py-3 text-sm font-medium text-zinc-200 border-b border-zinc-700">
-            <div class="flex items-center gap-2">
-                <span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded font-mono">${escapeHtml(scoring.ticker || 'N/A')}</span>
-                <span class="truncate max-w-[150px]" title="${escapeHtml(companyName)}">${escapeHtml(companyName)}</span>
-            </div>
-        </td>`;
+        // Company/Sector name (sticky)
+        if (isSectorAggregated) {
+            html += `<td class="sticky left-0 z-10 ${bgClass} hover:bg-zinc-700/50 px-4 py-3 text-sm font-medium text-zinc-200 border-b border-zinc-700">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs bg-green-500 text-white px-2 py-0.5 rounded font-mono">${scoring.company_count || 0}</span>
+                    <span class="truncate max-w-[150px]" title="${escapeHtml(itemName)}">${escapeHtml(itemName)}</span>
+                </div>
+            </td>`;
+        } else {
+            html += `<td class="sticky left-0 z-10 ${bgClass} hover:bg-zinc-700/50 px-4 py-3 text-sm font-medium text-zinc-200 border-b border-zinc-700">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded font-mono">${escapeHtml(scoring.ticker || 'N/A')}</span>
+                    <span class="truncate max-w-[150px]" title="${escapeHtml(itemName)}">${escapeHtml(itemName)}</span>
+                </div>
+            </td>`;
+        }
         
         // Coverage score
-        const coverageValue = coverageIntensity[companyName].coverage;
+        const coverageValue = displayCoverageIntensity[itemName].coverage;
         const coveragePercent = (coverageValue * 100).toFixed(0);
         html += `<td class="sticky left-[200px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-medium text-blue-400 border-b border-zinc-700">${coveragePercent}%</td>`;
 
         // Intensity score
-        const intensityValue = coverageIntensity[companyName].intensity;
+        const intensityValue = displayCoverageIntensity[itemName].intensity;
         const intensityPercent = (intensityValue * 100).toFixed(0);
         html += `<td class="sticky left-[260px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-medium text-purple-400 border-b border-zinc-700">${intensityPercent}%</td>`;
 
@@ -234,7 +328,7 @@ function renderHeatmap(themeScoring) {
         // Theme scores (ordered by popularity)
         themes.forEach(theme => {
             const score = (scoring.themes && theme in scoring.themes) ? scoring.themes[theme] : 0;
-            const intensity = maxScore > 0 ? score / maxScore : 0;
+            const intensity = displayMaxScore > 0 ? score / displayMaxScore : 0;
             
             // Color calculation: dark (0) to red (high risk)
             let bgColor = 'bg-zinc-800';
@@ -261,8 +355,8 @@ function renderHeatmap(themeScoring) {
             }
             
             html += `<td class="px-3 py-3 text-center text-xs font-semibold border-b border-r ${borderColor} ${bgColor} ${textColor} transition-all hover:scale-110 hover:z-30 cursor-pointer" 
-                title="${escapeHtml(companyName)}\n${escapeHtml(theme)}: ${score}"
-                onclick="filterByCompanyAndTheme('${escapeHtml(companyName)}', '${escapeHtml(theme)}')">
+                title="${escapeHtml(itemName)}\n${escapeHtml(theme)}: ${score}"
+                onclick="filterByCompanyAndTheme('${escapeHtml(itemName)}', '${escapeHtml(theme)}')">
                 ${score > 0 ? score : ''}
             </td>`;
         });
@@ -328,17 +422,22 @@ function sortHeatmapCompanies(companies, field, direction) {
     // Do not sort on initial render when no field selected
     if (!field) return;
     
+    // Determine which coverage/intensity data to use based on aggregation mode
+    const coverageIntensityData = isSectorAggregated 
+        ? currentHeatmapData.aggregatedCoverageIntensity 
+        : currentHeatmapData.coverageIntensity;
+    
     companies.sort((a, b) => {
         let aValue, bValue;
         
         switch (field) {
             case 'coverage':
-                aValue = currentHeatmapData.coverageIntensity[a[0]]?.coverage || 0;
-                bValue = currentHeatmapData.coverageIntensity[b[0]]?.coverage || 0;
+                aValue = coverageIntensityData[a[0]]?.coverage || 0;
+                bValue = coverageIntensityData[b[0]]?.coverage || 0;
                 break;
             case 'intensity':
-                aValue = currentHeatmapData.coverageIntensity[a[0]]?.intensity || 0;
-                bValue = currentHeatmapData.coverageIntensity[b[0]]?.intensity || 0;
+                aValue = coverageIntensityData[a[0]]?.intensity || 0;
+                bValue = coverageIntensityData[b[0]]?.intensity || 0;
                 break;
             case 'score':
             default:
@@ -371,8 +470,9 @@ function sortHeatmap(field) {
         currentSortDirection = 'desc';
     }
     
-    // Re-sort and re-render
-    sortHeatmapCompanies(currentHeatmapData.companies, currentSortField, currentSortDirection);
+    // Re-sort and re-render (use appropriate data source)
+    const displayData = isSectorAggregated ? currentHeatmapData.aggregatedSectors : currentHeatmapData.companies;
+    sortHeatmapCompanies(displayData, currentSortField, currentSortDirection);
     renderHeatmapFromData();
 }
 
@@ -383,7 +483,17 @@ function renderHeatmapFromData() {
     if (!container) return;
     
     // Re-render with current data
-    const { companies, themes, maxScore, coverageIntensity } = currentHeatmapData;
+    const { companies, themes, maxScore, aggregatedMaxScore, coverageIntensity, aggregatedSectors, aggregatedCoverageIntensity } = currentHeatmapData;
+    
+    // Use aggregated data if sector aggregation is enabled
+    const displayData = isSectorAggregated ? aggregatedSectors : companies;
+    const displayCoverageIntensity = isSectorAggregated ? aggregatedCoverageIntensity : coverageIntensity;
+    
+    // Use appropriate maxScore based on aggregation mode
+    const displayMaxScore = isSectorAggregated ? aggregatedMaxScore : maxScore;
+    
+    // Sort companies/sectors by current sort field
+    sortHeatmapCompanies(displayData, currentSortField, currentSortDirection);
 
     // Create HTML with only the heatmap
     let html = `
@@ -409,6 +519,16 @@ function renderHeatmapFromData() {
                         </svg>
                         <span id="flipButtonText">View by Risks</span>
                     </button>
+                    <button onclick="toggleSectorAggregation()" 
+                            class="flex items-center gap-2 px-4 py-2 bg-green-500/10 hover:bg-green-500/20 
+                                   border border-green-500/30 rounded-lg text-green-400 text-sm font-medium 
+                                   transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                        <span id="sectorAggButtonText">${isSectorAggregated ? 'Aggregate by company' : 'Aggregate by sector'}</span>
+                    </button>
                     <button onclick="showHeatmapGuide()" 
                             class="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 
                                    border border-blue-500/30 rounded-lg text-blue-400 text-sm font-medium 
@@ -433,7 +553,7 @@ function renderHeatmapFromData() {
                 </div>
                 <div class="flex-1 h-4 bg-gradient-to-r from-zinc-800 via-red-700 to-red-400 rounded max-w-xs"></div>
                 <div class="flex items-center gap-1">
-                    <span>${maxScore}</span>
+                    <span>${displayMaxScore}</span>
                     <div class="w-6 h-4 bg-red-400 border border-red-300 rounded"></div>
                 </div>
             </div>
@@ -445,7 +565,7 @@ function renderHeatmapFromData() {
                 <table class="w-full border-collapse">
                     <thead>
                         <tr>
-                            <th class="sticky left-0 z-20 bg-zinc-800 px-4 py-3 text-left text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[200px]">Company</th>
+                            <th class="sticky left-0 z-20 bg-zinc-800 px-4 py-3 text-left text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[200px]">${isSectorAggregated ? 'Sector' : 'Company'}</th>
                             <th class="sticky left-[200px] z-20 bg-zinc-800 px-2 py-3 text-center text-sm font-semibold text-white border-b-2 border-zinc-600 min-w-[60px] cursor-pointer hover:bg-zinc-700/50" onclick="sortHeatmap('coverage')">
                                 Coverage<br>Score
                             </th>
@@ -470,26 +590,35 @@ function renderHeatmapFromData() {
 
     html += `</tr></thead><tbody>`;
 
-    // Company rows
-    companies.forEach(([companyName, scoring], rowIdx) => {
+    // Company/Sector rows
+    displayData.forEach(([itemName, scoring], rowIdx) => {
         const bgClass = rowIdx % 2 === 0 ? 'bg-zinc-900/50' : 'bg-zinc-800/30';
         html += `<tr class="${bgClass} hover:bg-zinc-700/50 transition-colors">`;
         
-        // Company name (sticky)
-        html += `<td class="sticky left-0 z-10 ${bgClass} hover:bg-zinc-700/50 px-4 py-3 text-sm font-medium text-zinc-200 border-b border-zinc-700">
-            <div class="flex items-center gap-2">
-                <span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded font-mono">${escapeHtml(scoring.ticker || 'N/A')}</span>
-                <span class="truncate max-w-[150px]" title="${escapeHtml(companyName)}">${escapeHtml(companyName)}</span>
-            </div>
-        </td>`;
+        // Company/Sector name (sticky)
+        if (isSectorAggregated) {
+            html += `<td class="sticky left-0 z-10 ${bgClass} hover:bg-zinc-700/50 px-4 py-3 text-sm font-medium text-zinc-200 border-b border-zinc-700">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs bg-green-500 text-white px-2 py-0.5 rounded font-mono">${scoring.company_count || 0}</span>
+                    <span class="truncate max-w-[150px]" title="${escapeHtml(itemName)}">${escapeHtml(itemName)}</span>
+                </div>
+            </td>`;
+        } else {
+            html += `<td class="sticky left-0 z-10 ${bgClass} hover:bg-zinc-700/50 px-4 py-3 text-sm font-medium text-zinc-200 border-b border-zinc-700">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded font-mono">${escapeHtml(scoring.ticker || 'N/A')}</span>
+                    <span class="truncate max-w-[150px]" title="${escapeHtml(itemName)}">${escapeHtml(itemName)}</span>
+                </div>
+            </td>`;
+        }
         
         // Coverage score
-        const coverageValue = coverageIntensity[companyName].coverage;
+        const coverageValue = displayCoverageIntensity[itemName].coverage;
         const coveragePercent = (coverageValue * 100).toFixed(0);
         html += `<td class="sticky left-[200px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-medium text-blue-400 border-b border-zinc-700">${coveragePercent}%</td>`;
 
         // Intensity score
-        const intensityValue = coverageIntensity[companyName].intensity;
+        const intensityValue = displayCoverageIntensity[itemName].intensity;
         const intensityPercent = (intensityValue * 100).toFixed(0);
         html += `<td class="sticky left-[260px] z-10 ${bgClass} hover:bg-zinc-700/50 px-2 py-3 text-center text-sm font-medium text-purple-400 border-b border-zinc-700">${intensityPercent}%</td>`;
 
@@ -500,7 +629,7 @@ function renderHeatmapFromData() {
         // Theme scores (ordered by popularity)
         themes.forEach(theme => {
             const score = (scoring.themes && theme in scoring.themes) ? scoring.themes[theme] : 0;
-            const intensity = maxScore > 0 ? score / maxScore : 0;
+            const intensity = displayMaxScore > 0 ? score / displayMaxScore : 0;
             
             // Color calculation: dark (0) to red (high risk)
             let bgColor = 'bg-zinc-800';
@@ -527,8 +656,8 @@ function renderHeatmapFromData() {
             }
             
             html += `<td class="px-3 py-3 text-center text-xs font-semibold border-b border-r ${borderColor} ${bgColor} ${textColor} transition-all hover:scale-110 hover:z-30 cursor-pointer" 
-                title="${escapeHtml(companyName)}\n${escapeHtml(theme)}: ${score}"
-                onclick="filterByCompanyAndTheme('${escapeHtml(companyName)}', '${escapeHtml(theme)}')">
+                title="${escapeHtml(itemName)}\n${escapeHtml(theme)}: ${score}"
+                onclick="filterByCompanyAndTheme('${escapeHtml(itemName)}', '${escapeHtml(theme)}')">
                 ${score > 0 ? score : ''}
             </td>`;
         });
@@ -604,6 +733,22 @@ function flipHeatmapView() {
     }
 }
 
+// Toggle Sector Aggregation
+function toggleSectorAggregation() {
+    isSectorAggregated = !isSectorAggregated;
+    const buttonText = document.getElementById('sectorAggButtonText');
+    if (buttonText) {
+        buttonText.textContent = isSectorAggregated ? 'Aggregate by company' : 'Aggregate by sector';
+    }
+    
+    // Re-render the current view with updated aggregation
+    if (isRiskView) {
+        renderRiskView();
+    } else {
+        renderHeatmapFromData();
+    }
+}
+
 // Risk-based calculations
 function calculateRiskCoverageAndIntensity(companies, themes) {
     const results = {};
@@ -646,8 +791,14 @@ function renderRiskView() {
     const container = document.querySelector('[data-tab-content="summary"] .tab-actual-content');
     if (!container) return;
     
-    const { companies, themes, maxScore } = currentHeatmapData;
-    const riskScores = calculateRiskCoverageAndIntensity(companies, themes);
+    const { companies, themes, maxScore, aggregatedMaxScore, aggregatedSectors } = currentHeatmapData;
+    
+    // Use aggregated data if sector aggregation is enabled
+    const displayData = isSectorAggregated ? aggregatedSectors : companies;
+    const riskScores = calculateRiskCoverageAndIntensity(displayData, themes);
+    
+    // Use appropriate maxScore based on aggregation mode
+    const displayMaxScore = isSectorAggregated ? aggregatedMaxScore : maxScore;
     
     // Use the themes from currentHeatmapData (they may have been sorted)
     // If not sorted yet, sort by total evidence (descending)
@@ -684,6 +835,16 @@ function renderRiskView() {
                         </svg>
                         <span id="flipButtonText">View by Companies</span>
                     </button>
+                    <button onclick="toggleSectorAggregation()" 
+                            class="flex items-center gap-2 px-4 py-2 bg-green-500/10 hover:bg-green-500/20 
+                                   border border-green-500/30 rounded-lg text-green-400 text-sm font-medium 
+                                   transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                        <span id="sectorAggButtonText">Aggregate by sector</span>
+                    </button>
                     <button onclick="showHeatmapGuide()" 
                             class="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 
                                    border border-blue-500/30 rounded-lg text-blue-400 text-sm font-medium 
@@ -708,7 +869,7 @@ function renderRiskView() {
                 </div>
                 <div class="flex-1 h-4 bg-gradient-to-r from-zinc-800 via-red-700 to-red-400 rounded max-w-xs"></div>
                 <div class="flex items-center gap-1">
-                    <span>${maxScore}</span>
+                    <span>${displayMaxScore}</span>
                     <div class="w-6 h-4 bg-red-400 border border-red-300 rounded"></div>
                 </div>
             </div>
@@ -732,12 +893,12 @@ function renderRiskView() {
                             </th>
     `;
 
-    // Company headers (horizontal)
-    companies.forEach(([companyName, _], idx) => {
+    // Company/Sector headers (horizontal)
+    displayData.forEach(([itemName, _], idx) => {
         html += `<th class="bg-zinc-800 px-2 py-3 text-left text-sm font-bold text-zinc-200 border-b-2 border-zinc-600 min-w-[40px] max-w-[40px]">
             <div class="flex justify-center" style="height: 250px;">
                 <div class="transform -rotate-90 origin-center whitespace-nowrap flex items-center" style="width: 250px; transform-origin: center center;">
-                    ${escapeHtml(companyName)}
+                    ${escapeHtml(itemName)}
                 </div>
             </div>
         </th>`;
@@ -768,10 +929,10 @@ function renderRiskView() {
         // Total evidence
         html += `<td class="sticky left-[360px] z-10 ${bgClass} hover:bg-zinc-700/50 px-3 py-3 text-center text-sm font-bold text-red-400 border-b border-zinc-700">${riskData.totalEvidence}</td>`;
         
-        // Company scores (horizontal)
-        companies.forEach(([companyName, scoring]) => {
+        // Company/Sector scores (horizontal)
+        displayData.forEach(([itemName, scoring]) => {
             const score = (scoring.themes && scoring.themes[risk]) || 0;
-            const intensity = maxScore > 0 ? score / maxScore : 0;
+            const intensity = displayMaxScore > 0 ? score / displayMaxScore : 0;
             
             // Color calculation: dark (0) to red (high risk)
             let bgColor = 'bg-zinc-800';
@@ -798,8 +959,8 @@ function renderRiskView() {
             }
             
             html += `<td class="px-3 py-3 text-center text-xs font-semibold border-b border-r ${borderColor} ${bgColor} ${textColor} transition-all hover:scale-110 hover:z-30 cursor-pointer" 
-                title="${escapeHtml(risk)}\n${escapeHtml(companyName)}: ${score}"
-                onclick="filterByCompanyAndTheme('${escapeHtml(companyName)}', '${escapeHtml(risk)}')">
+                title="${escapeHtml(risk)}\n${escapeHtml(itemName)}: ${score}"
+                onclick="filterByCompanyAndTheme('${escapeHtml(itemName)}', '${escapeHtml(risk)}')">
                 ${score > 0 ? score : ''}
             </td>`;
         });
@@ -849,8 +1010,9 @@ function renderRiskView() {
 function sortRiskHeatmap(field) {
     if (!currentHeatmapData) return;
     
-    const { companies, themes } = currentHeatmapData;
-    const riskScores = calculateRiskCoverageAndIntensity(companies, themes);
+    const { companies, themes, aggregatedSectors } = currentHeatmapData;
+    const displayData = isSectorAggregated ? aggregatedSectors : companies;
+    const riskScores = calculateRiskCoverageAndIntensity(displayData, themes);
     
     // Toggle sort direction if same field
     if (currentSortField === field) {
@@ -899,4 +1061,5 @@ window.sortHeatmap = sortHeatmap;
 window.showHeatmapGuide = showHeatmapGuide;
 window.hideHeatmapGuide = hideHeatmapGuide;
 window.flipHeatmapView = flipHeatmapView;
+window.toggleSectorAggregation = toggleSectorAggregation;
 window.sortRiskHeatmap = sortRiskHeatmap;
