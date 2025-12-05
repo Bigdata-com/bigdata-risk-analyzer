@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.10] - 19-12-2025
+
+### Fixed
+- Companies with content chunks but missing from `risk_scoring` are now included in rankings, heatmap, and company screener
+- Companies with null tickers are now properly included in `df_company` during JSON generation
+- Fixed issue where companies in watchlist with evidence chunks were excluded from visualizations when they had null tickers or weren't aggregated in the initial scoring
+
 ## [2.3.9] - 12-11-2025
 
 ### Added

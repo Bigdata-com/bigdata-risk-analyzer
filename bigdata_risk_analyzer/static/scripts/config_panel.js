@@ -49,19 +49,74 @@ function adaptRiskDataToThemeFormat(riskData) {
     
     // Convert risk_scoring to theme_scoring
     // Note: We keep risk_taxonomy as-is (hierarchical) for mindmap compatibility
+    // Handle RootModel structure for content (content.root) or direct array
+    let contentArray = riskData.content;
+    if (contentArray && typeof contentArray === 'object' && contentArray.root && Array.isArray(contentArray.root)) {
+        contentArray = contentArray.root;
+    } else if (!Array.isArray(contentArray)) {
+        contentArray = [];
+    }
+    
     const adapted = {
         theme_scoring: {},
         theme_taxonomy: riskData.risk_taxonomy || {},
-        content: riskData.content || []
+        content: contentArray
     };
     
-    // Transform each company's risk data to theme format
+    // Transform each company's risk data to theme format from risk_scoring
     if (riskData.risk_scoring) {
         for (const [companyName, companyData] of Object.entries(riskData.risk_scoring)) {
             adapted.theme_scoring[companyName] = {
                 ...companyData,
                 themes: companyData.risks || companyData.themes || {}
             };
+        }
+    }
+    
+    // Derive companies from content that are missing from risk_scoring
+    // This ensures all companies with content chunks appear in rankings/heatmap
+    if (contentArray && contentArray.length > 0) {
+        const companyDataMap = {};
+        
+        // Aggregate content by company
+        contentArray.forEach(chunk => {
+            if (!chunk || !chunk.company) return;
+            
+            const companyName = chunk.company;
+            
+            // Skip if already in theme_scoring (from risk_scoring)
+            if (adapted.theme_scoring[companyName]) return;
+            
+            // Initialize company data if not exists
+            if (!companyDataMap[companyName]) {
+                companyDataMap[companyName] = {
+                    ticker: chunk.ticker || null,
+                    sector: chunk.sector || 'Unknown',
+                    industry: chunk.industry || 'Unknown',
+                    themes: {},
+                    composite_score: 0,
+                    motivation: null
+                };
+            }
+            
+            // Aggregate themes/risks from content chunks
+            // Use sub_scenario as the theme/risk identifier (fallback to risk_factor if not available)
+            const theme = chunk.sub_scenario || chunk.risk_factor || 'Unknown Risk';
+            if (!companyDataMap[companyName].themes[theme]) {
+                companyDataMap[companyName].themes[theme] = 0;
+            }
+            companyDataMap[companyName].themes[theme] += 1;
+            companyDataMap[companyName].composite_score += 1;
+            
+            // Collect motivation from chunks (use first non-empty one)
+            if (!companyDataMap[companyName].motivation && chunk.motivation) {
+                companyDataMap[companyName].motivation = chunk.motivation;
+            }
+        });
+        
+        // Add derived companies to theme_scoring
+        for (const [companyName, companyData] of Object.entries(companyDataMap)) {
+            adapted.theme_scoring[companyName] = companyData;
         }
     }
     
