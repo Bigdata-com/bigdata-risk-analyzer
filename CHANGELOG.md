@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.11] - 09-06-2026
+
+### Fixed
+- Updated Bigdata Research Tools to 1.1.2 to prevent watchlist searches from retrying malformed Knowledge Graph entity batches indefinitely.
+
 ## [2.3.10] - 19-12-2025
 
 ### Fixed

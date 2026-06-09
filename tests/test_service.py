@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from bigdata_research_tools.tree import SemanticTree
+from bigdata_research_tools.mindmap.mindmap import MindMap
 
 from bigdata_risk_analyzer.models import (
     LabeledContent,
@@ -93,13 +93,13 @@ def df_labeled():
 
 @pytest.fixture
 def risk_tree():
-    return SemanticTree(
+    return MindMap(
         label="Root",
         node=1,
         summary="Root node",
         children=[
-            SemanticTree(label="Risk1", node=2, summary="Risk1 for company"),
-            SemanticTree(
+            MindMap(label="Risk1", node=2, summary="Risk1 for company"),
+            MindMap(
                 label="Risk 2 with long name", node=3, summary="Risk 2 for company"
             ),
         ],
