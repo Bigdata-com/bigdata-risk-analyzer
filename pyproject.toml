@@ -15,9 +15,7 @@ dependencies = [
     "fastapi>=0.116.1",
     "uvicorn>=0.35.0",
     "bigdata-client==2.19.0",
-    # Bigdata research tools is working on a v1.0.0 version that is on beta, while we wait for its release we pin to a commit 
-    # including the required features https://github.com/Bigdata-com/bigdata-research-tools/tree/preparation_for_v1
-    "bigdata-research-tools[openai] @ git+https://github.com/Bigdata-com/bigdata-research-tools@46750ea5395a47b0b721e46fb338b26e6ce24d89",
+    "bigdata-research-tools[openai]==1.1.2",
     "sqlmodel>=0.0.24",
 ]
 
