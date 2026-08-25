@@ -28,7 +28,9 @@ class ChatRequest:
     # support the API default and reject an explicit temperature/seed value.
     temperature: float | None = None
     seed: int | None = None
-    response_format: dict[str, str] = field(default_factory=lambda: {"type": "json_object"})
+    response_format: dict[str, str] = field(
+        default_factory=lambda: {"type": "json_object"}
+    )
 
 
 @dataclass(slots=True)
@@ -56,12 +58,16 @@ def _call_with_retries(
                 kwargs["seed"] = request.seed
             completion = client.chat.completions.create(**kwargs)
             content = completion.choices[0].message.content
-            return ChatResponse(request_id=request.request_id, succeeded=True, content=content)
+            return ChatResponse(
+                request_id=request.request_id, succeeded=True, content=content
+            )
         except Exception as exc:  # noqa: BLE001 - retry any transient API error
             last_error = exc
             if attempt + 1 < max_retries:
                 time.sleep(DEFAULT_RETRY_BACKOFF_SECONDS * (2**attempt))
-    return ChatResponse(request_id=request.request_id, succeeded=False, error=str(last_error))
+    return ChatResponse(
+        request_id=request.request_id, succeeded=False, error=str(last_error)
+    )
 
 
 def run_chat_requests_parallel(
@@ -80,7 +86,9 @@ def run_chat_requests_parallel(
 
     with ThreadPoolExecutor(max_workers=max_concurrent_requests) as executor:
         futures = {
-            executor.submit(_call_with_retries, openai_client, request, max_retries): request
+            executor.submit(
+                _call_with_retries, openai_client, request, max_retries
+            ): request
             for request in requests
         }
         for future in as_completed(futures):

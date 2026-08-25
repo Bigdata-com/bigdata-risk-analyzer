@@ -30,6 +30,10 @@ dev = [
     "pytest-cov==5.0.0",
 ]
 
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["bigdata_risk_analyzer"]
 

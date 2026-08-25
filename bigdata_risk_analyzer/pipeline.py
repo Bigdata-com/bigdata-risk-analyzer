@@ -88,12 +88,16 @@ def label_sentences(
     parsed: dict[str, dict[str, str]] = {}
     for response in responses:
         if not response.succeeded or not response.content:
-            logger.warning("Labeling request %s failed: %s", response.request_id, response.error)
+            logger.warning(
+                "Labeling request %s failed: %s", response.request_id, response.error
+            )
             continue
         try:
             payload = json.loads(response.content)
         except json.JSONDecodeError:
-            logger.warning("Could not parse labeling response for %s", response.request_id)
+            logger.warning(
+                "Could not parse labeling response for %s", response.request_id
+            )
             continue
 
         if {"motivation", "label"}.issubset(payload):
@@ -151,7 +155,10 @@ def _company_evidence_block(rows: pd.DataFrame) -> str:
         lines.append(f"- sub_scenario={label}; motivation={motivation}")
     block = "\n".join(lines)
     if len(block) > MAX_MOTIVATIONS_CHARS:
-        block = block[:MAX_MOTIVATIONS_CHARS] + "\n\n[Truncated: additional motivations omitted.]"
+        block = (
+            block[:MAX_MOTIVATIONS_CHARS]
+            + "\n\n[Truncated: additional motivations omitted.]"
+        )
     return block
 
 
@@ -166,11 +173,16 @@ def summarize_companies(
         return pd.DataFrame(columns=["company_name", "summary"])
 
     company_rows = [
-        {"company_name": company_name, "motivations_text": _company_evidence_block(group)}
+        {
+            "company_name": company_name,
+            "motivations_text": _company_evidence_block(group),
+        }
         for company_name, group in merged_df.groupby("company_name", sort=True)
     ]
     company_motivations = pd.DataFrame(company_rows)
-    company_motivations = company_motivations[company_motivations["motivations_text"].str.len() > 0]
+    company_motivations = company_motivations[
+        company_motivations["motivations_text"].str.len() > 0
+    ]
     if company_motivations.empty:
         return pd.DataFrame(columns=["company_name", "summary"])
 
@@ -198,10 +210,14 @@ def summarize_companies(
     summaries: list[dict[str, str]] = []
     for response in responses:
         if not response.succeeded or not response.content:
-            logger.warning("Summary request %s failed: %s", response.request_id, response.error)
+            logger.warning(
+                "Summary request %s failed: %s", response.request_id, response.error
+            )
             continue
         try:
-            summary = CompanySummary.model_validate(json.loads(response.content)).summary
+            summary = CompanySummary.model_validate(
+                json.loads(response.content)
+            ).summary
         except (json.JSONDecodeError, ValueError) as exc:
             logger.warning("Summary parse error for %s: %s", response.request_id, exc)
             continue
@@ -255,14 +271,18 @@ def _company_metadata_lookup(universe_df: pd.DataFrame) -> dict[str, dict[str, A
     for _, row in universe_df.iterrows():
         name = row[NAME_COLUMN]
         lookup[name] = {
-            "ticker": _clean_scalar(row[TICKER_COLUMN]) if TICKER_COLUMN in columns else None,
+            "ticker": _clean_scalar(row[TICKER_COLUMN])
+            if TICKER_COLUMN in columns
+            else None,
             "sector": (_clean_scalar(row[SECTOR_COLUMN]) or UNKNOWN_VALUE)
             if SECTOR_COLUMN in columns
             else UNKNOWN_VALUE,
             "industry": (_clean_scalar(row[INDUSTRY_COLUMN]) or UNKNOWN_VALUE)
             if INDUSTRY_COLUMN in columns
             else UNKNOWN_VALUE,
-            "country": _clean_scalar(row[COUNTRY_COLUMN]) if COUNTRY_COLUMN in columns else None,
+            "country": _clean_scalar(row[COUNTRY_COLUMN])
+            if COUNTRY_COLUMN in columns
+            else None,
         }
     return lookup
 
@@ -324,7 +344,9 @@ def build_content_chunks(
     return chunks
 
 
-def build_risk_scoring(screener_df: pd.DataFrame, universe_df: pd.DataFrame) -> dict[str, Any]:
+def build_risk_scoring(
+    screener_df: pd.DataFrame, universe_df: pd.DataFrame
+) -> dict[str, Any]:
     metadata = _company_metadata_lookup(universe_df)
     scoring: dict[str, Any] = {}
 
@@ -334,13 +356,14 @@ def build_risk_scoring(screener_df: pd.DataFrame, universe_df: pd.DataFrame) -> 
     summaries: dict[str, Any] = {}
     if "summary" in screener_df.columns:
         for company, group in screener_df.groupby("company_name", sort=True):
-            summaries[company] = _clean_scalar(group["summary"].iloc[0])
+            summaries[str(company)] = _clean_scalar(group["summary"].iloc[0])
 
-    for company, group in screener_df.groupby("company_name", sort=True):
+    for company_key, group in screener_df.groupby("company_name", sort=True):
+        company = str(company_key)
         counts = group["label"].value_counts()
         risks = {str(label): int(count) for label, count in counts.items()}
         company_meta = metadata.get(company, {})
-        scoring[str(company)] = {
+        scoring[company] = {
             "ticker": company_meta.get("ticker"),
             "sector": company_meta.get("sector", UNKNOWN_VALUE),
             "industry": company_meta.get("industry", UNKNOWN_VALUE),
@@ -407,10 +430,14 @@ def run_risk_analysis(
         f"Search completed. {len(sentences)} chunks found for {len(company_ids)} companies."
     )
 
-    on_progress(f"Labelling {len(sentences)} chunks with {len(leaf_search_queries)} risks")
+    on_progress(
+        f"Labelling {len(sentences)} chunks with {len(leaf_search_queries)} risks"
+    )
     parsed_responses = label_sentences(sentences, main_theme, root, model=model)
     merged_df = build_labeled_dataframe(sentences, parsed_responses)
-    on_progress(f"Labeling completed. {len(merged_df)} chunks labeled with risk factors.")
+    on_progress(
+        f"Labeling completed. {len(merged_df)} chunks labeled with risk factors."
+    )
 
     on_progress("Post-processing results")
     company_summaries_df = summarize_companies(merged_df, main_theme, model=model)

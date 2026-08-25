@@ -10,7 +10,9 @@ def _csv(text: str) -> io.StringIO:
 
 
 def test_load_universe_csv_without_api_key_leaves_metadata_blank():
-    df = universe.load_universe_csv(_csv("RP_ENTITY_ID,COMPANY_NAME\nD8442A,Apple Inc.\n"))
+    df = universe.load_universe_csv(
+        _csv("RP_ENTITY_ID,COMPANY_NAME\nD8442A,Apple Inc.\n")
+    )
     assert df.loc[0, "TICKER"] is None
     assert df.loc[0, "SECTOR"] is None
     assert df.loc[0, "INDUSTRY"] is None
@@ -31,7 +33,9 @@ def test_load_universe_csv_enriches_missing_metadata_via_kg(monkeypatch):
             }
         }
 
-    monkeypatch.setattr(universe.bigdata_kg, "resolve_companies", fake_resolve_companies)
+    monkeypatch.setattr(
+        universe.bigdata_kg, "resolve_companies", fake_resolve_companies
+    )
 
     df = universe.load_universe_csv(
         _csv("RP_ENTITY_ID,COMPANY_NAME\nD8442A,Apple Inc.\n"), api_key="test-key"
@@ -64,7 +68,9 @@ def test_load_universe_csv_does_not_overwrite_csv_provided_values(monkeypatch):
             },
         }
 
-    monkeypatch.setattr(universe.bigdata_kg, "resolve_companies", fake_resolve_companies)
+    monkeypatch.setattr(
+        universe.bigdata_kg, "resolve_companies", fake_resolve_companies
+    )
 
     csv_text = (
         "RP_ENTITY_ID,COMPANY_NAME,TICKER\n"
@@ -90,7 +96,9 @@ def test_load_universe_csv_kg_failure_is_non_fatal(monkeypatch):
     def fake_resolve_companies(ids, api_key, api_base_url=None, timeout=30.0):
         raise ValueError("No entities found")
 
-    monkeypatch.setattr(universe.bigdata_kg, "resolve_companies", fake_resolve_companies)
+    monkeypatch.setattr(
+        universe.bigdata_kg, "resolve_companies", fake_resolve_companies
+    )
 
     df = universe.load_universe_csv(
         _csv("RP_ENTITY_ID,COMPANY_NAME\nD8442A,Apple Inc.\n"), api_key="test-key"
@@ -106,7 +114,9 @@ def test_blank_and_nan_like_cells_are_treated_as_missing(blank_value, monkeypatc
         calls["ids"] = set(ids)
         return {"D8442A": {"sector": "Technology"}}
 
-    monkeypatch.setattr(universe.bigdata_kg, "resolve_companies", fake_resolve_companies)
+    monkeypatch.setattr(
+        universe.bigdata_kg, "resolve_companies", fake_resolve_companies
+    )
 
     csv_text = f"RP_ENTITY_ID,COMPANY_NAME,SECTOR\nD8442A,Apple Inc.,{blank_value}\n"
     df = universe.load_universe_csv(_csv(csv_text), api_key="test-key")

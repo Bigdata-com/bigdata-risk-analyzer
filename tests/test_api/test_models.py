@@ -41,7 +41,10 @@ def test_risk_analysis_request_base_chunk_percentage_out_of_range(chunk_percenta
 
 def test_risk_analysis_request_base_max_taxonomy_depth_defaults_to_none():
     req = RiskAnalysisRequestBase(
-        main_theme="Theme", focus="Focus", start_date="2025-06-01", end_date="2025-08-01"
+        main_theme="Theme",
+        focus="Focus",
+        start_date="2025-06-01",
+        end_date="2025-08-01",
     )
     assert req.max_taxonomy_depth is None
 

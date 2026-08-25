@@ -78,7 +78,11 @@ def extract_sentences(
         timestamp = document.get("timestamp")
         for chunk in document.get("chunks", []):
             relevance = chunk.get("relevance")
-            if rerank_threshold and relevance is not None and relevance < rerank_threshold:
+            if (
+                rerank_threshold
+                and relevance is not None
+                and relevance < rerank_threshold
+            ):
                 continue
 
             entity_ids = chunk.get("entity_ids") or []
@@ -102,5 +106,7 @@ def extract_sentences(
             )
             idx += 1
 
-    logger.info("Extracted %d sentences from %d documents", len(sentences), len(documents))
+    logger.info(
+        "Extracted %d sentences from %d documents", len(sentences), len(documents)
+    )
     return sentences

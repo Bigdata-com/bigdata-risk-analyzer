@@ -27,7 +27,7 @@ UNKNOWN_VALUE = "Unknown"
 
 WATCHLIST_REJECTED_MESSAGE = (
     "Watchlist is not supported at this time. Provide a list of RP entity IDs "
-    "(`companies: [\"D8442A\", ...]`) or upload a CSV via /risk-analysis/upload."
+    '(`companies: ["D8442A", ...]`) or upload a CSV via /risk-analysis/upload.'
 )
 
 
@@ -91,7 +91,9 @@ def _enrich_missing_metadata(
 
     ids = universe_df.loc[missing_mask, ID_COLUMN].tolist()
     try:
-        resolved = bigdata_kg.resolve_companies(ids, api_key=api_key, api_base_url=api_base_url)
+        resolved = bigdata_kg.resolve_companies(
+            ids, api_key=api_key, api_base_url=api_base_url
+        )
     except ValueError:
         # None of the missing IDs resolved via the knowledge graph — keep the CSV as-is.
         return universe_df
@@ -107,7 +109,7 @@ def _enrich_missing_metadata(
 
 
 def load_universe_csv(
-    file: str | Path | IO[bytes],
+    file: str | Path | IO[str] | IO[bytes],
     api_key: str | None = None,
     api_base_url: str | None = None,
 ) -> pd.DataFrame:
@@ -169,7 +171,9 @@ def build_universe_from_ids(
     if not ids:
         raise ValueError("companies list must not be empty")
 
-    resolved = bigdata_kg.resolve_companies(ids, api_key=api_key, api_base_url=api_base_url)
+    resolved = bigdata_kg.resolve_companies(
+        ids, api_key=api_key, api_base_url=api_base_url
+    )
 
     rows = []
     for entity_id, meta in resolved.items():

@@ -70,7 +70,9 @@ def resolve_companies(
     unique_ids = list(dict.fromkeys(ids))
     for start in range(0, len(unique_ids), MAX_IDS_PER_REQUEST):
         batch = unique_ids[start : start + MAX_IDS_PER_REQUEST]
-        response = requests.post(url, json={"values": batch}, headers=headers, timeout=timeout)
+        response = requests.post(
+            url, json={"values": batch}, headers=headers, timeout=timeout
+        )
         response.raise_for_status()
         results = response.json().get("results", {})
         for entity_id, entity in results.items():

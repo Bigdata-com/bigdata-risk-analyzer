@@ -34,7 +34,11 @@ from bigdata_risk_analyzer.models import RiskAnalysisResponse
 from bigdata_risk_analyzer.service import process_request
 from bigdata_risk_analyzer.settings import settings
 from bigdata_risk_analyzer.templates import loader
-from bigdata_risk_analyzer.universe import build_universe_from_ids, load_universe_csv
+from bigdata_risk_analyzer.universe import (
+    WATCHLIST_REJECTED_MESSAGE,
+    build_universe_from_ids,
+    load_universe_csv,
+)
 
 engine = create_engine(settings.DB_STRING, echo=LOG_LEVEL == "DEBUG")
 
@@ -135,8 +139,13 @@ def analyze_risk(
     `companies` must be a list of RavenPack entity IDs. Watchlists are not supported; upload
     a CSV via `/risk-analysis/upload` for larger or metadata-rich universes.
     """
+    companies = request.companies
+    if isinstance(companies, str):
+        raise HTTPException(status_code=400, detail=WATCHLIST_REJECTED_MESSAGE)
     try:
-        universe_df = build_universe_from_ids(request.companies, api_key=settings.BIGDATA_API_KEY)
+        universe_df = build_universe_from_ids(
+            companies, api_key=settings.BIGDATA_API_KEY
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -146,9 +155,15 @@ def analyze_risk(
 @app.post("/risk-analysis/upload", response_model=RiskAnalysisResponse)
 def analyze_risk_upload(
     background_tasks: BackgroundTasks,
-    file: Annotated[UploadFile, File(description="Universe CSV with RP_ENTITY_ID + COMPANY_NAME columns.")],
+    file: Annotated[
+        UploadFile,
+        File(description="Universe CSV with RP_ENTITY_ID + COMPANY_NAME columns."),
+    ],
     request: Annotated[
-        str, Form(description="JSON-encoded request body (same fields as POST /risk-analysis, minus companies).")
+        str,
+        Form(
+            description="JSON-encoded request body (same fields as POST /risk-analysis, minus companies)."
+        ),
     ],
     storage_manager: StorageManager = Depends(get_storage_manager),
     _: str = Security(query_scheme),
@@ -167,7 +182,9 @@ def analyze_risk_upload(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    return _queue_analysis(parsed_request, universe_df, background_tasks, storage_manager)
+    return _queue_analysis(
+        parsed_request, universe_df, background_tasks, storage_manager
+    )
 
 
 @app.get(

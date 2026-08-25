@@ -208,7 +208,8 @@ def truncate_depth(node: Node, max_depth: int | None, _current_depth: int = 1) -
     return node.model_copy(
         update={
             "children": [
-                truncate_depth(child, max_depth, _current_depth + 1) for child in node.children
+                truncate_depth(child, max_depth, _current_depth + 1)
+                for child in node.children
             ]
         }
     )
@@ -321,7 +322,9 @@ def get_leaf_label_summary_options(node: Node) -> list[str]:
     return options
 
 
-def build_leaf_ancestry(node: Node, ancestors: list[str] | None = None) -> dict[str, list[str]]:
+def build_leaf_ancestry(
+    node: Node, ancestors: list[str] | None = None
+) -> dict[str, list[str]]:
     """Map each leaf ``label`` to its ancestor labels (root first)."""
     chain = ancestors or []
     if not node.children:
