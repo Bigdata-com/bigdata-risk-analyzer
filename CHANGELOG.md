@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 25-08-2026
+
+### Changed
+- Migrated off the deprecated `bigdata-client` / `bigdata-research-tools` SDKs onto the Bigdata.com REST API (`X-API-KEY` / `https://api.bigdata.com`), `bigdata-smart-batching` for search, and direct OpenAI calls for taxonomy generation, chunk labeling, and company summaries.
+- Company universes are now provided as a list of RP entity IDs or an uploaded CSV (`RP_ENTITY_ID`/`RP_COMPANY_ID` + `COMPANY_NAME`, optionally `TICKER`/`SECTOR`/`INDUSTRY`/`COUNTRY`). **Watchlists are no longer supported.**
+- `document_type`, `fiscal_year`, `control_entities`, `frequency`, `batch_size`, and `document_limit` request fields were dropped (no equivalent in the new stack); `document_limit`/`batch_size`/`frequency` are replaced by a single `chunk_percentage` retrieval-volume knob. Added `max_leaf_labels` to cap generated taxonomy size, and renamed `llm_model_config` to `llm_model` (plain string, default `gpt-5.6-luna`).
+
+### Added
+- `POST /risk-analysis/upload`: submit a risk analysis with a universe CSV instead of a list of RP entity IDs.
+
 ## [2.3.11] - 09-06-2026
 
 ### Fixed

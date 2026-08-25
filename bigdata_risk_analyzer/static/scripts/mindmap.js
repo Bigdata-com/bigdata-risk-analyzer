@@ -7,6 +7,13 @@ function renderMindmap(taxonomy) {
     if (!container || !taxonomy) return;
 
     mindmapData = taxonomy;
+    // Always start a freshly-rendered report in Tree View. Graph View's D3 layout
+    // needs the container's real on-screen width, which isn't available yet here
+    // (the Taxonomy tab is hidden until the user clicks it) — rendering the graph
+    // while hidden bakes in a wrong, clamped-fallback size that then sticks around
+    // (see switchMindmapView's re-render-on-switch below for why it doesn't self-heal
+    // on its own).
+    currentMindmapView = 'tree';
 
     let html = `
         <div class="mb-6">
@@ -78,9 +85,10 @@ function switchMindmapView() {
     } else {
         graphView.classList.remove('hidden');
         treeView.classList.add('hidden');
-        if (graphView.innerHTML === '') {
-            renderGraphView(mindmapData);
-        }
+        // Always recompute (not just when empty): the container is only guaranteed
+        // to have a real, visible width right now, at switch time. Re-rendering here
+        // both gets an accurate width and self-heals any earlier bad-width render.
+        renderGraphView(mindmapData);
     }
 }
 
@@ -147,9 +155,29 @@ function toggleTreeNode(button) {
     }
 }
 
+function countLeaves(node) {
+    if (!node || !node.children || node.children.length === 0) return 1;
+    return node.children.reduce((sum, child) => sum + countLeaves(child), 0);
+}
+
 function renderGraphView(taxonomy) {
     const container = document.getElementById('mindmapGraphView');
     if (!container || !taxonomy) return;
+
+    if (typeof d3 === 'undefined') {
+        container.innerHTML = `
+            <div class="bg-zinc-800/30 rounded-lg border border-red-700/50 p-6 text-center text-zinc-300">
+                Graph view could not load its charting library (d3.js from a CDN).
+                This is usually caused by a blocked network request — check the
+                browser console, or use Tree View instead.
+            </div>
+        `;
+        return;
+    }
+
+    // Height scales with the number of leaves so large taxonomies don't cram/overlap.
+    const leafCount = countLeaves(taxonomy);
+    const height = Math.max(600, leafCount * 28 + 100);
 
     // Clear and set up SVG container
     container.innerHTML = `
@@ -157,12 +185,13 @@ function renderGraphView(taxonomy) {
             <div class="mb-3 text-sm text-zinc-400 flex items-center gap-4">
                 <span>💡 Scroll to zoom • Hover for details • Tree grows left to right</span>
             </div>
-            <div id="graphSvgContainer" class="bg-zinc-900 rounded overflow-hidden" style="height: 600px;"></div>
+            <div id="graphSvgContainer" class="bg-zinc-900 rounded overflow-hidden overflow-y-auto" style="height: ${Math.min(height, 900)}px;"></div>
         </div>
     `;
 
-    const width = container.offsetWidth - 40;
-    const height = 600;
+    // container.offsetWidth can be 0 if this runs while the tab is still hidden
+    // (display:none) — fall back to a sane default instead of a negative tree size.
+    const width = Math.max(container.offsetWidth - 40, 600);
 
     // Convert taxonomy to D3 hierarchy
     function taxonomyToHierarchy(node) {
@@ -242,7 +271,9 @@ function renderGraphView(taxonomy) {
         .attr('fill', '#fff')
         .style('pointer-events', 'none');
 
-    // Tooltip
+    // Tooltip — remove any leftover one from a previous render (renderGraphView can
+    // now run more than once per report, see switchMindmapView) before adding a fresh one.
+    d3.selectAll('.mindmap-tooltip').remove();
     const tooltip = d3.select('body').append('div')
         .attr('class', 'mindmap-tooltip')
         .style('position', 'absolute')

@@ -1,6 +1,6 @@
 [project]
 name = "bigdata_risk_analyzer"
-version = "2.3.10"
+version = "3.0.0"
 description = "Identify corportate exposure to uncertain scenarios and risk channels, grounded on thousands of sources provided by Bigdata.com"
 authors = [{name = "jaldana", email = "jaldana@ravenpack.com"}]
 readme = "README.md"
@@ -14,9 +14,14 @@ dependencies = [
     "structlog>=25.4.0",
     "fastapi>=0.116.1",
     "uvicorn>=0.35.0",
-    "bigdata-client==2.19.0",
-    "bigdata-research-tools[openai]==1.1.2",
     "sqlmodel>=0.0.24",
+    "bigdata-smart-batching>=1.4.1,<2.0.0",
+    "openai>=2.0.0,<3.0.0",
+    "requests>=2.31",
+    "python-dotenv>=1.0.0",
+    "python-multipart>=0.0.9",
+    "pandas>=2.0.0",
+    "openpyxl>=3.1.0",
 ]
 
 [dependency-groups]
