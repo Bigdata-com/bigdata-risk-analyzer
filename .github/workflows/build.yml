@@ -31,17 +31,29 @@ jobs:
         context: .
         file: ./Dockerfile
         push: false
+        load: true
         cache-from: type=gha
         cache-to: type=gha,mode=max
         tags: ghcr.io/bigdata-com/bigdata-risk-analyzer:latest,ghcr.io/bigdata-com/bigdata-risk-analyzer:${{ github.event.release.tag_name }}
     - name: Run security scan
-      uses: Bigdata-com/security-scan-containers@master
+      id: security-scan
+      uses: crowdstrike/fcs-action@v5.0.2
       with:
-        image_name: ghcr.io/bigdata-com/bigdata-risk-analyzer:latest
+        scan_type: image
+        image: ghcr.io/bigdata-com/bigdata-risk-analyzer:latest
         falcon_client_id: ${{ secrets.FALCON_CLIENT_ID }}
-        falcon_client_secret: ${{ secrets.FALCON_CLIENT_SECRET }}
         falcon_region: ${{ secrets.FALCON_REGION }}
-        fcs_version: "2.0.2"
+        upload_results: true
+        no_color: true
+        show_full_description: true
+        show_full_detection_details: true
+      env:
+        FALCON_CLIENT_SECRET: ${{ secrets.FALCON_CLIENT_SECRET }}
+    - name: Fail on security scan findings
+      if: steps.security-scan.outputs.exit-code != 0
+      run: |
+        echo "Image assessment policy not met (FCS CLI exit code ${{ steps.security-scan.outputs.exit-code }})."
+        exit 1
     - name: Push Docker image
       uses: docker/build-push-action@v6
       with:
