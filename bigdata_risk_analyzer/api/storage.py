@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlmodel import Session, select
 
 from bigdata_risk_analyzer.api.models import (
-    RiskAnalysisRequest,
+    RiskAnalysisRequestBase,
     RiskAnalyzerStatusResponse,
     WorkflowStatus,
 )
@@ -82,7 +82,8 @@ class StorageManager:
     def mark_workflow_as_completed(
         self,
         request_id: UUID,
-        request: RiskAnalysisRequest,
+        request: RiskAnalysisRequestBase,
+        company_ids: list[str],
         report: RiskAnalysisResponse,
     ):
         with self.lock:
@@ -93,7 +94,7 @@ class StorageManager:
                 )
             workflow_status.status = WorkflowStatus.COMPLETED
             sql_report = SQLRiskAnalyzerReport.from_risk_analyzer_response(
-                request_id, request, report
+                request_id, request, company_ids, report
             )
 
             self.db_session.add(workflow_status)

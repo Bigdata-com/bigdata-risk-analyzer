@@ -2,17 +2,28 @@ from functools import partial
 from typing import Annotated
 from uuid import UUID, uuid4
 
-from bigdata_client import Bigdata
-from bigdata_client.models.search import DocumentType
-from fastapi import BackgroundTasks, Body, Depends, FastAPI, HTTPException, Security
+from fastapi import (
+    BackgroundTasks,
+    Body,
+    Depends,
+    FastAPI,
+    File,
+    Form,
+    HTTPException,
+    Security,
+    UploadFile,
+)
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import ValidationError
+from sqlalchemy import inspect
 from sqlmodel import Session, SQLModel, create_engine
 
 from bigdata_risk_analyzer import LOG_LEVEL, __version__, logger
 from bigdata_risk_analyzer.api.models import (
-    ExampleWatchlists,
+    EXAMPLE_COMPANY_LISTS,
     RiskAnalysisRequest,
+    RiskAnalysisRequestBase,
     RiskAnalyzerAcceptedResponse,
     RiskAnalyzerStatusResponse,
     WorkflowStatus,
@@ -22,17 +33,44 @@ from bigdata_risk_analyzer.api.storage import StorageManager
 from bigdata_risk_analyzer.api.utils import get_example_values_from_schema
 from bigdata_risk_analyzer.models import RiskAnalysisResponse
 from bigdata_risk_analyzer.service import process_request
-from bigdata_risk_analyzer.settings import UNSET, settings
+from bigdata_risk_analyzer.settings import settings
 from bigdata_risk_analyzer.templates import loader
-from bigdata_risk_analyzer.traces import TraceEventName, send_trace
+from bigdata_risk_analyzer.universe import (
+    WATCHLIST_REJECTED_MESSAGE,
+    build_universe_from_ids,
+    load_universe_csv,
+)
 
-BIGDATA: Bigdata | None = None
 engine = create_engine(settings.DB_STRING, echo=LOG_LEVEL == "DEBUG")
+
+
+def check_storage_schema():
+    """Fail fast on a database created by an incompatible earlier release.
+
+    ``create_all`` only creates missing tables, so a database left over from
+    2.x keeps its old columns and every read fails later with an opaque 500.
+    """
+    inspector = inspect(engine)
+    for table in SQLModel.metadata.sorted_tables:
+        if not inspector.has_table(table.name):
+            continue
+        existing_columns = {
+            column["name"] for column in inspector.get_columns(table.name)
+        }
+        missing_columns = {column.name for column in table.columns} - existing_columns
+        if missing_columns:
+            raise RuntimeError(
+                f"Table '{table.name}' in {settings.DB_STRING} is missing columns "
+                f"{sorted(missing_columns)}. The 3.0 schema is not compatible with "
+                "databases created by earlier releases. Remove the old database file "
+                "or point DB_STRING at a new one."
+            )
 
 
 def create_db_and_tables():
     logger.info("Setting up data storage", db_string=settings.DB_STRING)
     SQLModel.metadata.create_all(engine)
+    check_storage_schema()
 
 
 def get_session():
@@ -45,23 +83,8 @@ def get_storage_manager(session: Session = Depends(get_session)) -> StorageManag
 
 
 def lifespan(app: FastAPI):
-    global BIGDATA
     logger.info("Starting Risk Analyzer service")
-
-    # Instantiate Bigdata client
-    BIGDATA = Bigdata(api_key=settings.BIGDATA_API_KEY)
-
-    if settings.BIGDATA_API_KEY != UNSET:
-        send_trace(
-            BIGDATA,
-            event_name=TraceEventName.SERVICE_START,
-            trace={
-                "version": __version__,
-            },
-        )
-
     create_db_and_tables()
-
     yield
 
 
@@ -91,13 +114,39 @@ def health_check():
 async def sample_frontend(_: str = Security(query_scheme)) -> HTMLResponse:
     # Get example values from the schema for all fields
     template_values = get_example_values_from_schema(RiskAnalysisRequest)
-    template_values["example_watchlists"] = list(dict(ExampleWatchlists).values())
+    template_values["example_companies"] = EXAMPLE_COMPANY_LISTS
     template_values["demo_mode"] = settings.DEMO_MODE
     template_values["version"] = f"v{__version__}"
 
     return HTMLResponse(
         content=loader.get_template("api/index.html.jinja").render(**template_values),
         media_type="text/html",
+    )
+
+
+def _queue_analysis(
+    request: RiskAnalysisRequestBase,
+    universe_df,
+    background_tasks: BackgroundTasks,
+    storage_manager: StorageManager,
+) -> JSONResponse:
+    request_id: UUID = uuid4()
+    storage_manager.update_status(request_id, WorkflowStatus.QUEUED)
+
+    background_tasks.add_task(
+        partial(
+            process_request,
+            request,
+            universe_df=universe_df,
+            request_id=request_id,
+            storage_manager=storage_manager,
+        )
+    )
+    return JSONResponse(
+        status_code=202,
+        content=RiskAnalyzerAcceptedResponse(
+            request_id=str(request_id), status=WorkflowStatus.QUEUED
+        ).model_dump(),
     )
 
 
@@ -108,33 +157,58 @@ def analyze_risk(
     storage_manager: StorageManager = Depends(get_storage_manager),
     _: str = Security(query_scheme),
 ) -> JSONResponse:
-    """This endpoints starts the generation of therisk analyzer workflow on the background
+    """This endpoint starts the generation of the risk analyzer workflow on the background
     and will return a request_id that can be used to check the status of the request in the
     `/status/{request_id}` endpoint.
-    Note: for now, it only supports news as document type.
+
+    `companies` must be a list of RavenPack entity IDs. Watchlists are not supported; upload
+    a CSV via `/risk-analysis/upload` for larger or metadata-rich universes.
     """
-    # While we improve the UX of working with several document types with different sets of parameters
-    # we will limit the document type to news
-    DOCUMENT_TYPE = DocumentType.NEWS
-    request.document_type = DOCUMENT_TYPE
-    request_id = uuid4()
-
-    storage_manager.update_status(request_id, WorkflowStatus.QUEUED)
-
-    background_tasks.add_task(
-        partial(
-            process_request,
-            request,
-            bigdata=BIGDATA,
-            request_id=request_id,
-            storage_manager=storage_manager,
+    companies = request.companies
+    if isinstance(companies, str):
+        raise HTTPException(status_code=400, detail=WATCHLIST_REJECTED_MESSAGE)
+    try:
+        universe_df = build_universe_from_ids(
+            companies, api_key=settings.BIGDATA_API_KEY
         )
-    )
-    return JSONResponse(
-        status_code=202,
-        content=RiskAnalyzerAcceptedResponse(
-            request_id=str(request_id), status=WorkflowStatus.QUEUED
-        ).model_dump(),
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return _queue_analysis(request, universe_df, background_tasks, storage_manager)
+
+
+@app.post("/risk-analysis/upload", response_model=RiskAnalysisResponse)
+def analyze_risk_upload(
+    background_tasks: BackgroundTasks,
+    file: Annotated[
+        UploadFile,
+        File(description="Universe CSV with RP_ENTITY_ID + COMPANY_NAME columns."),
+    ],
+    request: Annotated[
+        str,
+        Form(
+            description="JSON-encoded request body (same fields as POST /risk-analysis, minus companies)."
+        ),
+    ],
+    storage_manager: StorageManager = Depends(get_storage_manager),
+    _: str = Security(query_scheme),
+) -> JSONResponse:
+    """Same as `POST /risk-analysis`, but the company universe comes from an uploaded CSV
+    (columns: `RP_ENTITY_ID` [alias `RP_COMPANY_ID`], `COMPANY_NAME`, and optionally
+    `TICKER`/`SECTOR`/`INDUSTRY`/`COUNTRY`) instead of a list of RP entity IDs.
+    """
+    try:
+        parsed_request = RiskAnalysisRequestBase.model_validate_json(request)
+    except ValidationError as e:
+        raise HTTPException(status_code=422, detail=e.errors())
+
+    try:
+        universe_df = load_universe_csv(file.file, api_key=settings.BIGDATA_API_KEY)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return _queue_analysis(
+        parsed_request, universe_df, background_tasks, storage_manager
     )
 
 

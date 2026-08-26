@@ -8,9 +8,7 @@ updates:
   - package-ecosystem: "uv"
     multi-ecosystem-group: "risk-analyzer-service"
     directory: "/"
-    patterns: ["bigdata-client", "bigdata-research-tools"]
-    allow:
-      - dependency-name: "bigdata-client"
+    patterns: ["*"]
   - package-ecosystem: "docker"
     multi-ecosystem-group: "risk-analyzer-service"
     directory: "/"

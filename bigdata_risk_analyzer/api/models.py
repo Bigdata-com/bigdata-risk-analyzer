@@ -1,21 +1,12 @@
 from datetime import date, datetime, timedelta
-from enum import Enum, StrEnum
-from typing import List, Literal, Optional, Self
+from enum import StrEnum
+from typing import List, Optional, Self
 
-from bigdata_client.models.search import DocumentType
-from bigdata_research_tools.llm.base import LLMConfig
 from pydantic import BaseModel, Field, model_validator
-from pydantic_core import ValidationError
 
 from bigdata_risk_analyzer.models import RiskAnalysisResponse
-
-
-class FrequencyEnum(StrEnum):
-    daily = "D"
-    weekly = "W"
-    monthly = "M"
-    quarterly = "3M"
-    yearly = "Y"
+from bigdata_risk_analyzer.taxonomy import DEFAULT_MAX_LEAF_LABELS
+from bigdata_risk_analyzer.universe import WATCHLIST_REJECTED_MESSAGE
 
 
 class WorkflowStatus(StrEnum):
@@ -25,45 +16,25 @@ class WorkflowStatus(StrEnum):
     FAILED = "failed"
 
 
-class WatchlistExample(BaseModel):
-    id: str = Field(..., description="The unique identifier for the watchlist.")
-    name: str = Field(..., description="The name of the watchlist.")
+# Example RP entity IDs for the demo UI's "quick fill" dropdown, sourced from
+# Internal/mag7.csv. Watchlists are not supported (see WATCHLIST_REJECTED_MESSAGE).
+EXAMPLE_COMPANY_LISTS: dict[str, list[str]] = {
+    "MAG_7": ["E09E2B", "D8442A", "228D42", "0157B1", "4A6F00", "12E454", "DD3BB1"],
+}
+
+DEFAULT_LLM_MODEL = "gpt-5.6-luna"
+DEFAULT_CHUNK_PERCENTAGE = 0.05
 
 
-class ExampleWatchlists(Enum):
-    TOP_100_UK = WatchlistExample(
-        id="33d6f577-9256-4a53-944f-09127e42fdc2", name="UK Top 100"
-    )
-    TOP_50_EU = WatchlistExample(
-        id="9baef470-8cf5-46fa-b30a-352bcb35cd94", name="Europe Top 50"
-    )
-    US_LARGE_CAP_100 = WatchlistExample(
-        id="44118802-9104-4265-b97a-2e6d88d74893", name="US Top 100"
-    )
-    TOP_40_DE = WatchlistExample(
-        id="8453c26f-47c5-4e78-b5c8-acf245caccad", name="Germany Top 40"
-    )
-    TOP_40_FR = WatchlistExample(
-        id="9fb6ac2d-a552-4dbb-b62f-8657ef18bf29", name="France Top 40"
-    )
-    DOW_30 = WatchlistExample(id="5b78837c-343d-4559-8f06-98668b09d1df", name="Dow 30")
-    NASDAQ_100 = WatchlistExample(
-        id="402acbcd-f1d8-4a55-997a-598819be0bbf", name="Nasdaq 100"
-    )
-    MAG_7 = WatchlistExample(
-        id="814d0944-a2c1-44f6-8b42-a70c0795428e", name="Magnificent 7"
-    )
+class RiskAnalysisRequestBase(BaseModel):
+    """Shared risk-analysis request fields.
 
-    def __iter__(self):
-        """Allows to create a dict from the enum
-        >>> dict(ExampleWatchlists)
-        {'POINT_72': {'id': '9ab396cf-a2bb-4c91-b9bf-ed737905803e', 'name': 'Point 72 Holdings'}, ...}
-        """
-        yield self.name
-        yield self.value.model_dump()
+    Used directly by the CSV-upload endpoint (whose company universe comes
+    from the uploaded file, not this model) and extended by
+    :class:`RiskAnalysisRequest` for the JSON endpoint (which additionally
+    takes a `companies` list of RP entity IDs).
+    """
 
-
-class RiskAnalysisRequest(BaseModel):
     main_theme: str = Field(
         ...,
         example="US Import Tariffs against China",
@@ -78,152 +49,77 @@ class RiskAnalysisRequest(BaseModel):
         description="The analyst focus that provides an expert perspective on the scenario and helps break it down into risks.",
     )
 
-    companies: list[str] | str = Field(
-        ...,
-        description="List of RavenPack entity IDs  or a watchlist ID representing the companies to track in the generated brief.",
-        example=ExampleWatchlists.US_LARGE_CAP_100.value.id,
-    )
-
-    control_entities: Optional[dict[str, list[str]]] = Field(
-        default=None,
-        description="Dictionary specifying the countries, people, or organizations that characterize the risk scenario.",
-        example=None,
-    )
-
     start_date: str = Field(
         default="2024-01-01",
-        description="Start date of the analysis window (format: YYYY-MM-DD). Defaults to 6 months ago.",
+        description="Start date of the analysis window (format: YYYY-MM-DD). Defaults to 2024-01-01.",
         example=(date.today() - timedelta(days=30)).isoformat(),
     )
     end_date: str = Field(
         default="2024-12-31",
-        description="End date of the analysis window (format: YYYY-MM-DD). Defaults to yesterday.",
+        description="End date of the analysis window (format: YYYY-MM-DD). Defaults to 2024-12-31.",
         example=date.today().isoformat(),
     )
 
     keywords: List[str] | None = Field(
         default=None,
-        description="Key risk-related terms to drive content retrieval (e.g., 'tariffs').",
+        description="Key risk-related terms to emphasize when generating the risk taxonomy (e.g. 'tariffs').",
         example=None,
     )
 
-    llm_model_config: str | LLMConfig = Field(
-        default="openai::gpt-4o-mini",
-        description="LLM model configuration with model name, temperature or reasoning effort, and custom chat kwargs. Used for taxonomy creation and semantic analysis.",
-        example="openai::gpt-4o-mini",
-    )
-    document_type: Literal[DocumentType.NEWS] = Field(
-        default=DocumentType.NEWS,
-        description="Type of documents to analyze (only transcript supported for now).",
-        example=DocumentType.NEWS,
-    )
-    fiscal_year: int | list[int] | None = Field(
-        default=None,
-        description="Fiscal year to filter documents (format: YYYY).",
-        example=None,
+    llm_model: str = Field(
+        default=DEFAULT_LLM_MODEL,
+        description="OpenAI model used for taxonomy generation, chunk labeling, and company summaries.",
+        example=DEFAULT_LLM_MODEL,
     )
     rerank_threshold: Optional[float] = Field(
         default=None,
-        description="Optional threshold (0-1) to rerank and filter search results by relevance.",
+        description="Optional relevance threshold (0-1); chunks scoring below it are discarded.",
         example=None,
     )
-    frequency: FrequencyEnum = Field(
-        default=FrequencyEnum.monthly,
-        description="Search frequency interval. Supported values: D (daily), W (weekly), M (monthly), Y (yearly).",
-        example=FrequencyEnum.monthly,
+    chunk_percentage: float = Field(
+        default=DEFAULT_CHUNK_PERCENTAGE,
+        ge=0.0,
+        le=1.0,
+        description="Fraction (0-1, not a percentage — e.g. 0.05 = 5%) of the estimated available chunks to retrieve per taxonomy leaf. Higher values cost more and take longer.",
+        example=DEFAULT_CHUNK_PERCENTAGE,
     )
-    document_limit: int = Field(
-        default=100,
-        description="Maximum number of documents to retrieve per query to Bigdata API.",
-        example=100,
+    max_leaf_labels: Optional[int] = Field(
+        default=DEFAULT_MAX_LEAF_LABELS,
+        description="Maximum number of leaf sub-scenarios in the generated risk taxonomy. Use 0 or null for no cap.",
+        example=DEFAULT_MAX_LEAF_LABELS,
     )
-    batch_size: int = Field(
-        default=10,
-        description="Number of entities to include in each batch for parallel querying.",
-        example=10,
+    max_taxonomy_depth: Optional[int] = Field(
+        default=None,
+        ge=2,
+        description=(
+            "Maximum number of levels in the generated risk taxonomy, counting the root "
+            "risk node as level 1 (e.g. 3 = root + risk channel + sub-scenario, dropping "
+            "the separate risk-factor layer). Defaults to the model's natural structure "
+            "(root + risk channel + risk factor + sub-scenario, 4 levels)."
+        ),
+        example=None,
     )
 
     @model_validator(mode="after")
-    def fiscal_year_only_when_transcrips_or_filings(self) -> Self:
-        if self.fiscal_year is not None and self.document_type not in {
-            DocumentType.FILINGS,
-            DocumentType.TRANSCRIPTS,
-            DocumentType.ALL,
-        }:
-            raise ValueError(
-                "fiscal_year can only be set when document_type is FILINGS or TRANSCRIPTS"
-            )
+    def check_date_range(self) -> Self:
+        # ISO-8601 calendar dates (YYYY-MM-DD) compare lexicographically.
+        if self.start_date > self.end_date:
+            raise ValueError("start_date must be earlier than end_date")
         return self
 
-    @model_validator(mode="before")
-    @classmethod
-    def check_date_range(cls, values):
-        try:
-            start_date = values["start_date"]
-            end_date = values["end_date"]
-            if (
-                start_date > end_date
-            ):  # We can compare directly as they are both ISO format strings
-                raise ValueError("start_date must be earlier than end_date")
-        except Exception as e:
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=[
-                    {
-                        "type": "value_error",
-                        "loc": ("start_date", "end_date"),
-                        "ctx": {"error": f"Invalid date format or range: {e}"},
-                        "input": {
-                            "start_date": values["start_date"],
-                            "end_date": values["end_date"],
-                        },
-                    }
-                ],
-            )
-        return values
 
-    @model_validator(mode="before")
-    @classmethod
-    def check_frequency_vs_date_range(cls, values):
-        start_date = values["start_date"]
-        end_date = values["end_date"]
-        freq = values.get("frequency")
-        delta_days = (
-            datetime.fromisoformat(end_date) - datetime.fromisoformat(start_date)
-        ).days + 1  # Adjust for inclusive range
-        freq_min_days = {"D": 1, "W": 7, "M": 30, "3M": 90, "Y": 365}
-        if isinstance(freq, str):
-            freq = FrequencyEnum(freq)
-        if not isinstance(freq, FrequencyEnum):
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=[
-                    {
-                        "type": "value_error",
-                        "loc": ("frequency",),
-                        "ctx": {"error": f"Invalid frequency: {freq}"},
-                        "input": {"frequency": freq},
-                    }
-                ],
-            )
-        if delta_days < freq_min_days[freq.value]:
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=[
-                    {
-                        "type": "value_error",
-                        "loc": ("start_date", "end_date"),
-                        "ctx": {
-                            "error": f"The number of days in the range between start_date={start_date} and end_date={end_date} ({delta_days} days) should be higher than the minimum required for the selected frequency '{freq.value}' ({freq_min_days[freq.value]} days)."
-                        },
-                        "input": {
-                            "start_date": values["start_date"],
-                            "end_date": values["end_date"],
-                        },
-                    }
-                ],
-            )
-        return values
+class RiskAnalysisRequest(RiskAnalysisRequestBase):
+    companies: list[str] | str = Field(
+        ...,
+        description="List of RavenPack entity IDs representing the companies to track in the generated report. Watchlists are not supported.",
+        example=EXAMPLE_COMPANY_LISTS["MAG_7"],
+    )
+
+    @model_validator(mode="after")
+    def reject_watchlist(self) -> Self:
+        if isinstance(self.companies, str):
+            raise ValueError(WATCHLIST_REJECTED_MESSAGE)
+        return self
 
 
 class RiskAnalyzerAcceptedResponse(BaseModel):

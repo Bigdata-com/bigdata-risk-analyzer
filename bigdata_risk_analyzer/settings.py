@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Literal
 
 from pydantic import field_validator, model_validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from bigdata_risk_analyzer import logger
 
@@ -12,6 +12,13 @@ UNSET: Literal["<UNSET>"] = "<UNSET>"
 
 
 class Settings(BaseSettings):
+    # Real environment variables take precedence over the .env file.
+    model_config = SettingsConfigDict(
+        env_file=(PROJECT_DIRECTORY / ".env", ".env"),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
     # Demo mode - disables "Run Analysis" functionality, only allows pre-computed demos
     # Only affects the frontend, to protect the backend, set ACCESS_TOKEN
     DEMO_MODE: bool = False

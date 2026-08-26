@@ -2,17 +2,14 @@
 const infoContents = {
     main_theme: `<b>Main Theme</b>:<br>The overarching risk scenario you want to analyze. It can be specified as a single word or as a short sentence. The risk analyzer will generate a list of sub-themes representing individual, self contained components of the main risk. It can contain multiple core concepts, but we recommend not adding too many core concepts in the same run.<br><i>Examples: "US Import Tariffs against China", "Energy Transition", "Regulatory Changes in AI"</i>`,
     focus: `<b>Focus</b>:<br>Use this parameter to pass additional, custom instructions to the LLM when breaking down the theme into sub-risks. Guide the mindmap creation and customize it to your needs, inject your domain knowledge, and ensure the mindmap covers all required risk dimensions.`,
-    companies: `<b>Company Universe</b>:<br>The portfolio of companies you want to screen for exposure, you have several input options:<br><ul class="list-disc pl-6"><li>Select one of the public watchlists using the dropdown menu</li><li>Write list of RavenPack entity IDs (e.g., <code>4A6F00, D8442A</code>)</li><li>Input a watchlist ID (e.g., <code>44118802-9104-4265-b97a-2e6d88d74893</code> )</li></ul><br>Watchlists can be created programmatically using the <a href='https://docs.bigdata.com/getting-started/watchlist_management' target='_blank'>Bigdata.com SDK</a> or through the <a href='https://app.bigdata.com/watchlists' target='_blank'>Bigdata app</a>.`,
-    control_entities: `<b>Control Entities</b>:<br>A dict of entities to be co-mentioned with the sentence, companies, and keywords (e.g. <code>{"place": ["China"]}</code>). Specify companies, places, people, concepts, etc. <a href='https://docs.bigdata.com/getting-started/knowledge_graph/find_companies#using-filters' target='_blank'>Learn more</a>.`,
+    companies: `<b>Company Universe</b>:<br>The portfolio of companies you want to screen for exposure, you have two input options:<br><ul class="list-disc pl-6"><li>Write a comma-separated list of RavenPack entity IDs (e.g., <code>4A6F00, D8442A</code>)</li><li>Upload a CSV with <code>RP_ENTITY_ID</code> and <code>COMPANY_NAME</code> columns (optionally <code>TICKER</code>/<code>SECTOR</code>/<code>INDUSTRY</code>/<code>COUNTRY</code>)</li></ul><br>Watchlists are not supported at this time.`,
     start_date: `<b>Start/End Date</b>:<br>The start and end of the time sample during which you want to screen your portfolio for thematic exposure. Format: <code>YYYY-MM-DD</code>.`,
-    keywords: `<b>Keywords</b>:<br>A list of keywords defining core concepts of the theme (or sub-theme) to be included in the query. Combined with OR and added to Similarity and Entity filter with AND.`,
-    document_type: `<b>Document Type</b>:<br>The type of documents to search over. Use this to analyze text data from news, corporate transcripts, or filings. Currently, only "TRANSCRIPTS" is supported.`,
-    fiscal_year: `<b>Fiscal Year</b>:<br>For Transcripts and Filings, filter documents by their reporting details. <b>fiscal_year</b> represents the annual reporting period and can be combined with <b>start_date</b> and <b>end_date</b> for time-sensitive queries. Not applicable to News.`,
-    rerank_threshold: `<b>Rerank Threshold</b>:<br>Optional, used with sentence search only. Ensures close cosine similarity between sentence embeddings and retrieved chunks. By default, not applied. For most use cases, one-step retrieval is sufficient. <a href='https://docs.bigdata.com/how-to-guides/rerank_search' target='_blank'>Learn more</a>.`,
-    frequency: `<b>Frequency</b>:<br>Break down your sample range into higher frequency intervals (<code>D</code>, <code>Y</code>, <code>M</code>, <code>3M</code>, <code>Y</code>). Useful for large samples to control document retrieval over time.`,
-    llm_model: `<b>LLM Model</b>:<br>The LLM model to be used for mindmap generation and text analysis. It has to be specified as a string containing both provider name and model name separated by two colons: <provider::model>.`,
-    document_limit: `<b>Document Limit</b>:<br>The maximum number of documents to be retrieved by each query. This is a single value that applies to any combination of query statement & date range.`,
-    batch_size: `<b>Batch Size</b>:<br>Set this parameter when screening a large portfolio of companies (i.e. 50 or more). It allows to break down the portfolio into smaller batches of fixed size, and instructs the search service to run parallel queries for each and every batch. This allows for improving the sampling across your portfolio, given the document limit constraint that has to be applied per query.`,
+    keywords: `<b>Keywords</b>:<br>Optional key terms to emphasize when generating the risk taxonomy.`,
+    rerank_threshold: `<b>Rerank Threshold</b>:<br>Optional relevance threshold (0-1); retrieved chunks scoring below it are discarded. By default, not applied.`,
+    chunk_percentage: `<b>Retrieval %</b>:<br>Percentage (0-100) of the estimated available chunks to retrieve per risk factor, e.g. <code>5</code> means 5%. Higher values cost more and take longer, but surface more evidence.`,
+    max_leaf_labels: `<b>Max Risk Factors</b>:<br>Maximum number of leaf sub-scenarios in the generated risk taxonomy. Leave empty for no cap.`,
+    max_taxonomy_depth: `<b>Max Taxonomy Depth</b>:<br>Maximum number of levels in the generated risk taxonomy, counting the root risk node as level 1. By default the taxonomy has 4 levels (root, risk channel, risk factor, sub-scenario); set this to <code>3</code> to drop the separate risk-factor layer so sub-scenarios sit directly under each risk channel. Leave empty for the default depth.`,
+    llm_model: `<b>LLM Model</b>:<br>The OpenAI model used for taxonomy generation, chunk labeling, and company summaries.`,
     headline_comment: `<b>Headline</b>:<br>Click on each headline to retrieve the DOCUMENT ID. The DOCUMENT ID identifies the document that contains that  headline.`,
 };
 
@@ -28,6 +25,21 @@ function toggleAdvancedOptions() {
         adv.style.display = 'none';
         adv.classList.add('hidden');
         btnIcon.textContent = '+';
+    }
+}
+
+// Toggle the "Process Logs" panel visibility
+function toggleProcessLogs() {
+    const container = document.getElementById('logViewerContainer');
+    const icon = document.getElementById('logsIcon');
+    if (!container) return;
+
+    if (container.classList.contains('hidden')) {
+        container.classList.remove('hidden');
+        if (icon) icon.style.transform = 'rotate(180deg)';
+    } else {
+        container.classList.add('hidden');
+        if (icon) icon.style.transform = 'rotate(0deg)';
     }
 }
 

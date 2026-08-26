@@ -1,132 +1,97 @@
 import pytest
+from pydantic import ValidationError
 
 from bigdata_risk_analyzer.api.models import (
-    DocumentType,
-    FrequencyEnum,
-    RiskAnalysisRequest,
+    EXAMPLE_COMPANY_LISTS,
+    RiskAnalysisRequestBase,
 )
 
 
-@pytest.mark.parametrize(
-    "main_theme,focus,companies,control_entities,start_date,end_date,keywords,llm_model_config,document_type,rerank_threshold,frequency,document_limit,batch_size,fiscal_year",
-    [
-        # Minimal valid input with companies
-        (
-            "US Import Tariffs against China",
-            "Taxonomy of risks for US companies",
-            ["4A6F00", "D8442A"],
-            {"place": ["China"]},
-            "2025-06-01",
-            "2025-08-01",
-            ["Tariffs"],
-            "openai::gpt-4o-mini",
-            DocumentType.NEWS,
-            None,
-            FrequencyEnum.monthly,
-            100,
-            10,
-            None,
-        ),
-        # Minimal valid input with watchlist_id
-        (
-            "US Import Tariffs against China",
-            "Taxonomy of risks for US companies",
-            "44118802-9104-4265-b97a-2e6d88d74893",
-            {"place": ["China"]},
-            "2025-06-01",
-            "2025-08-01",
-            ["Tariffs"],
-            "openai::gpt-4o-mini",
-            DocumentType.NEWS,
-            0.8,
-            FrequencyEnum.weekly,
-            50,
-            5,
-            None,
-        ),
-        # Different frequency and document type
-        (
-            "Risk of supply chain disruption",
-            "Impact on global logistics",
-            ["A12345"],
-            {"place": ["USA"]},
-            "2025-01-01",
-            "2025-12-31",
-            ["Disruption", "Logistics"],
-            "openai::gpt-4o-mini",
-            DocumentType.NEWS,
-            None,
-            FrequencyEnum.yearly,
-            200,
-            20,
-            None,
-        ),
-        # Control entities with multiple places
-        (
-            "Intellectual property risks",
-            "IP risk taxonomy",
-            ["B67890"],
-            {"place": ["China", "USA"]},
-            "2025-07-01",
-            "2025-08-01",
-            ["IP", "Patent"],
-            "openai::gpt-4o-mini",
-            DocumentType.NEWS,
-            None,
-            FrequencyEnum.daily,
-            10,
-            1,
-            None,
-        ),
-    ],
-)
-def test_risk_analysis_request_model(
-    main_theme,
-    focus,
-    companies,
-    control_entities,
-    start_date,
-    end_date,
-    keywords,
-    llm_model_config,
-    document_type,
-    rerank_threshold,
-    frequency,
-    document_limit,
-    batch_size,
-    fiscal_year,
-):
-    req = RiskAnalysisRequest(
-        main_theme=main_theme,
-        focus=focus,
-        companies=companies,
-        control_entities=control_entities,
-        start_date=start_date,
-        end_date=end_date,
-        keywords=keywords,
-        llm_model_config=llm_model_config,
-        document_type=document_type,
-        rerank_threshold=rerank_threshold,
-        frequency=frequency,
-        document_limit=document_limit,
-        batch_size=batch_size,
-        fiscal_year=fiscal_year,
+def test_example_company_lists_are_rp_entity_ids():
+    assert "MAG_7" in EXAMPLE_COMPANY_LISTS
+    assert len(EXAMPLE_COMPANY_LISTS["MAG_7"]) == 7
+    for entity_id in EXAMPLE_COMPANY_LISTS["MAG_7"]:
+        assert isinstance(entity_id, str) and entity_id
+
+
+def test_risk_analysis_request_base_valid():
+    req = RiskAnalysisRequestBase(
+        main_theme="US Import Tariffs against China",
+        focus="Taxonomy of risks for US companies",
+        start_date="2025-06-01",
+        end_date="2025-08-01",
+        chunk_percentage=0.05,
     )
-    assert req.main_theme == main_theme
-    assert req.focus == focus
-    assert req.start_date == start_date
-    assert req.end_date == end_date
-    assert req.llm_model_config == llm_model_config
-    assert req.document_type == document_type
-    assert req.frequency == frequency
-    assert req.document_limit == document_limit
-    assert req.batch_size == batch_size
-    assert companies == companies
-    if control_entities:
-        assert req.control_entities == control_entities
-    if keywords:
-        assert req.keywords == keywords
-    if rerank_threshold is not None:
-        assert req.rerank_threshold == rerank_threshold
-    if fiscal_year:
-        assert req.fiscal_year == fiscal_year
+    assert req.main_theme == "US Import Tariffs against China"
+    assert req.chunk_percentage == 0.05
+    assert req.llm_model == "gpt-5.6-luna"
+
+
+@pytest.mark.parametrize("chunk_percentage", [-0.1, 1.5])
+def test_risk_analysis_request_base_chunk_percentage_out_of_range(chunk_percentage):
+    with pytest.raises(ValidationError):
+        RiskAnalysisRequestBase(
+            main_theme="Theme",
+            focus="Focus",
+            start_date="2025-06-01",
+            end_date="2025-08-01",
+            chunk_percentage=chunk_percentage,
+        )
+
+
+def test_risk_analysis_request_base_max_taxonomy_depth_defaults_to_none():
+    req = RiskAnalysisRequestBase(
+        main_theme="Theme",
+        focus="Focus",
+        start_date="2025-06-01",
+        end_date="2025-08-01",
+    )
+    assert req.max_taxonomy_depth is None
+
+
+def test_risk_analysis_request_base_max_taxonomy_depth_accepts_three():
+    req = RiskAnalysisRequestBase(
+        main_theme="Theme",
+        focus="Focus",
+        start_date="2025-06-01",
+        end_date="2025-08-01",
+        max_taxonomy_depth=3,
+    )
+    assert req.max_taxonomy_depth == 3
+
+
+def test_risk_analysis_request_base_omitted_dates_use_defaults():
+    req = RiskAnalysisRequestBase(main_theme="Theme", focus="Focus")
+    assert req.start_date == "2024-01-01"
+    assert req.end_date == "2024-12-31"
+
+
+def test_risk_analysis_request_base_omitted_end_date_uses_default():
+    req = RiskAnalysisRequestBase(
+        main_theme="Theme", focus="Focus", start_date="2024-06-01"
+    )
+    assert req.start_date == "2024-06-01"
+    assert req.end_date == "2024-12-31"
+
+
+def test_risk_analysis_request_base_start_after_end_is_rejected():
+    with pytest.raises(
+        ValidationError, match="start_date must be earlier than end_date"
+    ):
+        RiskAnalysisRequestBase(
+            main_theme="Theme",
+            focus="Focus",
+            start_date="2025-08-01",
+            end_date="2025-06-01",
+        )
+
+
+def test_risk_analysis_request_base_max_taxonomy_depth_rejects_below_two():
+    with pytest.raises(ValidationError):
+        RiskAnalysisRequestBase(
+            main_theme="Theme",
+            focus="Focus",
+            start_date="2025-06-01",
+            end_date="2025-08-01",
+            max_taxonomy_depth=1,
+        )

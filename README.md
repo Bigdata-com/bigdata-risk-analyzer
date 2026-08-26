@@ -1,5 +1,5 @@
 # Risk Analyzer with Bigdata.com
-This repository contains a docker image for running a risk analyzing service using Bigdata.com SDK. You can read more on our [docs](https://docs.bigdata.com/use-cases/docker-services/risk-analyzer).
+This repository contains a docker image for running a risk analyzing service using the Bigdata.com REST API (`https://api.bigdata.com`, `X-API-KEY` auth) and OpenAI. You can read more on our [docs](https://docs.bigdata.com/use-cases/docker-services/risk-analyzer).
 
 # How to use?
 The risk analyzing service will allow you to assess and quantify risks related to a specific theme, such as US-China trade relations or supply chain disruptions. It will screen your trading universe and quantify the potential impact of identified risks for each company in the universe.
@@ -10,9 +10,8 @@ The risk analyzing service will allow you to assess and quantify risks related t
     - For more information on how to get an API key, refer to the [Bigdata.com documentation](https://docs.bigdata.com/api-reference/introduction#api-key-beta).
 
 # Quickstart
-To quickly get started, you have two options:
 
-1. **Build and run locally:**
+**Build and run locally:**
 You need to build the docker image first and then run it:
 
 ```bash
@@ -32,16 +31,6 @@ docker run -d \
   bigdata_risk_analyzer
 ```
 
-2. **Run directly from GitHub Container Registry:**
-
-```bash
-docker run -d \
-  --name bigdata_risk_analyzer \
-  -p 8000:8000 \
-  -e BIGDATA_API_KEY=<bigdata-api-key-here> \
-  -e OPENAI_API_KEY=<openai-api-key-here> \
-  ghcr.io/bigdata-com/bigdata-risk-analyzer:latest
-```
 
 This will start the risk analyzer service locally on port 8000. You can then access the service @ `http://localhost:8000/` and the documentation for the API @ `http://localhost:8000/docs`.
 
@@ -55,7 +44,9 @@ We perform a pre-release security scan on our container images to detect vulnera
 
 ## How to analyse a set of companies?
 
-A risk analysis report provides an executive summary of financially relevant information about a set of companies that form your watchlist. You can generate a report either using the UI or programmatically, allowing you to build custom workflows on top of this service.
+A risk analysis report provides an executive summary of financially relevant information about a set of companies in your universe. You can generate a report either using the UI or programmatically, allowing you to build custom workflows on top of this service.
+
+The company universe is provided either as a list of RavenPack (RP) entity IDs, or as an uploaded CSV. **Watchlists (watchlist IDs) are not supported.**
 
 ### Using the UI
 There is a very simple UI available @ `http://localhost:8000/` where you can set your parameters and receive an easy-to-read summary of the analysis.
@@ -64,7 +55,8 @@ There is a very simple UI available @ `http://localhost:8000/` where you can set
 The risk analysis API works asynchronously. You first submit a request to start the analysis, then check the status periodically until completion.
 
 #### Step 1: Submit Risk Analysis Request
-Send a POST request to the `/risk-analysis` endpoint with the required parameters. This will return a `request_id` and queue the analysis for processing:
+
+**Option A — a list of RP entity IDs**, via `POST /risk-analysis`:
 
 ```bash
 curl -X 'POST' \
@@ -74,24 +66,26 @@ curl -X 'POST' \
   -d '{
   "main_theme": "US Import Tariffs against China",
   "focus": "Provide a detailed taxonomy of risks describing how new American import tariffs against China will impact US companies, their operations and strategy. Cover trade-relations risks, foreign market access risks, supply chain risks, US market sales and revenue risks (including price impacts), and intellectual property risks, provide at least 4 sub-scenarios for each risk factor.",
-  "companies": "44118802-9104-4265-b97a-2e6d88d74893",
-  "control_entities": {
-    "place": [
-      "China"
-    ]
-  },
+  "companies": ["D8442A", "228D42", "4A6F00"],
   "start_date": "2024-01-01",
   "end_date": "2024-12-31",
-  "keywords": [
-    "Tariffs"
-  ],
-  "document_type": "TRANSCRIPTS",
-  "fiscal_year": 2024,
-  "frequency": "M"
+  "keywords": ["Tariffs"],
+  "chunk_percentage": 0.05,
+  "max_leaf_labels": 15
 }'
 ```
 
-This will return a response like:
+**Option B — a universe CSV**, via `POST /risk-analysis/upload` (multipart, same fields minus `companies`, sent as a JSON string in the `request` form field). The CSV needs `RP_ENTITY_ID` (alias `RP_COMPANY_ID`) and `COMPANY_NAME` columns; `TICKER`/`SECTOR`/`INDUSTRY`/`COUNTRY` are optional enrichment columns:
+
+```bash
+curl -X 'POST' \
+  'http://localhost:8000/risk-analysis/upload' \
+  -H 'accept: application/json' \
+  -F 'file=@Internal/mag7.csv;type=text/csv' \
+  -F 'request={"main_theme": "US Import Tariffs against China", "focus": "Provide a detailed taxonomy of risks describing how new American import tariffs against China will impact US companies.", "start_date": "2024-01-01", "end_date": "2024-12-31"};type=application/json'
+```
+
+Both endpoints return a response like:
 ```json
 {
   "request_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -139,20 +133,10 @@ curl -X 'POST' \
   -d '{
   "main_theme": "US Import Tariffs against China",
   "focus": "Provide a detailed taxonomy of risks describing how new American import tariffs against China will impact US companies, their operations and strategy. Cover trade-relations risks, foreign market access risks, supply chain risks, US market sales and revenue risks (including price impacts), and intellectual property risks, provide at least 4 sub-scenarios for each risk factor.",
-  "companies": "44118802-9104-4265-b97a-2e6d88d74893",
-  "control_entities": {
-    "place": [
-      "China"
-    ]
-  },
+  "companies": ["D8442A", "228D42", "4A6F00"],
   "start_date": "2024-01-01",
   "end_date": "2024-12-31",
-  "keywords": [
-    "Tariffs"
-  ],
-  "document_type": "TRANSCRIPTS",
-  "fiscal_year": 2024,
-  "frequency": "M"
+  "keywords": ["Tariffs"]
 }'
 
 # Check status using the returned request_id

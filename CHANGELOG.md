@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 25-08-2026
+
+### Changed
+- Migrated off the deprecated `bigdata-client` / `bigdata-research-tools` SDKs onto the Bigdata.com REST API (`X-API-KEY` / `https://api.bigdata.com`), `bigdata-smart-batching` for search, and direct OpenAI calls for taxonomy generation, chunk labeling, and company summaries.
+- Company universes are now provided as a list of RP entity IDs or an uploaded CSV (`RP_ENTITY_ID`/`RP_COMPANY_ID` + `COMPANY_NAME`, optionally `TICKER`/`SECTOR`/`INDUSTRY`/`COUNTRY`). **Watchlists are no longer supported.**
+- `document_type`, `fiscal_year`, `control_entities`, `frequency`, `batch_size`, and `document_limit` request fields were dropped (no equivalent in the new stack); `document_limit`/`batch_size`/`frequency` are replaced by a single `chunk_percentage` retrieval-volume knob. Added `max_leaf_labels` to cap generated taxonomy size, and renamed `llm_model_config` to `llm_model` (plain string, default `gpt-5.6-luna`).
+- **The report storage schema changed and is not backwards compatible.** Databases created by 2.x keep their old columns and must be removed (or `DB_STRING` pointed at a new database) before starting 3.0; the service now fails at startup with an explicit message instead of returning 500s from `/status/{request_id}`.
+
+### Added
+- `POST /risk-analysis/upload`: submit a risk analysis with a universe CSV instead of a list of RP entity IDs.
+
+### Fixed
+- API keys supplied through a `.env` file are now picked up again. `bigdata-client` used to call `load_dotenv()` on import; without it the service started with unset credentials and failed mid-analysis. Settings read `.env` explicitly and the Bigdata.com and OpenAI clients are constructed with the configured keys instead of relying on `os.environ`.
+- Retrieved chunks are attributed to every company from the universe detected in them, rather than to whichever entity ID happened to sort first.
+
 ## [2.3.11] - 09-06-2026
 
 ### Fixed
