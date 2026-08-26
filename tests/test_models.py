@@ -23,7 +23,7 @@ from bigdata_risk_analyzer.api.models import RiskAnalysisRequest
             ["4A6F00"],
             "2025-08-01",
             "2025-06-01",
-            "Invalid date format or range",
+            "start_date must be earlier than end_date",
         ),
         # Bare-string companies (legacy watchlist ID) is rejected
         (

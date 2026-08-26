@@ -3,7 +3,6 @@ from enum import StrEnum
 from typing import List, Optional, Self
 
 from pydantic import BaseModel, Field, model_validator
-from pydantic_core import ValidationError
 
 from bigdata_risk_analyzer.models import RiskAnalysisResponse
 from bigdata_risk_analyzer.taxonomy import DEFAULT_MAX_LEAF_LABELS
@@ -52,12 +51,12 @@ class RiskAnalysisRequestBase(BaseModel):
 
     start_date: str = Field(
         default="2024-01-01",
-        description="Start date of the analysis window (format: YYYY-MM-DD). Defaults to 6 months ago.",
+        description="Start date of the analysis window (format: YYYY-MM-DD). Defaults to 2024-01-01.",
         example=(date.today() - timedelta(days=30)).isoformat(),
     )
     end_date: str = Field(
         default="2024-12-31",
-        description="End date of the analysis window (format: YYYY-MM-DD). Defaults to yesterday.",
+        description="End date of the analysis window (format: YYYY-MM-DD). Defaults to 2024-12-31.",
         example=date.today().isoformat(),
     )
 
@@ -101,32 +100,12 @@ class RiskAnalysisRequestBase(BaseModel):
         example=None,
     )
 
-    @model_validator(mode="before")
-    @classmethod
-    def check_date_range(cls, values):
-        try:
-            start_date = values["start_date"]
-            end_date = values["end_date"]
-            if (
-                start_date > end_date
-            ):  # We can compare directly as they are both ISO format strings
-                raise ValueError("start_date must be earlier than end_date")
-        except Exception as e:
-            raise ValidationError.from_exception_data(
-                title=cls.__name__,
-                line_errors=[
-                    {
-                        "type": "value_error",
-                        "loc": ("start_date", "end_date"),
-                        "ctx": {"error": f"Invalid date format or range: {e}"},
-                        "input": {
-                            "start_date": values["start_date"],
-                            "end_date": values["end_date"],
-                        },
-                    }
-                ],
-            )
-        return values
+    @model_validator(mode="after")
+    def check_date_range(self) -> Self:
+        # ISO-8601 calendar dates (YYYY-MM-DD) compare lexicographically.
+        if self.start_date > self.end_date:
+            raise ValueError("start_date must be earlier than end_date")
+        return self
 
 
 class RiskAnalysisRequest(RiskAnalysisRequestBase):

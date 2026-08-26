@@ -60,6 +60,32 @@ def test_risk_analysis_request_base_max_taxonomy_depth_accepts_three():
     assert req.max_taxonomy_depth == 3
 
 
+def test_risk_analysis_request_base_omitted_dates_use_defaults():
+    req = RiskAnalysisRequestBase(main_theme="Theme", focus="Focus")
+    assert req.start_date == "2024-01-01"
+    assert req.end_date == "2024-12-31"
+
+
+def test_risk_analysis_request_base_omitted_end_date_uses_default():
+    req = RiskAnalysisRequestBase(
+        main_theme="Theme", focus="Focus", start_date="2024-06-01"
+    )
+    assert req.start_date == "2024-06-01"
+    assert req.end_date == "2024-12-31"
+
+
+def test_risk_analysis_request_base_start_after_end_is_rejected():
+    with pytest.raises(
+        ValidationError, match="start_date must be earlier than end_date"
+    ):
+        RiskAnalysisRequestBase(
+            main_theme="Theme",
+            focus="Focus",
+            start_date="2025-08-01",
+            end_date="2025-06-01",
+        )
+
+
 def test_risk_analysis_request_base_max_taxonomy_depth_rejects_below_two():
     with pytest.raises(ValidationError):
         RiskAnalysisRequestBase(

@@ -9,4 +9,3 @@ coverage-reports/
 .coverage
 .vscode/
 .DS_Store
-uv.lock
