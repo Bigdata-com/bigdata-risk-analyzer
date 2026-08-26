@@ -13,6 +13,7 @@ from typing import Any
 import pandas as pd
 from bigdata_smart_batching import deduplicate_documents, execute_search, plan_search
 
+from bigdata_risk_analyzer.settings import settings
 from bigdata_risk_analyzer.universe import ID_COLUMN, NAME_COLUMN
 
 logger = logging.getLogger(__name__)
@@ -32,9 +33,13 @@ def search_universe(
     chunk_percentage: float,
     category: dict[str, Any] | None = None,
     requests_per_minute: int = DEFAULT_REQUESTS_PER_MINUTE,
+    api_key: str | None = None,
 ) -> list[dict[str, Any]]:
     """Plan and execute one smart-batching search per taxonomy leaf, deduplicated."""
     search_category = category if category is not None else DEFAULT_SEARCH_CATEGORY
+    # Smart batching otherwise falls back to os.environ, which misses keys that
+    # reach the service through the .env file.
+    search_api_key = api_key or settings.BIGDATA_API_KEY
 
     all_documents: list[dict[str, Any]] = []
     for search_query in leaf_search_queries:
@@ -45,12 +50,14 @@ def search_universe(
             volume_query_mode="iterative",
             text=search_query,
             category=search_category,
+            api_key=search_api_key,
         )
         documents = execute_search(
             search_plan=plan,
             chunk_percentage=chunk_percentage,
             requests_per_minute=requests_per_minute,
             basket_filtered_entities=True,
+            api_key=search_api_key,
         )
         all_documents.extend(documents)
 

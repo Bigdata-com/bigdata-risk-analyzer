@@ -13,6 +13,8 @@ import re
 from openai import OpenAI
 from pydantic import BaseModel, Field
 
+from bigdata_risk_analyzer.openai_utils import build_openai_client
+
 DEFAULT_MAX_LEAF_LABELS = 15
 
 # ---------------------------------------------------------------------------
@@ -229,7 +231,7 @@ def generate_taxonomy(
     :func:`truncate_depth` after generation, on top of a soft prompt hint —
     see :func:`analyst_focus_with_depth_cap`.
     """
-    openai_client = client if client is not None else OpenAI()
+    openai_client = client if client is not None else build_openai_client()
     focus_for_prompt = analyst_focus_with_leaf_cap(analyst_focus, max_leaf_labels)
     focus_for_prompt = analyst_focus_with_depth_cap(focus_for_prompt, max_depth)
     completion = openai_client.chat.completions.create(

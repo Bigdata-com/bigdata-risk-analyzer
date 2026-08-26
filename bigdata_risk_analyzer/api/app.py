@@ -16,6 +16,7 @@ from fastapi import (
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
+from sqlalchemy import inspect
 from sqlmodel import Session, SQLModel, create_engine
 
 from bigdata_risk_analyzer import LOG_LEVEL, __version__, logger
@@ -43,9 +44,33 @@ from bigdata_risk_analyzer.universe import (
 engine = create_engine(settings.DB_STRING, echo=LOG_LEVEL == "DEBUG")
 
 
+def check_storage_schema():
+    """Fail fast on a database created by an incompatible earlier release.
+
+    ``create_all`` only creates missing tables, so a database left over from
+    2.x keeps its old columns and every read fails later with an opaque 500.
+    """
+    inspector = inspect(engine)
+    for table in SQLModel.metadata.sorted_tables:
+        if not inspector.has_table(table.name):
+            continue
+        existing_columns = {
+            column["name"] for column in inspector.get_columns(table.name)
+        }
+        missing_columns = {column.name for column in table.columns} - existing_columns
+        if missing_columns:
+            raise RuntimeError(
+                f"Table '{table.name}' in {settings.DB_STRING} is missing columns "
+                f"{sorted(missing_columns)}. The 3.0 schema is not compatible with "
+                "databases created by earlier releases. Remove the old database file "
+                "or point DB_STRING at a new one."
+            )
+
+
 def create_db_and_tables():
     logger.info("Setting up data storage", db_string=settings.DB_STRING)
     SQLModel.metadata.create_all(engine)
+    check_storage_schema()
 
 
 def get_session():

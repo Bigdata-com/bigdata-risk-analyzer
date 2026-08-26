@@ -42,7 +42,9 @@ def test_extract_sentences_skips_chunks_with_no_universe_entity():
             "id": "doc-1",
             "headline": "Unrelated",
             "timestamp": "2025-01-01T00:00:00+00:00",
-            "chunks": [{"text": "Other firm", "relevance": 0.9, "entity_ids": ["ZZZZZZ"]}],
+            "chunks": [
+                {"text": "Other firm", "relevance": 0.9, "entity_ids": ["ZZZZZZ"]}
+            ],
         }
     ]
 

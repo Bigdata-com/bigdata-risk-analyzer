@@ -14,9 +14,20 @@ from threading import Lock
 
 from openai import OpenAI
 
+from bigdata_risk_analyzer.settings import settings
+
 DEFAULT_MAX_CONCURRENT_REQUESTS = 20
 DEFAULT_MAX_RETRIES = 5
 DEFAULT_RETRY_BACKOFF_SECONDS = 1.0
+
+
+def build_openai_client(api_key: str | None = None) -> OpenAI:
+    """Build a client from configured settings.
+
+    ``OpenAI()`` only reads ``os.environ``, which misses keys that reach the
+    service through the .env file.
+    """
+    return OpenAI(api_key=api_key or settings.OPENAI_API_KEY)
 
 
 @dataclass(slots=True, frozen=True)
@@ -80,7 +91,7 @@ def run_chat_requests_parallel(
     if not requests:
         return []
 
-    openai_client = client if client is not None else OpenAI()
+    openai_client = client if client is not None else build_openai_client()
     responses: list[ChatResponse] = []
     responses_lock = Lock()
 
